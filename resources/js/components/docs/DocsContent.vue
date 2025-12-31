@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import GithubIcon from '@/components/icons/GithubIcon.vue';
 import type { SiteSettings } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { CheckIcon, CopyIcon } from 'lucide-vue-next';
@@ -16,6 +17,8 @@ interface Props {
   contentRaw?: string;
   title?: string;
   updatedAt?: string;
+  editOnGithubUrl?: string;
+  gitLastAuthor?: string;
 }
 
 const props = defineProps<Props>();
@@ -33,6 +36,8 @@ const formattedDate = computed(() => {
     day: 'numeric',
   });
 });
+
+const hasEditLink = computed(() => !!props.editOnGithubUrl);
 
 const copyPageContent = async () => {
   const text = props.contentRaw || '';
@@ -133,14 +138,26 @@ watch(
     <header v-if="title" class="mb-8 space-y-2">
       <div class="flex items-start justify-between gap-4">
         <h1 class="text-3xl font-bold tracking-tight">{{ title }}</h1>
-        <Button variant="outline" size="sm" class="shrink-0" @click="copyPageContent">
-          <CheckIcon v-if="copiedPage" class="mr-2 h-4 w-4 text-green-500" />
-          <CopyIcon v-else class="mr-2 h-4 w-4" />
-          {{ copiedPage ? 'Copied!' : 'Copy page' }}
-        </Button>
+        <div class="flex shrink-0 items-center gap-2">
+          <Button v-if="hasEditLink" variant="outline" size="sm" as-child>
+            <a :href="editOnGithubUrl" target="_blank" rel="noopener noreferrer">
+              <GithubIcon class="mr-2 h-4 w-4" />
+              Edit on GitHub
+            </a>
+          </Button>
+
+          <Button variant="outline" size="sm" @click="copyPageContent">
+            <CheckIcon v-if="copiedPage" class="mr-2 h-4 w-4 text-green-500" />
+            <CopyIcon v-else class="mr-2 h-4 w-4" />
+            {{ copiedPage ? 'Copied!' : 'Copy page' }}
+          </Button>
+        </div>
       </div>
       <p v-if="formattedDate" class="text-sm text-muted-foreground">
         Last updated: {{ formattedDate }}
+      </p>
+      <p v-if="gitLastAuthor" class="text-sm text-muted-foreground">
+        Last commit author: {{ gitLastAuthor }}
       </p>
       <Separator class="mt-4" />
     </header>

@@ -18,6 +18,7 @@ import {
   Activity,
   ExternalLink,
   FileText,
+  GitPullRequest,
   Image,
   LayoutGrid,
   MessageSquare,
@@ -59,6 +60,11 @@ const mainNavItems = computed<NavItem[]>(() => {
       title: 'Users',
       href: '/users',
       icon: Users,
+    });
+    items.push({
+      title: 'Git Sync',
+      href: '/admin/git-sync',
+      icon: GitPullRequest,
     });
     items.push({
       title: 'Activity Logs',

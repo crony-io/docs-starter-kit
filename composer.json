@@ -11,13 +11,16 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
-        "inertiajs/inertia-laravel": "^2.0.16",
+        "inertiajs/inertia-laravel": "^2.0.17",
         "laravel/fortify": "^1.33.0",
-        "laravel/framework": "^12.40.1",
+        "laravel/framework": "^12.44.0",
         "laravel/wayfinder": "^0.1.12",
+        "league/commonmark": "^2.8",
+        "mews/purifier": "^3.4.3",
         "phpoffice/phpspreadsheet": "^5.3.0",
         "spatie/laravel-csp": "^3.21",
         "spatie/laravel-medialibrary": "^11.17.7",
+        "spatie/yaml-front-matter": "^2.1.1",
         "spipu/html2pdf": "^5.3.3"
     },
     "require-dev": {

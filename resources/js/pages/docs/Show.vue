@@ -31,6 +31,10 @@ interface CurrentPage {
   seo_title: string | null;
   seo_description: string | null;
   updated_at: string;
+  source?: 'git' | 'cms';
+  updated_at_git?: string | null;
+  git_last_author?: string | null;
+  edit_on_github_url?: string | null;
 }
 
 interface TocItem {
@@ -69,10 +73,27 @@ const pageDescription = computed(() => {
 });
 
 const currentPath = computed(() => {
-  if (!props.breadcrumbs.length) {
+  if (!props.currentPage) {
     return '';
   }
-  return props.breadcrumbs.map((b) => b.path).join('/');
+
+  if (!props.breadcrumbs.length) {
+    return props.currentPage.slug;
+  }
+
+  return props.breadcrumbs[props.breadcrumbs.length - 1].path;
+});
+
+const lastUpdatedAt = computed(() => {
+  if (!props.currentPage) {
+    return undefined;
+  }
+
+  if (props.currentPage.source === 'git') {
+    return props.currentPage.updated_at_git ?? props.currentPage.updated_at;
+  }
+
+  return props.currentPage.updated_at;
 });
 
 const showBreadcrumbs = computed(() => siteSettings.value?.layout?.showBreadcrumbs ?? true);
@@ -108,7 +129,9 @@ const contentWidth = computed(() => siteSettings.value?.layout?.contentWidth ?? 
             :content="currentPage.content ?? ''"
             :content-raw="currentPage.content_raw ?? ''"
             :title="currentPage.title"
-            :updated-at="currentPage.updated_at"
+            :updated-at="lastUpdatedAt"
+            :git-last-author="currentPage.git_last_author ?? undefined"
+            :edit-on-github-url="currentPage.edit_on_github_url ?? undefined"
           />
           <FeedbackWidget :page-id="currentPage.id" :forms="feedbackForms" />
         </div>

@@ -69,11 +69,14 @@ class DocsController extends Controller
             $pageData = $currentPage->only([
                 'id', 'title', 'slug', 'type',
                 'seo_title', 'seo_description', 'updated_at',
+                'source', 'updated_at_git', 'git_last_author',
             ]);
-            $pageData['content'] = $currentPage->content
-                ? Str::markdown($currentPage->content, ['html_input' => 'strip', 'allow_unsafe_links' => false])
-                : null;
             $pageData['content_raw'] = $currentPage->content;
+            $pageData['content'] = $pageData['content_raw']
+                ? Str::markdown($pageData['content_raw'], ['html_input' => 'strip', 'allow_unsafe_links' => false])
+                : null;
+
+            $pageData['edit_on_github_url'] = $currentPage->getEditOnGitHubUrlAttribute();
         }
 
         $feedbackForms = FeedbackForm::active()->get(['id', 'name', 'trigger_type', 'fields']);

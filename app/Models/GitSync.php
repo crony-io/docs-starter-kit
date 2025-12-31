@@ -13,6 +13,7 @@ class GitSync extends Model
         'commit_date',
         'sync_status',
         'files_changed',
+        'sync_details',
         'error_message',
     ];
 
@@ -21,6 +22,7 @@ class GitSync extends Model
         return [
             'commit_date' => 'datetime',
             'files_changed' => 'integer',
+            'sync_details' => 'array',
         ];
     }
 
@@ -39,9 +41,19 @@ class GitSync extends Model
         return $query->where('sync_status', 'in_progress');
     }
 
+    public function scopeRecent($query, int $limit = 20)
+    {
+        return $query->latest()->limit($limit);
+    }
+
     public function isSuccessful(): bool
     {
         return $this->sync_status === 'success';
+    }
+
+    public function isSuccess(): bool
+    {
+        return $this->isSuccessful();
     }
 
     public function isFailed(): bool

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamp('commit_date')->nullable();
             $table->enum('sync_status', ['pending', 'in_progress', 'success', 'failed'])->default('pending');
             $table->unsignedInteger('files_changed')->default(0);
+            $table->json('sync_details')->nullable();
             $table->text('error_message')->nullable();
             $table->timestamps();
 

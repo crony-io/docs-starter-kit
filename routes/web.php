@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Admin\GitSyncController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\SetupController;
 use App\Http\Controllers\Admin\SiteSettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocsController;
@@ -10,6 +12,7 @@ use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -28,7 +31,14 @@ Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'stor
     ->middleware('throttle:10,1')
     ->name('feedback.store');
 
+// Webhook (public, but verified)
+Route::post('/webhook/github', [WebhookController::class, 'github'])->name('webhook.github');
+
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    Route::get('/admin/setup', [SetupController::class, 'index'])->name('admin.setup');
+    Route::post('/admin/setup', [SetupController::class, 'store'])->name('admin.setup.store');
+
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
@@ -109,5 +119,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('settings/branding/logo', [SiteSettingsController::class, 'deleteLogo'])->name('settings.branding.delete-logo');
         Route::get('settings/advanced', [SiteSettingsController::class, 'advanced'])->name('settings.advanced');
         Route::put('settings/advanced', [SiteSettingsController::class, 'updateAdvanced'])->name('settings.advanced.update');
+
+        Route::get('/git-sync', [GitSyncController::class, 'index'])->name('git-sync.index');
+        Route::post('/git-sync/manual', [GitSyncController::class, 'manualSync'])->name('git-sync.manual');
+        Route::post('/git-sync/test', [GitSyncController::class, 'testConnection'])->name('git-sync.test');
+        Route::put('/git-sync/config', [GitSyncController::class, 'updateConfig'])->name('git-sync.config');
+        Route::post('/git-sync/rollback/{sync}', [GitSyncController::class, 'rollback'])->name('git-sync.rollback');
+
     });
 });
