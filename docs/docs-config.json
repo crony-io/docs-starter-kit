@@ -1,0 +1,36 @@
+{
+  "name": "Docs Starter Kit",
+  "version": "1.0.0",
+  "language": "en",
+  "timezone": "UTC",
+  "theme": {
+    "primary_color": "#3B82F6",
+    "dark_mode": true
+  },
+  "features": {
+    "search": true,
+    "feedback": true,
+    "table_of_contents": true,
+    "breadcrumbs": true
+  },
+  "navigation": {
+    "logo": "/assets/images/logo.png",
+    "links": [
+      {
+        "text": "GitHub",
+        "url": "https://github.com/crony-io/docs-starter-kit",
+        "external": true
+      }
+    ]
+  },
+  "seo": {
+    "title": "Docs Starter Kit",
+    "description": "An open-source starter kit for building modern documentation websites with Vue.js, Laravel, and TypeScript",
+    "keywords": "documentation, laravel, vue, typescript, inertia",
+    "image": "/assets/images/og-image.png"
+  },
+  "analytics": {
+    "google_analytics": "",
+    "plausible": false
+  }
+}

@@ -11,6 +11,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { forms as feedbackForms, index as feedbackIndex } from '@/routes/admin/feedback';
+import {
+  create as createForm,
+  destroy as destroyForm,
+  edit as editForm,
+} from '@/routes/admin/feedback/forms';
 import type { BreadcrumbItem } from '@/types';
 import type { FeedbackForm } from '@/types/feedback';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -19,14 +26,14 @@ import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 defineProps<{ forms: FeedbackForm[] }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Feedback', href: '/admin/feedback' },
-  { title: 'Forms', href: '/admin/feedback/forms' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Feedback', href: feedbackIndex().url },
+  { title: 'Forms', href: feedbackForms().url },
 ];
 
 const deleteForm = (id: number) => {
   if (confirm('Delete this form? All responses using this form will be preserved.')) {
-    router.delete(`/admin/feedback/forms/${id}`);
+    router.delete(destroyForm(id).url);
   }
 };
 
@@ -45,7 +52,7 @@ const triggerLabels = {
       <div class="flex items-center justify-between">
         <Heading title="Feedback Forms" description="Manage custom feedback forms" />
         <Button as-child>
-          <Link href="/admin/feedback/forms/create">
+          <Link :href="createForm()">
             <Plus class="mr-2 h-4 w-4" />
             Create Form
           </Link>
@@ -81,7 +88,7 @@ const triggerLabels = {
               <TableCell>
                 <div class="flex gap-1">
                   <Button variant="ghost" size="icon" as-child>
-                    <Link :href="`/admin/feedback/forms/${form.id}/edit`">
+                    <Link :href="editForm(form.id)">
                       <Pencil class="h-4 w-4" />
                     </Link>
                   </Button>

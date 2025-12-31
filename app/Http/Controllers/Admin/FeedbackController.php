@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\FeedbackFormRequest;
 use App\Models\FeedbackForm;
 use App\Models\FeedbackResponse;
 use App\Models\Page;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FeedbackController extends Controller
 {
@@ -18,25 +22,11 @@ class FeedbackController extends Controller
         $query = FeedbackResponse::query()
             ->with(['page:id,title,slug', 'feedbackForm:id,name']);
 
-        if ($request->filled('page_id')) {
-            $query->where('page_id', $request->page_id);
-        }
-
-        if ($request->filled('is_helpful')) {
-            $query->where('is_helpful', $request->is_helpful === 'true');
-        }
-
-        if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->start_date);
-        }
-
-        if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->end_date);
-        }
+        $this->applyFilters($query, $request);
 
         $responses = $query
             ->orderBy('created_at', 'desc')
-            ->paginate(20)
+            ->paginate(config('pagination.feedback', 20))
             ->withQueryString();
 
         $stats = $this->getStats();
@@ -66,20 +56,9 @@ class FeedbackController extends Controller
         return Inertia::render('admin/feedback/CreateForm');
     }
 
-    public function storeForm(Request $request): RedirectResponse
+    public function storeForm(FeedbackFormRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'trigger_type' => ['required', 'in:positive,negative,always'],
-            'fields' => ['required', 'array', 'min:1'],
-            'fields.*.type' => ['required', 'in:text,textarea,radio,checkbox,rating,email'],
-            'fields.*.label' => ['required', 'string', 'max:255'],
-            'fields.*.required' => ['boolean'],
-            'fields.*.options' => ['nullable', 'array'],
-            'is_active' => ['boolean'],
-        ]);
-
-        FeedbackForm::create($validated);
+        FeedbackForm::create($request->validated());
 
         return to_route('admin.feedback.forms')->with('success', 'Feedback form created successfully.');
     }
@@ -91,20 +70,9 @@ class FeedbackController extends Controller
         ]);
     }
 
-    public function updateForm(Request $request, FeedbackForm $form): RedirectResponse
+    public function updateForm(FeedbackFormRequest $request, FeedbackForm $form): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'trigger_type' => ['required', 'in:positive,negative,always'],
-            'fields' => ['required', 'array', 'min:1'],
-            'fields.*.type' => ['required', 'in:text,textarea,radio,checkbox,rating,email'],
-            'fields.*.label' => ['required', 'string', 'max:255'],
-            'fields.*.required' => ['boolean'],
-            'fields.*.options' => ['nullable', 'array'],
-            'is_active' => ['boolean'],
-        ]);
-
-        $form->update($validated);
+        $form->update($request->validated());
 
         return to_route('admin.feedback.forms')->with('success', 'Feedback form updated successfully.');
     }
@@ -116,26 +84,12 @@ class FeedbackController extends Controller
         return to_route('admin.feedback.forms')->with('success', 'Feedback form deleted successfully.');
     }
 
-    public function export(Request $request)
+    public function export(Request $request): StreamedResponse|JsonResponse
     {
         $query = FeedbackResponse::query()
             ->with(['page:id,title,slug', 'feedbackForm:id,name']);
 
-        if ($request->filled('page_id')) {
-            $query->where('page_id', $request->page_id);
-        }
-
-        if ($request->filled('is_helpful')) {
-            $query->where('is_helpful', $request->is_helpful === 'true');
-        }
-
-        if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->start_date);
-        }
-
-        if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->end_date);
-        }
+        $this->applyFilters($query, $request);
 
         $responses = $query->orderBy('created_at', 'desc')->get();
 
@@ -189,6 +143,25 @@ class FeedbackController extends Controller
         $response->delete();
 
         return back()->with('success', 'Feedback response deleted.');
+    }
+
+    private function applyFilters(Builder $query, Request $request): void
+    {
+        if ($request->filled('page_id')) {
+            $query->where('page_id', $request->page_id);
+        }
+
+        if ($request->filled('is_helpful')) {
+            $query->where('is_helpful', $request->is_helpful === 'true');
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
     }
 
     private function getStats(): array

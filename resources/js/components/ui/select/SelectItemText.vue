@@ -1,12 +1,13 @@
-<script setup lang="ts">
-import type { SelectItemTextProps } from 'reka-ui';
-import { SelectItemText } from 'reka-ui';
-
-const props = defineProps<SelectItemTextProps>();
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <SelectItemText v-bind="props">
+  <span class="select-item-text-content">
     <slot />
-  </SelectItemText>
+  </span>
 </template>
+
+<style scoped>
+.select-item-text-content {
+  pointer-events: none;
+}
+</style>

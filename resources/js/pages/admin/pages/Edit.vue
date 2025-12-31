@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
+import IconPicker from '@/components/IconPicker.vue';
 import InputError from '@/components/InputError.vue';
 import PageEditor from '@/components/PageEditor/PageEditor.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
@@ -17,6 +18,15 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import {
+  edit,
+  index as pagesIndex,
+  publish,
+  restoreVersion as restoreVersionRoute,
+  unpublish,
+  update,
+} from '@/routes/admin/pages';
 import type { BreadcrumbItem, Page, PageType, PageVersion } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { useDebounceFn, useLocalStorage } from '@vueuse/core';
@@ -25,8 +35,10 @@ import {
   Book,
   Check,
   Eye,
+  EyeOff,
   FileText,
   FolderTree,
+  Globe,
   History,
   RotateCcw,
   Save,
@@ -53,9 +65,9 @@ const pageTypes = [
 ];
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Pages', href: '/admin/pages' },
-  { title: props.page.title, href: `/admin/pages/${props.page.id}/edit` },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Pages', href: pagesIndex().url },
+  { title: props.page.title, href: edit(props.page.id).url },
 ];
 
 const form = useForm({
@@ -75,8 +87,39 @@ const form = useForm({
 const showContentEditor = computed(() => form.type === 'document');
 const showParentSelector = computed(() => form.type !== 'navigation');
 
+const isPublishing = ref(false);
+const isUnpublishing = ref(false);
+
 const submit = () => {
-  form.put(`/admin/pages/${props.page.id}`);
+  form.submit(update(props.page.id));
+};
+
+const quickPublish = () => {
+  isPublishing.value = true;
+  router.post(
+    publish(props.page.id).url,
+    {},
+    {
+      preserveScroll: true,
+      onFinish: () => {
+        isPublishing.value = false;
+      },
+    },
+  );
+};
+
+const quickUnpublish = () => {
+  isUnpublishing.value = true;
+  router.post(
+    unpublish(props.page.id).url,
+    {},
+    {
+      preserveScroll: true,
+      onFinish: () => {
+        isUnpublishing.value = false;
+      },
+    },
+  );
 };
 
 const onStatusChange = (value: unknown) => {
@@ -91,7 +134,7 @@ const onTypeChange = (value: unknown) => {
 };
 
 const onParentChange = (value: unknown) => {
-  form.parent_id = value ? Number(value) : null;
+  form.parent_id = value && value !== 'none' ? Number(value) : null;
 };
 
 const filteredParents = computed(() => {
@@ -137,7 +180,7 @@ const restoringVersionId = ref<number | null>(null);
 const restoreVersion = (versionId: number) => {
   restoringVersionId.value = versionId;
   router.post(
-    `/admin/pages/${props.page.id}/restore-version/${versionId}`,
+    restoreVersionRoute({ page: props.page.id, versionId }).url,
     {},
     {
       preserveScroll: false,
@@ -168,7 +211,7 @@ const autoSave = useDebounceFn(() => {
 
   autoSaveStatus.value = 'saving';
 
-  form.put(`/admin/pages/${props.page.id}`, {
+  form.put(update(props.page.id).url, {
     preserveScroll: true,
     onSuccess: () => {
       lastSaved.value = new Date();
@@ -285,15 +328,28 @@ const formatDate = (dateString: string) => {
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <Button variant="outline" @click="router.visit('/admin/pages')">
+          <Button variant="outline" @click="router.visit(pagesIndex().url)">
             <ArrowLeft class="mr-2 h-4 w-4" />
             Back
           </Button>
-          <Button variant="outline" as-child v-if="form.status === 'published'">
+          <Button variant="outline" as-child v-if="page.status === 'published'">
             <a :href="`/docs/${fullPath}`" target="_blank">
               <Eye class="mr-2 h-4 w-4" />
               View
             </a>
+          </Button>
+          <Button
+            v-if="page.status !== 'published'"
+            variant="default"
+            @click="quickPublish"
+            :disabled="isPublishing"
+          >
+            <Globe class="mr-2 h-4 w-4" />
+            {{ isPublishing ? 'Publishing...' : 'Publish' }}
+          </Button>
+          <Button v-else variant="outline" @click="quickUnpublish" :disabled="isUnpublishing">
+            <EyeOff class="mr-2 h-4 w-4" />
+            {{ isUnpublishing ? 'Unpublishing...' : 'Unpublish' }}
           </Button>
         </div>
       </div>
@@ -385,14 +441,14 @@ const formatDate = (dateString: string) => {
                 <div v-if="showParentSelector" class="space-y-2">
                   <Label>Parent</Label>
                   <Select
-                    :model-value="form.parent_id?.toString() ?? ''"
+                    :model-value="form.parent_id?.toString() ?? 'none'"
                     @update:model-value="onParentChange"
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select parent" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No parent (root level)</SelectItem>
+                      <SelectItem value="none">No parent (root level)</SelectItem>
                       <SelectItem
                         v-for="parent in filteredParents"
                         :key="parent.id"
@@ -424,14 +480,9 @@ const formatDate = (dateString: string) => {
                 </div>
 
                 <div class="space-y-2">
-                  <Label for="icon">Icon (optional)</Label>
-                  <Input
-                    id="icon"
-                    v-model="form.icon"
-                    placeholder="e.g., book, file-text, folder"
-                    :disabled="form.processing"
-                  />
-                  <p class="text-xs text-muted-foreground">Lucide icon name for navigation</p>
+                  <Label>Icon (optional)</Label>
+                  <IconPicker v-model="form.icon" :disabled="form.processing" />
+                  <p class="text-xs text-muted-foreground">Lucide icon for navigation</p>
                   <InputError :message="form.errors.icon" />
                 </div>
               </CardContent>

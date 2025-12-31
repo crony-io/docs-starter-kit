@@ -6,6 +6,12 @@ import FeedbackTable from '@/components/feedback/FeedbackTable.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import {
+  exportMethod as feedbackExport,
+  forms as feedbackForms,
+  index as feedbackIndex,
+} from '@/routes/admin/feedback';
 import type { BreadcrumbItem, PaginatedData } from '@/types';
 import type { FeedbackResponse, FeedbackStats, PageOption, PageStat } from '@/types/feedback';
 import { Head, Link } from '@inertiajs/vue3';
@@ -27,8 +33,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Feedback', href: '/admin/feedback' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Feedback', href: feedbackIndex().url },
 ];
 
 const exportData = () => {
@@ -46,7 +52,7 @@ const exportData = () => {
     params.set('end_date', props.filters.end_date);
   }
   params.set('format', 'csv');
-  window.location.href = `/admin/feedback/export?${params.toString()}`;
+  window.location.href = feedbackExport.url({ query: Object.fromEntries(params) });
 };
 </script>
 
@@ -59,7 +65,7 @@ const exportData = () => {
         <Heading title="Feedback" description="View and manage user feedback" />
         <div class="flex gap-2">
           <Button variant="outline" as-child>
-            <Link href="/admin/feedback/forms">
+            <Link :href="feedbackForms()">
               <FileText class="mr-2 h-4 w-4" />
               Manage Forms
             </Link>

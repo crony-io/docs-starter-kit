@@ -1,0 +1,24 @@
+{
+  "title": "Git Mode",
+  "description": "Using Git-based documentation synchronization",
+  "order": 1,
+  "icon": "git-branch",
+  "items": {
+    "setup": {
+      "title": "Setup",
+      "order": 1
+    },
+    "repository-structure": {
+      "title": "Repository Structure",
+      "order": 2
+    },
+    "webhooks": {
+      "title": "Webhooks",
+      "order": 3
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "order": 4
+    }
+  }
+}

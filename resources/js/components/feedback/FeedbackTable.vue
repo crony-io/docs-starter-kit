@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { destroy as destroyFeedback } from '@/routes/admin/feedback';
 import type { PaginatedData } from '@/types';
 import type { FeedbackResponse } from '@/types/feedback';
 import { router } from '@inertiajs/vue3';
@@ -28,7 +29,7 @@ const formatDate = (dateString: string) => {
 
 const deleteResponse = (id: number) => {
   if (confirm('Delete this feedback response?')) {
-    router.delete(`/admin/feedback/${id}`);
+    router.delete(destroyFeedback(id).url);
   }
 };
 </script>

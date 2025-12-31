@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
-import { ColorField } from '@/components/settings';
+import InputError from '@/components/InputError.vue';
+import { ColorField, SettingsNav } from '@/components/settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,9 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { index as settingsIndex, theme } from '@/routes/admin/settings';
+import { update as updateTheme } from '@/routes/admin/settings/theme';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, RotateCcw, Save } from 'lucide-vue-next';
@@ -26,9 +30,9 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Site Settings', href: '/admin/settings' },
-  { title: 'Theme', href: '/admin/settings/theme' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Site Settings', href: settingsIndex().url },
+  { title: 'Theme', href: theme().url },
 ];
 
 const form = useForm({
@@ -42,7 +46,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.put('/admin/settings/theme');
+  form.submit(updateTheme());
 };
 
 const resetToDefaults = () => {
@@ -75,11 +79,13 @@ const previewStyles = computed(() => ({
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading title="Theme Settings" description="Customize colors and appearance" />
-        <Button variant="outline" @click="router.visit('/admin/settings')">
+        <Button variant="outline" @click="router.visit(settingsIndex().url)">
           <ArrowLeft class="mr-2 h-4 w-4" />
           Back
         </Button>
       </div>
+
+      <SettingsNav />
 
       <form @submit.prevent="submit" class="space-y-6">
         <div class="grid gap-6 lg:grid-cols-2">
@@ -181,27 +187,11 @@ const previewStyles = computed(() => ({
                 <CardDescription>See how your colors look</CardDescription>
               </CardHeader>
               <CardContent>
-                <div
-                  class="rounded-lg border p-4"
-                  :style="previewStyles"
-                  style="background-color: var(--preview-bg); color: var(--preview-text)"
-                >
+                <div class="theme-preview rounded-lg border p-4" v-csp-style="previewStyles">
                   <div class="mb-4 flex gap-2">
-                    <div
-                      class="h-8 w-8 rounded"
-                      style="background-color: var(--preview-primary)"
-                      title="Primary"
-                    />
-                    <div
-                      class="h-8 w-8 rounded"
-                      style="background-color: var(--preview-secondary)"
-                      title="Secondary"
-                    />
-                    <div
-                      class="h-8 w-8 rounded"
-                      style="background-color: var(--preview-accent)"
-                      title="Accent"
-                    />
+                    <div class="preview-primary h-8 w-8 rounded" title="Primary" />
+                    <div class="preview-secondary h-8 w-8 rounded" title="Secondary" />
+                    <div class="preview-accent h-8 w-8 rounded" title="Accent" />
                   </div>
                   <h3 class="mb-2 text-lg font-semibold">Sample Heading</h3>
                   <p class="mb-3 text-sm">
@@ -211,15 +201,13 @@ const previewStyles = computed(() => ({
                   <div class="flex gap-2">
                     <button
                       type="button"
-                      class="rounded px-3 py-1.5 text-sm font-medium text-white"
-                      style="background-color: var(--preview-primary)"
+                      class="preview-btn-primary rounded px-3 py-1.5 text-sm font-medium text-white"
                     >
                       Primary Button
                     </button>
                     <button
                       type="button"
-                      class="rounded border px-3 py-1.5 text-sm font-medium"
-                      style="border-color: var(--preview-primary); color: var(--preview-primary)"
+                      class="preview-btn-outline rounded border px-3 py-1.5 text-sm font-medium"
                     >
                       Secondary
                     </button>
@@ -249,3 +237,31 @@ const previewStyles = computed(() => ({
     </div>
   </AppLayout>
 </template>
+
+<style scoped>
+.theme-preview {
+  background-color: var(--preview-bg);
+  color: var(--preview-text);
+}
+
+.preview-primary {
+  background-color: var(--preview-primary);
+}
+
+.preview-secondary {
+  background-color: var(--preview-secondary);
+}
+
+.preview-accent {
+  background-color: var(--preview-accent);
+}
+
+.preview-btn-primary {
+  background-color: var(--preview-primary);
+}
+
+.preview-btn-outline {
+  border-color: var(--preview-primary);
+  color: var(--preview-primary);
+}
+</style>

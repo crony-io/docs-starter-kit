@@ -150,16 +150,7 @@ class DocsController extends Controller
             ->orderBy('order')
             ->get(['id', 'title', 'slug', 'type', 'icon', 'is_expanded', 'parent_id']);
 
-        return $this->buildTreeFromCollection($allPages, $navigation->id);
-    }
-
-    private function buildTreeFromCollection($pages, int $parentId): array
-    {
-        $items = [];
-
-        $children = $pages->where('parent_id', $parentId);
-
-        foreach ($children as $child) {
+        return Page::buildTreeFromCollection($allPages, $navigation->id, function ($child) {
             $item = [
                 'id' => $child->id,
                 'title' => $child->title,
@@ -170,14 +161,8 @@ class DocsController extends Controller
                 'isExpanded' => $child->is_expanded,
             ];
 
-            if ($child->isGroup()) {
-                $item['children'] = $this->buildTreeFromCollection($pages, $child->id);
-            }
-
-            $items[] = $item;
-        }
-
-        return $items;
+            return $item;
+        });
     }
 
     private function extractTableOfContents(string $content): array

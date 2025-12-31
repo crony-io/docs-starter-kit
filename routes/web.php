@@ -11,6 +11,7 @@ use App\Http\Controllers\DocsController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,9 @@ Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'stor
 
 // Webhook (public, but verified)
 Route::post('/webhook/github', [WebhookController::class, 'github'])->name('webhook.github');
+
+// Sitemap
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import StatusBadge from '@/components/StatusBadge.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { edit } from '@/routes/admin/pages';
 import type { Page } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { Book, FileText, FolderTree } from 'lucide-vue-next';
@@ -36,7 +37,7 @@ const formatDate = (dateString: string) => {
         <Link
           v-for="page in pages"
           :key="page.id"
-          :href="`/admin/pages/${page.id}/edit`"
+          :href="edit(page.id)"
           class="flex items-center gap-3 rounded-md p-2 hover:bg-accent"
         >
           <component :is="typeIcons[page.type]" class="h-4 w-4 text-muted-foreground" />

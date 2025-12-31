@@ -66,11 +66,6 @@ class SystemConfig extends Model
         return self::instance()->setup_completed;
     }
 
-    public static function isSetupComplete(): bool
-    {
-        return self::isSetupCompleted();
-    }
-
     protected static function booted(): void
     {
         static::saved(fn () => self::clearCache());

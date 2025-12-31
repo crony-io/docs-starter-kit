@@ -3,12 +3,25 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class MediaUploadRequest extends FormRequest
 {
+    private const ALLOWED_MIME_SIGNATURES = [
+        'image/jpeg' => ["\xFF\xD8\xFF"],
+        'image/png' => ["\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"],
+        'image/gif' => ['GIF87a', 'GIF89a'],
+        'image/webp' => ['RIFF'],
+        'application/pdf' => ['%PDF'],
+        'video/mp4' => ["\x00\x00\x00\x18ftypmp4", "\x00\x00\x00\x1Cftypisom", "\x00\x00\x00"],
+        'video/webm' => ["\x1A\x45\xDF\xA3"],
+        'audio/mpeg' => ["\xFF\xFB", "\xFF\xFA", "\xFF\xF3", 'ID3'],
+        'audio/wav' => ['RIFF'],
+    ];
+
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->isAdmin() ?? false;
     }
 
     public function rules(): array
@@ -31,6 +44,65 @@ class MediaUploadRequest extends FormRequest
                 'max:255',
             ],
         ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($this->hasFile('file') && ! $this->verifyFileMagicBytes()) {
+                    $validator->errors()->add(
+                        'file',
+                        'The file content does not match its extension. Please upload a valid file.'
+                    );
+                }
+            },
+        ];
+    }
+
+    private function verifyFileMagicBytes(): bool
+    {
+        $file = $this->file('file');
+        if (! $file) {
+            return false;
+        }
+
+        $mimeType = $file->getMimeType();
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        // Skip verification for SVG (text-based) and Office documents (complex format)
+        $skipExtensions = ['svg', 'doc', 'docx'];
+        if (in_array($extension, $skipExtensions)) {
+            return true;
+        }
+
+        // Read first 32 bytes for magic byte check
+        $handle = fopen($file->getRealPath(), 'rb');
+        if (! $handle) {
+            return false;
+        }
+
+        $header = fread($handle, 32);
+        fclose($handle);
+
+        if (! $header) {
+            return false;
+        }
+
+        // Check if mime type has known signatures
+        if (! isset(self::ALLOWED_MIME_SIGNATURES[$mimeType])) {
+            // If we don't have a signature for this type, allow it (relies on mimes validation)
+            return true;
+        }
+
+        // Verify magic bytes match
+        foreach (self::ALLOWED_MIME_SIGNATURES[$mimeType] as $signature) {
+            if (str_starts_with($header, $signature)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function messages(): array

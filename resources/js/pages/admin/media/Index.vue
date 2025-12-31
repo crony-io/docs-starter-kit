@@ -2,6 +2,8 @@
 import FileManagerBrowser from '@/components/FileManager/FileManagerBrowser.vue';
 import Heading from '@/components/Heading.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { index as mediaIndex } from '@/routes/admin/media';
 import type { MediaFile } from '@/types/media';
 import { Head } from '@inertiajs/vue3';
 
@@ -23,8 +25,8 @@ interface Props {
 defineProps<Props>();
 
 const breadcrumbs = [
-  { title: 'Admin', href: '/dashboard' },
-  { title: 'Media Library', href: '/admin/media' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Media Library', href: mediaIndex().url },
 ];
 </script>
 

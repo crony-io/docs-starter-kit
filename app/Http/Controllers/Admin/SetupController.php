@@ -14,7 +14,7 @@ class SetupController extends Controller
     public function index(): Response|RedirectResponse
     {
         // Redirect if already setup
-        if (SystemConfig::isSetupComplete()) {
+        if (SystemConfig::isSetupCompleted()) {
             return redirect()->route('dashboard');
         }
 

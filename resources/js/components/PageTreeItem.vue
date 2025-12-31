@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { create, duplicate, edit, publish, unpublish } from '@/routes/admin/pages';
 import { Link, router } from '@inertiajs/vue3';
 import {
   Book,
@@ -62,7 +63,7 @@ const processingId = ref<number | null>(null);
 const handleDuplicate = () => {
   processingId.value = props.item.id;
   router.post(
-    `/admin/pages/${props.item.id}/duplicate`,
+    duplicate(props.item.id).url,
     {},
     {
       onFinish: () => {
@@ -75,7 +76,7 @@ const handleDuplicate = () => {
 const handlePublish = () => {
   processingId.value = props.item.id;
   router.post(
-    `/admin/pages/${props.item.id}/publish`,
+    publish(props.item.id).url,
     {},
     {
       onFinish: () => {
@@ -88,7 +89,7 @@ const handlePublish = () => {
 const handleUnpublish = () => {
   processingId.value = props.item.id;
   router.post(
-    `/admin/pages/${props.item.id}/unpublish`,
+    unpublish(props.item.id).url,
     {},
     {
       onFinish: () => {
@@ -103,7 +104,13 @@ const handleUnpublish = () => {
   <Collapsible v-model:open="isOpen" class="group">
     <div
       class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent"
-      :style="{ paddingLeft: `${depth * 16 + 8}px` }"
+      :class="[
+        depth === 0 && 'pl-2',
+        depth === 1 && 'pl-6',
+        depth === 2 && 'pl-10',
+        depth === 3 && 'pl-14',
+        depth >= 4 && 'pl-18',
+      ]"
     >
       <CollapsibleTrigger
         v-if="item.children.length > 0"
@@ -115,12 +122,7 @@ const handleUnpublish = () => {
 
       <component :is="typeIcons[item.type]" class="h-4 w-4 text-muted-foreground" />
 
-      <Link
-        :href="`/admin/pages/${item.id}/edit`"
-        class="flex-1 truncate text-sm font-medium hover:underline"
-      >
-        {{ item.title }}
-      </Link>
+      <h2 class="flex-1 truncate text-sm font-medium hover:underline">{{ item.title }}</h2>
 
       <StatusBadge :status="item.status" class="text-xs" />
 
@@ -138,7 +140,7 @@ const handleUnpublish = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem as-child>
-            <Link :href="`/admin/pages/${item.id}/edit`" class="flex items-center">
+            <Link :href="edit(item.id)" class="flex items-center">
               <Pencil class="mr-2 h-4 w-4" />
               Edit
             </Link>
@@ -149,7 +151,7 @@ const handleUnpublish = () => {
           </DropdownMenuItem>
           <DropdownMenuSeparator v-if="item.type !== 'document'" />
           <DropdownMenuItem v-if="item.type !== 'document'" as-child>
-            <Link :href="`/admin/pages/create?parent_id=${item.id}`" class="flex items-center">
+            <Link :href="create({ query: { parent_id: item.id } })" class="flex items-center">
               <Plus class="mr-2 h-4 w-4" />
               Add Child Page
             </Link>

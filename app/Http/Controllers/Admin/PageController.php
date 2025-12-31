@@ -37,7 +37,7 @@ class PageController extends Controller
 
         $pages = $query
             ->orderBy('order')
-            ->paginate(20)
+            ->paginate(config('pagination.pages', 20))
             ->withQueryString();
 
         $navigationTabs = Page::navigationTabs()->published()->get(['id', 'title', 'slug']);
@@ -50,13 +50,13 @@ class PageController extends Controller
             'navigationTabs' => $navigationTabs,
             'filters' => $request->only(['status', 'search', 'type', 'view']),
             'statuses' => [
-                ['value' => '', 'label' => 'All Statuses'],
+                ['value' => 'all', 'label' => 'All Statuses'],
                 ['value' => 'draft', 'label' => 'Draft'],
                 ['value' => 'published', 'label' => 'Published'],
                 ['value' => 'archived', 'label' => 'Archived'],
             ],
             'types' => [
-                ['value' => '', 'label' => 'All Types'],
+                ['value' => 'all', 'label' => 'All Types'],
                 ['value' => 'navigation', 'label' => 'Navigation Tab'],
                 ['value' => 'group', 'label' => 'Group'],
                 ['value' => 'document', 'label' => 'Document'],
@@ -70,30 +70,14 @@ class PageController extends Controller
             ->orderBy('order')
             ->get(['id', 'title', 'slug', 'type', 'status', 'parent_id', 'updated_at']);
 
-        return $this->buildTreeFromCollection($allPages, null);
-    }
-
-    private function buildTreeFromCollection($pages, ?int $parentId): array
-    {
-        $items = [];
-
-        $children = $pages->where('parent_id', $parentId);
-
-        foreach ($children as $child) {
-            $item = [
-                'id' => $child->id,
-                'title' => $child->title,
-                'slug' => $child->slug,
-                'type' => $child->type,
-                'status' => $child->status,
-                'updated_at' => $child->updated_at->toISOString(),
-                'children' => $this->buildTreeFromCollection($pages, $child->id),
-            ];
-
-            $items[] = $item;
-        }
-
-        return $items;
+        return Page::buildTreeFromCollection($allPages, null, fn ($child) => [
+            'id' => $child->id,
+            'title' => $child->title,
+            'slug' => $child->slug,
+            'type' => $child->type,
+            'status' => $child->status,
+            'updated_at' => $child->updated_at->toISOString(),
+        ]);
     }
 
     public function create(Request $request): Response

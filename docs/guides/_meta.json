@@ -1,0 +1,20 @@
+{
+  "title": "Guides",
+  "description": "In-depth guides and tutorials",
+  "order": 2,
+  "icon": "compass",
+  "items": {
+    "git-mode": {
+      "title": "Git Mode",
+      "order": 1
+    },
+    "cms-mode": {
+      "title": "CMS Mode",
+      "order": 2
+    },
+    "advanced": {
+      "title": "Advanced",
+      "order": 3
+    }
+  }
+}

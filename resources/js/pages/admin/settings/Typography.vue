@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import { SliderField } from '@/components/settings';
+import { SettingsNav, SliderField } from '@/components/settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { index as settingsIndex, typography } from '@/routes/admin/settings';
+import { update as updateTypography } from '@/routes/admin/settings/typography';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, RotateCcw, Save } from 'lucide-vue-next';
@@ -32,9 +35,9 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Site Settings', href: '/admin/settings' },
-  { title: 'Typography', href: '/admin/settings/typography' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Site Settings', href: settingsIndex().url },
+  { title: 'Typography', href: typography().url },
 ];
 
 const form = useForm({
@@ -50,7 +53,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.put('/admin/settings/typography');
+  form.submit(updateTypography());
 };
 
 const resetToDefaults = () => {
@@ -72,14 +75,13 @@ const textFonts = props.googleFonts.filter(
 );
 
 const previewStyles = computed(() => ({
-  fontFamily: form.body_font,
-  fontSize: `${form.base_font_size}px`,
-  lineHeight: form.line_height,
-}));
-
-const headingPreviewStyles = computed(() => ({
-  fontFamily: form.heading_font,
-  fontSize: `${form.base_font_size * form.heading_scale}px`,
+  '--typo-body-font': form.body_font,
+  '--typo-heading-font': form.heading_font,
+  '--typo-code-font': form.code_font,
+  '--typo-font-size': `${form.base_font_size}px`,
+  '--typo-heading-size': `${form.base_font_size * form.heading_scale}px`,
+  '--typo-line-height': form.line_height,
+  '--typo-paragraph-spacing': `${form.paragraph_spacing}em`,
 }));
 </script>
 
@@ -90,11 +92,13 @@ const headingPreviewStyles = computed(() => ({
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading title="Typography Settings" description="Configure fonts and text styling" />
-        <Button variant="outline" @click="router.visit('/admin/settings')">
+        <Button variant="outline" @click="router.visit(settingsIndex().url)">
           <ArrowLeft class="mr-2 h-4 w-4" />
           Back
         </Button>
       </div>
+
+      <SettingsNav />
 
       <form @submit.prevent="submit" class="space-y-6">
         <div class="grid gap-6 lg:grid-cols-2">
@@ -112,8 +116,14 @@ const headingPreviewStyles = computed(() => ({
                       <SelectValue placeholder="Select font" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem v-for="font in textFonts" :key="font.value" :value="font.value">
-                        <span :style="{ fontFamily: font.value }">{{ font.label }}</span>
+                      <SelectItem
+                        v-for="font in textFonts"
+                        :key="font.value"
+                        :value="font.value"
+                        v-csp-style="{ '--font-preview': font.value }"
+                        class="font-preview-item"
+                      >
+                        {{ font.label }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -127,8 +137,14 @@ const headingPreviewStyles = computed(() => ({
                       <SelectValue placeholder="Select font" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem v-for="font in textFonts" :key="font.value" :value="font.value">
-                        <span :style="{ fontFamily: font.value }">{{ font.label }}</span>
+                      <SelectItem
+                        v-for="font in textFonts"
+                        :key="font.value"
+                        :value="font.value"
+                        v-csp-style="{ '--font-preview': font.value }"
+                        class="font-preview-item"
+                      >
+                        {{ font.label }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -142,8 +158,14 @@ const headingPreviewStyles = computed(() => ({
                       <SelectValue placeholder="Select font" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem v-for="font in codeFonts" :key="font.value" :value="font.value">
-                        <span :style="{ fontFamily: font.value }">{{ font.label }}</span>
+                      <SelectItem
+                        v-for="font in codeFonts"
+                        :key="font.value"
+                        :value="font.value"
+                        v-csp-style="{ '--font-preview': font.value }"
+                        class="font-preview-item"
+                      >
+                        {{ font.label }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -205,20 +227,17 @@ const headingPreviewStyles = computed(() => ({
                 <CardDescription>See how your typography looks</CardDescription>
               </CardHeader>
               <CardContent>
-                <div class="rounded-lg border p-6" :style="previewStyles">
-                  <h1 class="mb-4 font-bold" :style="headingPreviewStyles">Sample Heading</h1>
-                  <p :style="{ marginBottom: `${form.paragraph_spacing}em` }">
+                <div class="typo-preview rounded-lg border p-6" v-csp-style="previewStyles">
+                  <h1 class="typo-heading mb-4 font-bold">Sample Heading</h1>
+                  <p class="typo-paragraph">
                     This is a sample paragraph demonstrating how your documentation text will appear
                     with the selected typography settings. Good typography improves readability.
                   </p>
-                  <p :style="{ marginBottom: `${form.paragraph_spacing}em` }">
+                  <p class="typo-paragraph">
                     Another paragraph to show spacing between blocks of text. The line height and
                     paragraph spacing work together to create comfortable reading.
                   </p>
-                  <pre
-                    class="rounded bg-muted p-3 text-sm"
-                    :style="{ fontFamily: form.code_font }"
-                  ><code>// Code sample
+                  <pre class="typo-code rounded bg-muted p-3 text-sm"><code>// Code sample
 function example() {
   return "Hello, World!";
 }</code></pre>
@@ -247,3 +266,28 @@ function example() {
     </div>
   </AppLayout>
 </template>
+
+<style scoped>
+.typo-preview {
+  font-family: var(--typo-body-font), system-ui, sans-serif;
+  font-size: var(--typo-font-size);
+  line-height: var(--typo-line-height);
+}
+
+.typo-heading {
+  font-family: var(--typo-heading-font), system-ui, sans-serif;
+  font-size: var(--typo-heading-size);
+}
+
+.typo-paragraph {
+  margin-bottom: var(--typo-paragraph-spacing);
+}
+
+.typo-code {
+  font-family: var(--typo-code-font), monospace;
+}
+
+.font-preview-item {
+  font-family: var(--font-preview), system-ui, sans-serif;
+}
+</style>

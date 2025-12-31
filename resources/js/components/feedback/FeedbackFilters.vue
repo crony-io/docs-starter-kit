@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { index as feedbackIndex } from '@/routes/admin/feedback';
 import type { PageOption } from '@/types/feedback';
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
@@ -23,17 +24,17 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const pageFilter = ref(props.filters.page_id ?? '');
-const helpfulFilter = ref(props.filters.is_helpful ?? '');
+const pageFilter = ref(props.filters.page_id || 'all');
+const helpfulFilter = ref(props.filters.is_helpful || 'all');
 const startDate = ref(props.filters.start_date ?? '');
 const endDate = ref(props.filters.end_date ?? '');
 
 const applyFilters = () => {
   router.get(
-    '/admin/feedback',
+    feedbackIndex().url,
     {
-      page_id: pageFilter.value || undefined,
-      is_helpful: helpfulFilter.value || undefined,
+      page_id: pageFilter.value === 'all' ? undefined : pageFilter.value,
+      is_helpful: helpfulFilter.value === 'all' ? undefined : helpfulFilter.value,
       start_date: startDate.value || undefined,
       end_date: endDate.value || undefined,
     },
@@ -51,7 +52,7 @@ watch([pageFilter, helpfulFilter, startDate, endDate], applyFilters);
         <SelectValue placeholder="Filter by page" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All Pages</SelectItem>
+        <SelectItem value="all">All Pages</SelectItem>
         <SelectItem v-for="page in pages" :key="page.id" :value="page.id.toString()">
           {{ page.title }}
         </SelectItem>
@@ -63,7 +64,7 @@ watch([pageFilter, helpfulFilter, startDate, endDate], applyFilters);
         <SelectValue placeholder="Filter by type" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All Responses</SelectItem>
+        <SelectItem value="all">All Responses</SelectItem>
         <SelectItem value="true">Helpful</SelectItem>
         <SelectItem value="false">Not Helpful</SelectItem>
       </SelectContent>

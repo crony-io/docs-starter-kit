@@ -1,0 +1,21 @@
+{
+  "title": "Getting Started",
+  "description": "Learn the basics and get up and running quickly",
+  "order": 1,
+  "icon": "rocket",
+  "is_expanded": true,
+  "items": {
+    "introduction": {
+      "title": "Introduction",
+      "order": 1
+    },
+    "installation": {
+      "title": "Installation",
+      "order": 2
+    },
+    "quick-start": {
+      "title": "Quick Start",
+      "order": 3
+    }
+  }
+}

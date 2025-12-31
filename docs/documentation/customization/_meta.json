@@ -1,0 +1,20 @@
+{
+  "title": "Customization",
+  "description": "Customize the look and feel of your documentation",
+  "order": 3,
+  "icon": "palette",
+  "items": {
+    "theming": {
+      "title": "Theming",
+      "order": 1
+    },
+    "typography": {
+      "title": "Typography",
+      "order": 2
+    },
+    "layout": {
+      "title": "Layout",
+      "order": 3
+    }
+  }
+}

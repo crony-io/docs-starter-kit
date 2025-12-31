@@ -16,10 +16,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { config as updateConfig, manual, rollback, test } from '@/routes/admin/git-sync';
+import { dashboard } from '@/routes';
+import {
+  index as gitSyncIndex,
+  manual,
+  rollback,
+  test,
+  config as updateConfig,
+} from '@/routes/admin/git-sync';
 import type { BreadcrumbItem } from '@/types';
 import type { GitSync, SystemConfig } from '@/types/git-sync';
-import { router, Form, Head } from '@inertiajs/vue3';
+import { Form, Head, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -30,8 +37,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Git Sync', href: '/admin/git-sync' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Git Sync', href: gitSyncIndex().url },
 ];
 
 const gitRepositoryUrl = ref<string>(props.config.git_repository_url ?? '');
@@ -212,9 +219,16 @@ const testConnection = () => {
               </div>
 
               <div class="flex flex-wrap items-center gap-3">
-                <Button type="submit" :disabled="processing">{{ processing ? 'Saving…' : 'Save' }}</Button>
+                <Button type="submit" :disabled="processing">{{
+                  processing ? 'Saving…' : 'Save'
+                }}</Button>
 
-                <Button type="button" variant="outline" :disabled="!hasGitConfigured" @click="testConnection">
+                <Button
+                  type="button"
+                  variant="outline"
+                  :disabled="!hasGitConfigured"
+                  @click="testConnection"
+                >
                   Test connection
                 </Button>
 

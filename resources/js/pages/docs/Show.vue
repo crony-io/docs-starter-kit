@@ -99,7 +99,6 @@ const lastUpdatedAt = computed(() => {
 const showBreadcrumbs = computed(() => siteSettings.value?.layout?.showBreadcrumbs ?? true);
 const showToc = computed(() => siteSettings.value?.layout?.showToc ?? true);
 const tocPosition = computed(() => siteSettings.value?.layout?.tocPosition ?? 'right');
-const contentWidth = computed(() => siteSettings.value?.layout?.contentWidth ?? 900);
 </script>
 
 <template>
@@ -121,7 +120,7 @@ const contentWidth = computed(() => siteSettings.value?.layout?.contentWidth ?? 
         class="order-first"
       />
 
-      <div class="flex-1 px-8 py-6" :style="{ maxWidth: `${contentWidth}px` }">
+      <div class="docs-content-area flex-1 px-8 py-6">
         <DocsBreadcrumb v-if="showBreadcrumbs" :items="breadcrumbs" />
 
         <div v-if="currentPage && currentPage.type === 'document'">

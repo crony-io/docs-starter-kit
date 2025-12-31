@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
+import IconPicker from '@/components/IconPicker.vue';
 import InputError from '@/components/InputError.vue';
 import PageEditor from '@/components/PageEditor/PageEditor.vue';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { create, index as pagesIndex, store } from '@/routes/admin/pages';
 import type { BreadcrumbItem, Page, PageType } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Book, FileText, FolderTree, Save } from 'lucide-vue-next';
@@ -30,9 +33,9 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Pages', href: '/admin/pages' },
-  { title: 'Create', href: '/admin/pages/create' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Pages', href: pagesIndex().url },
+  { title: 'Create', href: create().url },
 ];
 
 const form = useForm({
@@ -87,7 +90,7 @@ watch(
 );
 
 const submit = () => {
-  form.post('/admin/pages');
+  form.submit(store());
 };
 
 const onStatusChange = (value: unknown) => {
@@ -102,7 +105,7 @@ const onTypeChange = (value: unknown) => {
 };
 
 const onParentChange = (value: unknown) => {
-  form.parent_id = value ? Number(value) : null;
+  form.parent_id = value && value !== 'none' ? Number(value) : null;
 };
 
 const filteredParents = computed(() => {
@@ -148,7 +151,7 @@ const canSubmit = computed(() => form.title.trim().length > 0);
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading title="Create Page" description="Add a new documentation page" />
-        <Button variant="outline" @click="router.visit('/admin/pages')">
+        <Button variant="outline" @click="router.visit(pagesIndex().url)">
           <ArrowLeft class="mr-2 h-4 w-4" />
           Back to Pages
         </Button>
@@ -228,14 +231,14 @@ const canSubmit = computed(() => form.title.trim().length > 0);
                 <div v-if="showParentSelector" class="space-y-2">
                   <Label>Parent</Label>
                   <Select
-                    :model-value="form.parent_id?.toString() ?? ''"
+                    :model-value="form.parent_id?.toString() ?? 'none'"
                     @update:model-value="onParentChange"
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select parent" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No parent (root level)</SelectItem>
+                      <SelectItem value="none">No parent (root level)</SelectItem>
                       <SelectItem
                         v-for="parent in filteredParents"
                         :key="parent.id"
@@ -267,14 +270,9 @@ const canSubmit = computed(() => form.title.trim().length > 0);
                 </div>
 
                 <div class="space-y-2">
-                  <Label for="icon">Icon (optional)</Label>
-                  <Input
-                    id="icon"
-                    v-model="form.icon"
-                    placeholder="e.g., book, file-text, folder"
-                    :disabled="form.processing"
-                  />
-                  <p class="text-xs text-muted-foreground">Lucide icon name for navigation</p>
+                  <Label>Icon (optional)</Label>
+                  <IconPicker v-model="form.icon" :disabled="form.processing" />
+                  <p class="text-xs text-muted-foreground">Lucide icon for navigation</p>
                   <InputError :message="form.errors.icon" />
                 </div>
               </CardContent>

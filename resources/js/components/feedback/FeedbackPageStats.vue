@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import type { PageStat } from '@/types/feedback';
 
 defineProps<{ pageStats: PageStat[] }>();
@@ -15,12 +16,7 @@ defineProps<{ pageStats: PageStat[] }>();
         <div v-for="stat in pageStats" :key="stat.page_id" class="flex items-center gap-4">
           <div class="flex-1 truncate text-sm font-medium">{{ stat.page_title }}</div>
           <div class="w-32">
-            <div class="h-2 rounded-full bg-muted">
-              <div
-                class="h-2 rounded-full bg-green-500"
-                :style="{ width: `${stat.helpfulness_score}%` }"
-              />
-            </div>
+            <Progress :model-value="stat.helpfulness_score" class="h-2" />
           </div>
           <div class="w-16 text-right text-sm text-muted-foreground">
             {{ stat.helpfulness_score }}%

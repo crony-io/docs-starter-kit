@@ -4,6 +4,7 @@ import FileManagerToolbar from '@/components/FileManager/FileManagerToolbar.vue'
 import FileManagerUploader from '@/components/FileManager/FileManagerUploader.vue';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { bulkDestroy, index as mediaIndex, store as mediaStore } from '@/routes/admin/media';
 import type { MediaFile, MediaFilters, MediaFolder } from '@/types/media';
 import axios from 'axios';
 import { ChevronLeftIcon, ChevronRightIcon, FolderIcon } from 'lucide-vue-next';
@@ -58,7 +59,7 @@ const fetchFiles = async (page = 1) => {
       params.set('type', filters.value.type);
     }
 
-    const response = await axios.get(`/admin/media?${params.toString()}`, {
+    const response = await axios.get(mediaIndex.url({ query: Object.fromEntries(params) }), {
       headers: { Accept: 'application/json' },
     });
 
@@ -118,7 +119,7 @@ const handleUpload = async (uploadFiles: File[]) => {
     }
 
     try {
-      const response = await axios.post('/admin/media', formData, {
+      const response = await axios.post(mediaStore().url, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -139,7 +140,7 @@ const handleDeleteSelected = async () => {
   }
 
   try {
-    await axios.post('/admin/media/bulk-destroy', {
+    await axios.post(bulkDestroy().url, {
       ids: selectedFiles.value.map((f) => f.id),
     });
 

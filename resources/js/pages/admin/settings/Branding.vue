@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import { SettingsNav } from '@/components/settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { branding, index as settingsIndex } from '@/routes/admin/settings';
+import {
+  deleteLogo as deleteLogoRoute,
+  update as updateBranding,
+} from '@/routes/admin/settings/branding';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save, Trash2, Upload } from 'lucide-vue-next';
@@ -19,9 +26,9 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Site Settings', href: '/admin/settings' },
-  { title: 'Branding', href: '/admin/settings/branding' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Site Settings', href: settingsIndex().url },
+  { title: 'Branding', href: branding().url },
 ];
 
 const form = useForm({
@@ -47,7 +54,7 @@ const faviconPreview = ref<string | null>(
 );
 
 const submit = () => {
-  form.post('/admin/settings/branding', {
+  form.post(updateBranding().url, {
     forceFormData: true,
   });
 };
@@ -80,7 +87,7 @@ const handleFaviconChange = (event: Event) => {
 };
 
 const deleteLogo = (type: 'light' | 'dark') => {
-  router.delete('/admin/settings/branding/logo', {
+  router.delete(deleteLogoRoute().url, {
     data: { type },
     preserveScroll: true,
     onSuccess: () => {
@@ -101,11 +108,13 @@ const deleteLogo = (type: 'light' | 'dark') => {
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading title="Branding Settings" description="Configure your site identity" />
-        <Button variant="outline" @click="router.visit('/admin/settings')">
+        <Button variant="outline" @click="router.visit(settingsIndex().url)">
           <ArrowLeft class="mr-2 h-4 w-4" />
           Back
         </Button>
       </div>
+
+      <SettingsNav />
 
       <form @submit.prevent="submit" class="space-y-6">
         <div class="grid gap-6 lg:grid-cols-2">

@@ -1,0 +1,20 @@
+{
+  "title": "Advanced",
+  "description": "Advanced configuration and features",
+  "order": 3,
+  "icon": "settings-2",
+  "items": {
+    "feedback-system": {
+      "title": "Feedback System",
+      "order": 1
+    },
+    "llm-files": {
+      "title": "LLM Files",
+      "order": 2
+    },
+    "deployment": {
+      "title": "Deployment",
+      "order": 3
+    }
+  }
+}

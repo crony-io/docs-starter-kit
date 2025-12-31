@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { destroy, index, store } from '@/actions/App/Http/Controllers/UserManagementController';
+import {
+  destroy,
+  edit,
+  index,
+  store,
+} from '@/actions/App/Http/Controllers/UserManagementController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import {
@@ -136,7 +141,7 @@ const confirmDelete = () => {
               <TableCell class="text-right">
                 <div class="flex items-center justify-end gap-2">
                   <Button variant="outline" size="sm" as-child>
-                    <Link :href="`/users/${user.id}/edit`" class="inline-flex items-center gap-1">
+                    <Link :href="edit(user.id)" class="inline-flex items-center gap-1">
                       <Pencil class="h-3 w-3" />
                       Editar
                     </Link>

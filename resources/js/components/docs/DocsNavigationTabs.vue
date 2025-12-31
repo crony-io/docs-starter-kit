@@ -26,7 +26,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <nav class="border-b bg-background px-4">
+  <nav class="flex items-center">
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem v-for="tab in tabs" :key="tab.id">
@@ -36,8 +36,8 @@ defineProps<Props>();
               :class="
                 cn(
                   navigationMenuTriggerStyle(),
-                  'rounded-none border-b-2 border-transparent',
-                  tab.id === activeId && 'border-primary bg-transparent text-foreground',
+                  'h-8 rounded-md px-3 text-sm',
+                  tab.id === activeId && 'bg-accent text-accent-foreground',
                 )
               "
             >

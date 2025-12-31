@@ -1,25 +1,22 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { reactiveOmit } from '@vueuse/core';
 import { ChevronDown } from 'lucide-vue-next';
-import type { SelectScrollDownButtonProps } from 'reka-ui';
-import { SelectScrollDownButton, useForwardProps } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
 
-const props = defineProps<SelectScrollDownButtonProps & { class?: HTMLAttributes['class'] }>();
+interface SelectScrollDownButtonProps {
+  class?: HTMLAttributes['class'];
+}
 
-const delegatedProps = reactiveOmit(props, 'class');
-
-const forwardedProps = useForwardProps(delegatedProps);
+const props = defineProps<SelectScrollDownButtonProps>();
 </script>
 
 <template>
-  <SelectScrollDownButton
-    v-bind="forwardedProps"
+  <div
+    aria-hidden="true"
     :class="cn('flex cursor-default items-center justify-center py-1', props.class)"
   >
     <slot>
       <ChevronDown class="h-4 w-4" />
     </slot>
-  </SelectScrollDownButton>
+  </div>
 </template>

@@ -146,5 +146,6 @@ export interface SiteSettings {
     searchEnabled: boolean;
     codeCopyButton: boolean;
     codeLineNumbers: boolean;
+    llmTxtEnabled: boolean;
   };
 }

@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { create, edit, reorder } from '@/routes/admin/pages';
 import { Link, router } from '@inertiajs/vue3';
 import {
   Book,
@@ -107,7 +108,7 @@ const initSortable = () => {
       }));
 
       router.post(
-        '/admin/pages/reorder',
+        reorder().url,
         { pages: newOrder },
         {
           preserveScroll: true,
@@ -121,7 +122,7 @@ const initSortable = () => {
 onMounted(() => {
   initSortable();
   props.items.forEach((item) => {
-    if (item.children.length > 0) {
+    if (item.children?.length > 0) {
       expandedItems.value.add(item.id);
     }
   });
@@ -162,7 +163,7 @@ watch(
           </div>
 
           <CollapsibleTrigger
-            v-if="item.children.length > 0"
+            v-if="item.children?.length > 0"
             class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent"
             @click="toggleExpanded(item.id)"
           >
@@ -186,15 +187,12 @@ watch(
             </div>
 
             <div class="min-w-0 flex-1">
-              <Link
-                :href="`/admin/pages/${item.id}/edit`"
-                class="block truncate font-medium transition-colors hover:text-primary"
-              >
+              <h3 class="block truncate font-medium transition-colors hover:text-primary">
                 {{ item.title }}
-              </Link>
+              </h3>
               <p class="truncate text-xs text-muted-foreground">
                 /{{ item.slug }}
-                <span v-if="item.children.length > 0" class="ml-2">
+                <span v-if="item.children?.length > 0" class="ml-2">
                   · {{ item.children.length }}
                   {{ item.children.length === 1 ? 'child' : 'children' }}
                 </span>
@@ -213,7 +211,7 @@ watch(
               as-child
               title="Add child page"
             >
-              <Link :href="`/admin/pages/create?parent_id=${item.id}`">
+              <Link :href="create({ query: { parent_id: item.id } })">
                 <Plus class="h-4 w-4" />
               </Link>
             </Button>
@@ -225,7 +223,7 @@ watch(
               as-child
               title="Edit page"
             >
-              <Link :href="`/admin/pages/${item.id}/edit`">
+              <Link :href="edit(item.id)">
                 <Pencil class="h-4 w-4" />
               </Link>
             </Button>
@@ -244,7 +242,7 @@ watch(
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" class="w-48">
                 <DropdownMenuItem as-child>
-                  <Link :href="`/admin/pages/${item.id}/edit`" class="flex items-center">
+                  <Link :href="edit(item.id)" class="flex items-center">
                     <Pencil class="mr-2 h-4 w-4" />
                     Edit
                   </Link>
@@ -268,7 +266,7 @@ watch(
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   class="text-destructive focus:text-destructive"
-                  :disabled="item.children.length > 0"
+                  :disabled="(item.children?.length ?? 0) > 0"
                   @click="emit('delete', item)"
                 >
                   <Trash2 class="mr-2 h-4 w-4" />
@@ -279,7 +277,7 @@ watch(
           </div>
         </div>
 
-        <CollapsibleContent v-if="item.children.length > 0">
+        <CollapsibleContent v-if="item.children?.length > 0">
           <div class="border-t bg-muted/30 px-2 pb-2">
             <PageTreeDraggable
               :items="item.children"

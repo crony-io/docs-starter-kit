@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import GithubIcon from '@/components/icons/GithubIcon.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import GithubIcon from '@/components/icons/GithubIcon.vue';
+import { applyDynamicStyles } from '@/composables/useCspNonce';
 import type { SiteSettings } from '@/types';
 import { usePage } from '@inertiajs/vue3';
-import { CheckIcon, CopyIcon } from 'lucide-vue-next';
+import { CheckIcon, CopyIcon, DownloadIcon } from 'lucide-vue-next';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 const page = usePage();
@@ -54,6 +55,25 @@ const copyPageContent = async () => {
   } catch (error) {
     console.error('Failed to copy:', error);
   }
+};
+
+const downloadPageContent = () => {
+  const text = props.contentRaw || '';
+  if (!text || !props.title) {
+    return;
+  }
+
+  const filename = `${props.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.txt`;
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const addCopyButtons = () => {
@@ -111,7 +131,9 @@ const addLineNumbers = () => {
     if (lines.length > 1 && lines[lines.length - 1] === '') {
       lines.pop();
     }
-    code.setAttribute('style', `counter-reset: line ${lines.length > 1 ? '' : 'none'}`);
+    applyDynamicStyles(code as HTMLElement, {
+      'counter-reset': `line ${lines.length > 1 ? '' : 'none'}`,
+    });
   });
 };
 
@@ -134,7 +156,7 @@ watch(
 </script>
 
 <template>
-  <article class="prose prose-slate dark:prose-invert max-w-none">
+  <article class="prose max-w-none prose-slate dark:prose-invert">
     <header v-if="title" class="mb-8 space-y-2">
       <div class="flex items-start justify-between gap-4">
         <h1 class="text-3xl font-bold tracking-tight">{{ title }}</h1>
@@ -151,6 +173,11 @@ watch(
             <CopyIcon v-else class="mr-2 h-4 w-4" />
             {{ copiedPage ? 'Copied!' : 'Copy page' }}
           </Button>
+
+          <Button variant="outline" size="sm" @click="downloadPageContent" title="Download as TXT">
+            <DownloadIcon class="mr-2 h-4 w-4" />
+            Download
+          </Button>
         </div>
       </div>
       <p v-if="formattedDate" class="text-sm text-muted-foreground">
@@ -162,6 +189,6 @@ watch(
       <Separator class="mt-4" />
     </header>
 
-    <div ref="contentRef" v-html="content" class="prose prose-slate dark:prose-invert max-w-none" />
+    <div ref="contentRef" v-html="content" class="prose max-w-none prose-slate dark:prose-invert" />
   </article>
 </template>

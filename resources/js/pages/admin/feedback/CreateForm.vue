@@ -15,15 +15,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { forms as feedbackForms, index as feedbackIndex } from '@/routes/admin/feedback';
+import {
+  create as createFeedbackForm,
+  store as storeFeedbackForm,
+} from '@/routes/admin/feedback/forms';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Feedback', href: '/admin/feedback' },
-  { title: 'Forms', href: '/admin/feedback/forms' },
-  { title: 'Create', href: '/admin/feedback/forms/create' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Feedback', href: feedbackIndex().url },
+  { title: 'Forms', href: feedbackForms().url },
+  { title: 'Create', href: createFeedbackForm().url },
 ];
 
 const form = useForm({
@@ -36,7 +42,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post('/admin/feedback/forms');
+  form.submit(storeFeedbackForm());
 };
 </script>
 
@@ -47,7 +53,7 @@ const submit = () => {
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading title="Create Feedback Form" description="Build a custom feedback form" />
-        <Button variant="outline" @click="router.visit('/admin/feedback/forms')">
+        <Button variant="outline" @click="router.visit(feedbackForms().url)">
           <ArrowLeft class="mr-2 h-4 w-4" /> Back
         </Button>
       </div>

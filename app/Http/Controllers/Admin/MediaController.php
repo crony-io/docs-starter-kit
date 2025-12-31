@@ -39,7 +39,7 @@ class MediaController extends Controller
             };
         }
 
-        $files = $query->paginate(24)->withQueryString();
+        $files = $query->paginate(config('pagination.media', 24))->withQueryString();
 
         $folders = Folder::query()
             ->when($request->filled('folder_id'),

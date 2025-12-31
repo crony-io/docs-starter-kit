@@ -118,6 +118,13 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString('es-ES');
 };
 
+const getWeekStart = () => {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(now.setDate(diff)).toISOString().split('T')[0];
+};
+
 const formatExecutionTime = (time?: number) => {
   if (!time) {
     return 'N/A';
@@ -217,6 +224,63 @@ watch(
             {{ isExporting ? 'Exportando...' : 'Exportar CSV' }}
           </Button>
         </div>
+      </div>
+
+      <!-- Quick Filters -->
+      <div class="flex flex-wrap gap-2">
+        <Button
+          :variant="
+            !filters.start_date && !filters.with_errors && !filters.successful
+              ? 'default'
+              : 'outline'
+          "
+          size="sm"
+          @click="clearFilters"
+        >
+          All
+        </Button>
+        <Button
+          :variant="
+            filters.start_date === new Date().toISOString().split('T')[0] ? 'default' : 'outline'
+          "
+          size="sm"
+          @click="
+            filters.start_date = new Date().toISOString().split('T')[0];
+            filters.end_date = new Date().toISOString().split('T')[0];
+          "
+        >
+          Today
+        </Button>
+        <Button
+          :variant="filters.start_date === getWeekStart() ? 'default' : 'outline'"
+          size="sm"
+          @click="
+            filters.start_date = getWeekStart();
+            filters.end_date = '';
+          "
+        >
+          This Week
+        </Button>
+        <Button
+          :variant="filters.with_errors ? 'default' : 'outline'"
+          size="sm"
+          @click="
+            filters.with_errors = !filters.with_errors;
+            filters.successful = false;
+          "
+        >
+          Errors Only
+        </Button>
+        <Button
+          :variant="filters.successful ? 'default' : 'outline'"
+          size="sm"
+          @click="
+            filters.successful = !filters.successful;
+            filters.with_errors = false;
+          "
+        >
+          Successful Only
+        </Button>
       </div>
 
       <!-- Stats Cards -->

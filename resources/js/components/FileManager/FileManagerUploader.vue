@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { AlertCircleIcon, CheckCircleIcon, UploadCloudIcon, XIcon } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -149,15 +150,11 @@ defineExpose({
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-medium">{{ item.file.name }}</p>
             <p class="text-xs text-muted-foreground">{{ formatFileSize(item.file.size) }}</p>
-            <div
+            <Progress
               v-if="item.status === 'uploading'"
-              class="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted"
-            >
-              <div
-                class="h-full bg-primary transition-all"
-                :style="{ width: `${item.progress}%` }"
-              />
-            </div>
+              :model-value="item.progress"
+              class="mt-1 h-1"
+            />
           </div>
 
           <div class="flex items-center gap-2">

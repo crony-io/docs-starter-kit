@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class Page extends Model
@@ -49,6 +50,18 @@ class Page extends Model
             if (empty($page->slug)) {
                 $page->slug = Str::slug($page->title);
             }
+        });
+
+        static::saved(function (Page $page) {
+            $page->clearPathCache();
+            // Clear cache for all children as their full paths may have changed
+            if ($page->wasChanged(['slug', 'parent_id'])) {
+                $page->clearChildrenPathCache();
+            }
+        });
+
+        static::deleted(function (Page $page) {
+            $page->clearPathCache();
         });
     }
 
@@ -171,6 +184,15 @@ class Page extends Model
 
     public function getFullPath(): string
     {
+        return Cache::remember(
+            "page.{$this->id}.full_path",
+            3600,
+            fn () => $this->computeFullPath()
+        );
+    }
+
+    private function computeFullPath(): string
+    {
         $segments = [$this->slug];
         $parentId = $this->parent_id;
 
@@ -185,6 +207,19 @@ class Page extends Model
         }
 
         return implode('/', $segments);
+    }
+
+    public function clearPathCache(): void
+    {
+        Cache::forget("page.{$this->id}.full_path");
+    }
+
+    public function clearChildrenPathCache(): void
+    {
+        $this->children()->each(function (Page $child) {
+            $child->clearPathCache();
+            $child->clearChildrenPathCache();
+        });
     }
 
     public function publish(): self
@@ -243,5 +278,50 @@ class Page extends Model
         }
 
         return $breadcrumbs->toArray();
+    }
+
+    public static function buildTree(
+        ?\Illuminate\Support\Collection $pages = null,
+        ?int $parentId = null,
+        array $fields = ['id', 'title', 'slug', 'type', 'parent_id'],
+        bool $publishedOnly = false,
+        ?callable $transformer = null
+    ): array {
+        if ($pages === null) {
+            $query = static::query()->orderBy('order');
+
+            if ($publishedOnly) {
+                $query->published();
+            }
+
+            $pages = $query->get($fields);
+        }
+
+        return static::buildTreeFromCollection($pages, $parentId, $transformer);
+    }
+
+    public static function buildTreeFromCollection(
+        \Illuminate\Support\Collection $pages,
+        ?int $parentId,
+        ?callable $transformer = null
+    ): array {
+        $items = [];
+        $children = $pages->where('parent_id', $parentId);
+
+        foreach ($children as $child) {
+            $item = $transformer
+                ? $transformer($child, $pages)
+                : $child->toArray();
+
+            $childItems = static::buildTreeFromCollection($pages, $child->id, $transformer);
+
+            if (! empty($childItems)) {
+                $item['children'] = $childItems;
+            }
+
+            $items[] = $item;
+        }
+
+        return $items;
     }
 }

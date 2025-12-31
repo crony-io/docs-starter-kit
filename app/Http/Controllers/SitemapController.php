@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Page;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
@@ -31,21 +32,34 @@ class SitemapController extends Controller
      */
     protected function getUrls(): array
     {
-        return [
+        $urls = [
             [
                 'loc' => url('/'),
                 'lastmod' => now()->toDateString(),
                 'changefreq' => 'weekly',
                 'priority' => '1.0',
             ],
-            // Add more URLs here as needed:
-            // [
-            //     'loc' => url('/about'),
-            //     'lastmod' => '2025-01-01',
-            //     'changefreq' => 'monthly',
-            //     'priority' => '0.8',
-            // ],
+            [
+                'loc' => url('/docs'),
+                'lastmod' => now()->toDateString(),
+                'changefreq' => 'daily',
+                'priority' => '0.9',
+            ],
         ];
+
+        Page::published()
+            ->where('type', 'document')
+            ->orderBy('updated_at', 'desc')
+            ->each(function (Page $page) use (&$urls) {
+                $urls[] = [
+                    'loc' => url('/docs/'.$page->getFullPath()),
+                    'lastmod' => $page->updated_at->toDateString(),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.8',
+                ];
+            });
+
+        return $urls;
     }
 
     /**

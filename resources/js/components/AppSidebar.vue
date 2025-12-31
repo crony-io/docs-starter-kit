@@ -12,6 +12,13 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as activityLogsIndex } from '@/routes/activity-logs';
+import { index as feedbackIndex } from '@/routes/admin/feedback';
+import { index as gitSyncIndex } from '@/routes/admin/git-sync';
+import { index as mediaIndex } from '@/routes/admin/media';
+import { index as pagesIndex } from '@/routes/admin/pages';
+import { index as settingsIndex } from '@/routes/admin/settings';
+import { index as usersIndex } from '@/routes/users';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
@@ -40,17 +47,17 @@ const mainNavItems = computed<NavItem[]>(() => {
     },
     {
       title: 'Pages',
-      href: '/admin/pages',
+      href: pagesIndex(),
       icon: FileText,
     },
     {
       title: 'Media',
-      href: '/admin/media',
+      href: mediaIndex(),
       icon: Image,
     },
     {
       title: 'Feedback',
-      href: '/admin/feedback',
+      href: feedbackIndex(),
       icon: MessageSquare,
     },
   ];
@@ -58,22 +65,22 @@ const mainNavItems = computed<NavItem[]>(() => {
   if (isAdmin.value) {
     items.push({
       title: 'Users',
-      href: '/users',
+      href: usersIndex(),
       icon: Users,
     });
     items.push({
       title: 'Git Sync',
-      href: '/admin/git-sync',
+      href: gitSyncIndex(),
       icon: GitPullRequest,
     });
     items.push({
       title: 'Activity Logs',
-      href: '/activity-logs',
+      href: activityLogsIndex(),
       icon: Activity,
     });
     items.push({
       title: 'Site Settings',
-      href: '/admin/settings',
+      href: settingsIndex(),
       icon: Settings,
     });
   }

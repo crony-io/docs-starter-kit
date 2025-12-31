@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { reactiveOmit } from '@vueuse/core';
-import type { SelectGroupProps } from 'reka-ui';
-import { SelectGroup } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
 
-const props = defineProps<SelectGroupProps & { class?: HTMLAttributes['class'] }>();
+interface SelectGroupProps {
+  class?: HTMLAttributes['class'];
+}
 
-const delegatedProps = reactiveOmit(props, 'class');
+const props = defineProps<SelectGroupProps>();
 </script>
 
 <template>
-  <SelectGroup :class="cn('w-full p-1', props.class)" v-bind="delegatedProps">
+  <div role="group" :class="cn('w-full p-1', props.class)">
     <slot />
-  </SelectGroup>
+  </div>
 </template>

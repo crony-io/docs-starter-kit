@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import { SwitchField } from '@/components/settings';
+import { SettingsNav, SwitchField } from '@/components/settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { advanced, index as settingsIndex } from '@/routes/admin/settings';
+import { update as updateAdvanced } from '@/routes/admin/settings/advanced';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, RotateCcw, Save } from 'lucide-vue-next';
@@ -26,9 +29,9 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Site Settings', href: '/admin/settings' },
-  { title: 'Advanced', href: '/admin/settings/advanced' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Site Settings', href: settingsIndex().url },
+  { title: 'Advanced', href: advanced().url },
 ];
 
 const form = useForm({
@@ -62,7 +65,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.put('/admin/settings/advanced');
+  form.submit(updateAdvanced());
 };
 
 const resetToDefaults = () => {
@@ -87,11 +90,13 @@ const resetToDefaults = () => {
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading title="Advanced Settings" description="Configure advanced features" />
-        <Button variant="outline" @click="router.visit('/admin/settings')">
+        <Button variant="outline" @click="router.visit(settingsIndex().url)">
           <ArrowLeft class="mr-2 h-4 w-4" />
           Back
         </Button>
       </div>
+
+      <SettingsNav />
 
       <form @submit.prevent="submit" class="space-y-6">
         <div class="grid gap-6 lg:grid-cols-2">

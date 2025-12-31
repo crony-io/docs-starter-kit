@@ -1,0 +1,20 @@
+{
+  "title": "Configuration",
+  "description": "Configure your Docs Starter Kit installation",
+  "order": 2,
+  "icon": "settings",
+  "items": {
+    "environment-variables": {
+      "title": "Environment Variables",
+      "order": 1
+    },
+    "content-modes": {
+      "title": "Content Modes",
+      "order": 2
+    },
+    "database": {
+      "title": "Database",
+      "order": 3
+    }
+  }
+}

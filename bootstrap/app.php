@@ -95,6 +95,18 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->skip(100)
                 ->delete();
         })->weekly()->sundays()->at('03:00');
+
+        // Anonymize old IP addresses for GDPR compliance (runs daily at 3:30 AM)
+        $schedule->command('privacy:anonymize-ips --days=30')
+            ->daily()
+            ->at('03:30')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                Log::info('Scheduled IP anonymization completed');
+            })
+            ->onFailure(function () {
+                Log::error('Scheduled IP anonymization failed');
+            });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {

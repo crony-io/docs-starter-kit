@@ -78,7 +78,7 @@ provideSidebarContext({
   <TooltipProvider :delay-duration="0">
     <div
       data-slot="sidebar-wrapper"
-      :style="{
+      v-csp-style="{
         '--sidebar-width': SIDEBAR_WIDTH,
         '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
       }"

@@ -15,6 +15,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { forms as feedbackForms, index as feedbackIndex } from '@/routes/admin/feedback';
+import {
+  edit as editFeedbackForm,
+  update as updateFeedbackForm,
+} from '@/routes/admin/feedback/forms';
 import type { BreadcrumbItem } from '@/types';
 import type { FeedbackForm } from '@/types/feedback';
 import { Head, router, useForm } from '@inertiajs/vue3';
@@ -23,10 +29,10 @@ import { ArrowLeft, Save } from 'lucide-vue-next';
 const props = defineProps<{ form: FeedbackForm }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Feedback', href: '/admin/feedback' },
-  { title: 'Forms', href: '/admin/feedback/forms' },
-  { title: 'Edit', href: `/admin/feedback/forms/${props.form.id}/edit` },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Feedback', href: feedbackIndex().url },
+  { title: 'Forms', href: feedbackForms().url },
+  { title: 'Edit', href: editFeedbackForm(props.form.id).url },
 ];
 
 const formData = useForm({
@@ -37,7 +43,7 @@ const formData = useForm({
 });
 
 const submit = () => {
-  formData.put(`/admin/feedback/forms/${props.form.id}`);
+  formData.submit(updateFeedbackForm(props.form.id));
 };
 </script>
 
@@ -48,7 +54,7 @@ const submit = () => {
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading :title="form.name" description="Edit feedback form" />
-        <Button variant="outline" @click="router.visit('/admin/feedback/forms')">
+        <Button variant="outline" @click="router.visit(feedbackForms().url)">
           <ArrowLeft class="mr-2 h-4 w-4" /> Back
         </Button>
       </div>

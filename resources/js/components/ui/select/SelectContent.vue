@@ -1,54 +1,101 @@
 <script setup lang="ts">
+import { applyDynamicStyles } from '@/composables/useCspNonce';
+import { useSelectContext } from '@/composables/useSelect';
 import { cn } from '@/lib/utils';
-import { reactiveOmit } from '@vueuse/core';
-import type { SelectContentEmits, SelectContentProps } from 'reka-ui';
-import { SelectContent, SelectPortal, SelectViewport, useForwardPropsEmits } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
-import { SelectScrollDownButton, SelectScrollUpButton } from '.';
+import { nextTick, onMounted, onUnmounted, Teleport, watch } from 'vue';
 
 defineOptions({
   inheritAttrs: false,
 });
 
-const props = withDefaults(
-  defineProps<SelectContentProps & { class?: HTMLAttributes['class'] }>(),
-  {
-    position: 'popper',
+interface SelectContentProps {
+  class?: HTMLAttributes['class'];
+  position?: 'item-aligned' | 'popper';
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  sideOffset?: number;
+  align?: 'start' | 'center' | 'end';
+}
+
+const props = withDefaults(defineProps<SelectContentProps>(), {
+  position: 'popper',
+  side: 'bottom',
+  sideOffset: 4,
+  align: 'start',
+});
+
+const context = useSelectContext();
+
+const updatePosition = () => {
+  if (!context.triggerRef.value || !context.open.value || !context.contentRef.value) return;
+
+  const trigger = context.triggerRef.value;
+  const rect = trigger.getBoundingClientRect();
+
+  applyDynamicStyles(context.contentRef.value, {
+    position: 'fixed',
+    left: `${rect.left}px`,
+    top: `${rect.bottom + props.sideOffset}px`,
+    'min-width': `${rect.width}px`,
+    'z-index': '50',
+  });
+};
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    context.close();
+  }
+};
+
+watch(
+  () => context.open.value,
+  (open) => {
+    if (open) {
+      nextTick(() => {
+        updatePosition();
+        context.contentRef.value?.focus();
+      });
+    }
   },
 );
-const emits = defineEmits<SelectContentEmits>();
 
-const delegatedProps = reactiveOmit(props, 'class');
+onMounted(() => {
+  window.addEventListener('resize', updatePosition);
+  window.addEventListener('scroll', updatePosition, true);
+});
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits);
+onUnmounted(() => {
+  window.removeEventListener('resize', updatePosition);
+  window.removeEventListener('scroll', updatePosition, true);
+});
 </script>
 
 <template>
-  <SelectPortal>
-    <SelectContent
-      v-bind="{ ...forwarded, ...$attrs }"
+  <Teleport to="body">
+    <div
+      v-if="context.open.value"
+      :ref="(el) => (context.contentRef.value = el as HTMLElement)"
+      role="listbox"
+      :id="context.contentId"
+      :aria-labelledby="context.triggerId"
+      tabindex="-1"
+      :data-state="context.open.value ? 'open' : 'closed'"
+      :data-side="props.side"
       :class="
         cn(
-          'relative z-50 max-h-96 min-w-32 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
-          position === 'popper' &&
-            'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
+          'relative z-50 max-h-96 min-w-32 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md',
+          'animate-in fade-in-0 zoom-in-95',
+          'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+          position === 'popper' && 'data-[side=bottom]:translate-y-1',
           props.class,
         )
       "
+      @keydown="handleKeydown"
     >
-      <SelectScrollUpButton />
-      <SelectViewport
-        :class="
-          cn(
-            'p-1',
-            position === 'popper' &&
-              'h-[--reka-select-trigger-height] w-full min-w-[--reka-select-trigger-width]',
-          )
-        "
-      >
+      <div class="p-1">
         <slot />
-      </SelectViewport>
-      <SelectScrollDownButton />
-    </SelectContent>
-  </SelectPortal>
+      </div>
+    </div>
+  </Teleport>
 </template>

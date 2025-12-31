@@ -31,10 +31,10 @@ const emit = defineEmits<{
 }>();
 
 const searchQuery = ref(props.filters.search ?? '');
-const selectedType = ref(props.filters.type ?? '');
+const selectedType = ref(props.filters.type || 'all');
 
 const typeOptions = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },
   { value: 'image', label: 'Images' },
   { value: 'document', label: 'Documents' },
   { value: 'video', label: 'Videos' },
@@ -48,7 +48,7 @@ watch(searchQuery, (value) => {
 watch(selectedType, (value) => {
   emit('update:filters', {
     ...props.filters,
-    type: (value as MediaFilters['type']) || undefined,
+    type: value === 'all' ? undefined : (value as MediaFilters['type']),
   });
 });
 

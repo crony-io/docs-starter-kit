@@ -67,16 +67,14 @@ class Setting extends Model
 
     protected static function booted(): void
     {
-        static::saved(function (self $setting) {
-            Cache::forget("setting.{$setting->key}");
-            Cache::forget("settings.group.{$setting->group}");
-            Cache::forget('settings.all');
-        });
+        static::saved(fn (self $setting) => $setting->clearRelatedCaches());
+        static::deleted(fn (self $setting) => $setting->clearRelatedCaches());
+    }
 
-        static::deleted(function (self $setting) {
-            Cache::forget("setting.{$setting->key}");
-            Cache::forget("settings.group.{$setting->group}");
-            Cache::forget('settings.all');
-        });
+    private function clearRelatedCaches(): void
+    {
+        Cache::forget("setting.{$this->key}");
+        Cache::forget("settings.group.{$this->group}");
+        Cache::forget('settings.all');
     }
 }

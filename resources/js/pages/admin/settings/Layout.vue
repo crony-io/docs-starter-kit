@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import { SliderField, SwitchField } from '@/components/settings';
+import { SettingsNav, SliderField, SwitchField } from '@/components/settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { layout, index as settingsIndex } from '@/routes/admin/settings';
+import { update as updateLayout } from '@/routes/admin/settings/layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, RotateCcw, Save } from 'lucide-vue-next';
@@ -26,9 +29,9 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Site Settings', href: '/admin/settings' },
-  { title: 'Layout', href: '/admin/settings/layout' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Site Settings', href: settingsIndex().url },
+  { title: 'Layout', href: layout().url },
 ];
 
 const form = useForm({
@@ -47,7 +50,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.put('/admin/settings/layout');
+  form.submit(updateLayout());
 };
 
 const resetToDefaults = () => {
@@ -69,11 +72,13 @@ const resetToDefaults = () => {
     <div class="px-4 py-6">
       <div class="mb-6 flex items-center justify-between">
         <Heading title="Layout Settings" description="Configure page structure and navigation" />
-        <Button variant="outline" @click="router.visit('/admin/settings')">
+        <Button variant="outline" @click="router.visit(settingsIndex().url)">
           <ArrowLeft class="mr-2 h-4 w-4" />
           Back
         </Button>
       </div>
+
+      <SettingsNav />
 
       <form @submit.prevent="submit" class="space-y-6">
         <div class="grid gap-6 lg:grid-cols-2">
@@ -199,8 +204,13 @@ const resetToDefaults = () => {
                   <div class="flex gap-2">
                     <div
                       v-if="form.navigation_style !== 'topnav'"
-                      class="rounded bg-primary/20 p-2 text-center text-xs"
-                      :style="{ width: `${(form.sidebar_width / 1400) * 100}%`, minWidth: '60px' }"
+                      class="min-w-[60px] rounded bg-primary/20 p-2 text-center text-xs"
+                      :class="[
+                        form.sidebar_width <= 220 && 'w-[15%]',
+                        form.sidebar_width > 220 && form.sidebar_width <= 280 && 'w-[20%]',
+                        form.sidebar_width > 280 && form.sidebar_width <= 340 && 'w-[24%]',
+                        form.sidebar_width > 340 && 'w-[28%]',
+                      ]"
                     >
                       Sidebar
                     </div>

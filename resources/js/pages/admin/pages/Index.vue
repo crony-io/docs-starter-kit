@@ -12,6 +12,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import {
+  create,
+  destroy,
+  duplicate,
+  index as pagesIndex,
+  publish,
+  unpublish,
+} from '@/routes/admin/pages';
 import type { BreadcrumbItem, Page, StatusOption } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
@@ -43,24 +52,24 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Pages', href: '/admin/pages' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Pages', href: pagesIndex().url },
 ];
 
 const search = ref(props.filters.search ?? '');
-const statusFilter = ref(props.filters.status ?? '');
-const typeFilter = ref(props.filters.type ?? '');
+const statusFilter = ref(props.filters.status || 'all');
+const typeFilter = ref(props.filters.type || 'all');
 const isDeleteDialogOpen = ref(false);
 const itemToDelete = ref<TreeItem | null>(null);
 const processingId = ref<number | null>(null);
 
 const applyFilters = useDebounceFn(() => {
   router.get(
-    '/admin/pages',
+    pagesIndex().url,
     {
       search: search.value || undefined,
-      status: statusFilter.value || undefined,
-      type: typeFilter.value || undefined,
+      status: statusFilter.value === 'all' ? undefined : statusFilter.value,
+      type: typeFilter.value === 'all' ? undefined : typeFilter.value,
     },
     {
       preserveState: true,
@@ -92,7 +101,7 @@ const confirmDelete = () => {
   }
 
   processingId.value = itemToDelete.value.id;
-  router.delete(`/admin/pages/${itemToDelete.value.id}`, {
+  router.delete(destroy(itemToDelete.value.id).url, {
     onFinish: () => {
       processingId.value = null;
       isDeleteDialogOpen.value = false;
@@ -104,7 +113,7 @@ const confirmDelete = () => {
 const handleDuplicate = (item: TreeItem) => {
   processingId.value = item.id;
   router.post(
-    `/admin/pages/${item.id}/duplicate`,
+    duplicate(item.id).url,
     {},
     {
       onFinish: () => {
@@ -117,7 +126,7 @@ const handleDuplicate = (item: TreeItem) => {
 const handlePublish = (item: TreeItem) => {
   processingId.value = item.id;
   router.post(
-    `/admin/pages/${item.id}/publish`,
+    publish(item.id).url,
     {},
     {
       onFinish: () => {
@@ -130,7 +139,7 @@ const handlePublish = (item: TreeItem) => {
 const handleUnpublish = (item: TreeItem) => {
   processingId.value = item.id;
   router.post(
-    `/admin/pages/${item.id}/unpublish`,
+    unpublish(item.id).url,
     {},
     {
       onFinish: () => {
@@ -149,7 +158,7 @@ const handleUnpublish = (item: TreeItem) => {
       <div class="flex items-center justify-between">
         <Heading title="Pages" description="Manage your documentation pages" />
         <Button as-child>
-          <Link href="/admin/pages/create">
+          <Link :href="create()">
             <Plus class="mr-2 h-4 w-4" />
             Create Page
           </Link>
@@ -194,7 +203,7 @@ const handleUnpublish = (item: TreeItem) => {
             Get started by creating your first documentation page.
           </p>
           <Button as-child class="mt-4">
-            <Link href="/admin/pages/create">
+            <Link :href="create()">
               <Plus class="mr-2 h-4 w-4" />
               Create Page
             </Link>

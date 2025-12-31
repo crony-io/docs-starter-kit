@@ -96,6 +96,7 @@ class HandleInertiaRequests extends Middleware
                 'searchEnabled' => $settings['advanced_search_enabled'] ?? true,
                 'codeCopyButton' => $settings['advanced_code_copy_button'] ?? true,
                 'codeLineNumbers' => $settings['advanced_code_line_numbers'] ?? true,
+                'llmTxtEnabled' => $settings['advanced_llm_txt_enabled'] ?? false,
             ],
         ];
     }

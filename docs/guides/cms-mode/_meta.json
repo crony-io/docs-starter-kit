@@ -1,0 +1,24 @@
+{
+  "title": "CMS Mode",
+  "description": "Using the database CMS for content management",
+  "order": 2,
+  "icon": "layout-dashboard",
+  "items": {
+    "overview": {
+      "title": "Overview",
+      "order": 1
+    },
+    "creating-pages": {
+      "title": "Creating Pages",
+      "order": 2
+    },
+    "editor-guide": {
+      "title": "Editor Guide",
+      "order": 3
+    },
+    "media-management": {
+      "title": "Media Management",
+      "order": 4
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Changelog",
+  "description": "Version history and release notes",
+  "order": 4,
+  "icon": "history",
+  "items": {
+    "v1-0-0": {
+      "title": "v1.0.0",
+      "order": 1
+    }
+  }
+}

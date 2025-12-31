@@ -2,6 +2,15 @@
 import Heading from '@/components/Heading.vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import {
+  advanced,
+  branding,
+  layout,
+  index as settingsIndex,
+  theme,
+  typography,
+} from '@/routes/admin/settings';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import { ChevronRight, Code, Layout, Palette, Settings2, Type } from 'lucide-vue-next';
@@ -20,9 +29,17 @@ interface Props {
 defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Site Settings', href: '/admin/settings' },
+  { title: 'Dashboard', href: dashboard().url },
+  { title: 'Site Settings', href: settingsIndex().url },
 ];
+
+const groupRoutes: Record<string, () => { url: string }> = {
+  theme,
+  typography,
+  layout,
+  branding,
+  advanced,
+};
 
 const groupIcons: Record<string, typeof Palette> = {
   theme: Palette,
@@ -55,7 +72,7 @@ const groupColors: Record<string, string> = {
         <Link
           v-for="group in groups"
           :key="group.key"
-          :href="`/admin/settings/${group.key}`"
+          :href="groupRoutes[group.key]().url"
           class="group"
         >
           <Card class="h-full transition-all hover:border-primary hover:shadow-md">

@@ -1,15 +1,41 @@
 <script setup lang="ts">
-import type { SelectRootEmits, SelectRootProps } from 'reka-ui';
-import { SelectRoot, useForwardPropsEmits } from 'reka-ui';
+import { useSelectRoot } from '@/composables/useSelect';
+import { toRef } from 'vue';
 
-const props = defineProps<SelectRootProps>();
-const emits = defineEmits<SelectRootEmits>();
+interface SelectProps {
+  modelValue?: string;
+  defaultValue?: string;
+  defaultOpen?: boolean;
+  open?: boolean;
+  disabled?: boolean;
+  name?: string;
+  autocomplete?: string;
+  required?: boolean;
+}
 
-const forwarded = useForwardPropsEmits(props, emits);
+const props = withDefaults(defineProps<SelectProps>(), {
+  disabled: false,
+  defaultOpen: false,
+});
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string];
+  'update:open': [open: boolean];
+}>();
+
+useSelectRoot({
+  modelValue: toRef(() => props.modelValue),
+  defaultValue: props.defaultValue,
+  disabled: toRef(() => props.disabled),
+  open: toRef(() => props.open),
+  defaultOpen: props.defaultOpen,
+  onUpdateModelValue: (value) => emit('update:modelValue', value),
+  onUpdateOpen: (open) => emit('update:open', open),
+});
 </script>
 
 <template>
-  <SelectRoot v-bind="forwarded">
+  <div class="relative">
     <slot />
-  </SelectRoot>
+  </div>
 </template>

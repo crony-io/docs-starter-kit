@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { FileManagerDialog } from '@/components/FileManager';
 import PageEditorToolbar from '@/components/PageEditor/PageEditorToolbar.vue';
+import { useCspNonce } from '@/composables/useCspNonce';
 import { htmlToMarkdown } from '@/composables/useHtmlToMarkdown';
 import { markdownToHtml } from '@/composables/useMarkdownToHtml';
 import type { MediaFile } from '@/types/media';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
-import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { common, createLowlight } from 'lowlight';
@@ -30,17 +29,18 @@ const lowlight = createLowlight(common);
 
 const showFileManager = ref(false);
 
+const cspNonce = useCspNonce();
+
 const editor = useEditor({
   content: markdownToHtml(props.modelValue),
   extensions: [
     StarterKit.configure({
       codeBlock: false,
-    }),
-    Underline,
-    Link.configure({
-      openOnClick: false,
-      HTMLAttributes: {
-        class: 'text-primary underline',
+      link: {
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-primary underline',
+        },
       },
     }),
     CodeBlockLowlight.configure({
@@ -60,6 +60,8 @@ const editor = useEditor({
       class: 'prose prose-sm dark:prose-invert max-w-none min-h-[300px] focus:outline-none p-4',
     },
   },
+  injectCSS: true,
+  injectNonce: cspNonce ?? undefined,
   onUpdate: ({ editor }) => {
     const html = editor.getHTML();
     const markdown = htmlToMarkdown(html);
