@@ -11,8 +11,15 @@ import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAppearance } from '@/composables/useAppearance';
 import { dashboard } from '@/routes';
-import { Link } from '@inertiajs/vue3';
+import type { SiteSettings } from '@/types';
+import { Link, usePage } from '@inertiajs/vue3';
 import { Monitor, Moon, Sun } from 'lucide-vue-next';
+import { computed } from 'vue';
+
+const page = usePage();
+const siteSettings = computed(() => page.props.siteSettings as SiteSettings | undefined);
+const darkModeSetting = computed(() => siteSettings.value?.theme?.darkMode ?? 'system');
+const canToggleTheme = computed(() => darkModeSetting.value === 'system');
 
 interface NavigationTab {
   id: number;
@@ -25,9 +32,12 @@ interface NavigationTab {
 interface Props {
   navigationTabs: NavigationTab[];
   activeNavId: number | null;
+  showNavTabs?: boolean;
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showNavTabs: true,
+});
 
 const { appearance, updateAppearance } = useAppearance();
 </script>
@@ -41,14 +51,14 @@ const { appearance, updateAppearance } = useAppearance();
       <Separator orientation="vertical" class="mr-2 h-4" />
 
       <DocsNavigationTabs
-        v-if="navigationTabs.length > 1"
+        v-if="props.showNavTabs && navigationTabs.length > 1"
         :tabs="navigationTabs"
         :active-id="activeNavId"
       />
     </div>
 
     <div class="flex items-center gap-2">
-      <DropdownMenu>
+      <DropdownMenu v-if="canToggleTheme">
         <DropdownMenuTrigger as-child>
           <Button variant="ghost" size="icon" class="h-9 w-9">
             <Sun v-if="appearance === 'light'" class="h-4 w-4" />
@@ -72,6 +82,10 @@ const { appearance, updateAppearance } = useAppearance();
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <div v-else class="flex items-center">
+        <Sun v-if="darkModeSetting === 'light'" class="h-4 w-4 text-muted-foreground" />
+        <Moon v-else class="h-4 w-4 text-muted-foreground" />
+      </div>
 
       <Button v-if="$page.props.auth?.user" variant="ghost" size="sm" as-child>
         <Link :href="dashboard()">Admin</Link>

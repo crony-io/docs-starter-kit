@@ -47,7 +47,6 @@ class SettingsSeeder extends Seeder
             ['key' => 'layout_footer_text', 'value' => '© '.date('Y').' Docs Starter Kit. All rights reserved.', 'group' => 'layout'],
 
             // Advanced
-            ['key' => 'advanced_custom_domain', 'value' => '', 'group' => 'advanced'],
             ['key' => 'advanced_analytics_ga4_id', 'value' => '', 'group' => 'advanced'],
             ['key' => 'advanced_analytics_plausible_domain', 'value' => '', 'group' => 'advanced'],
             ['key' => 'advanced_search_enabled', 'value' => true, 'group' => 'advanced'],

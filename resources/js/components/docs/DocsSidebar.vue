@@ -2,7 +2,10 @@
 import AppLogo from '@/components/AppLogo.vue';
 import type { SidebarItem } from '@/components/docs/DocsNavigation.vue';
 import DocsNavigationItem from '@/components/docs/DocsNavigationItem.vue';
+import DiscordIcon from '@/components/icons/DiscordIcon.vue';
 import GithubIcon from '@/components/icons/GithubIcon.vue';
+import LinkedInIcon from '@/components/icons/LinkedInIcon.vue';
+import TwitterIcon from '@/components/icons/TwitterIcon.vue';
 import { Button } from '@/components/ui/button';
 import {
   Sidebar,
@@ -17,7 +20,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { SiteSettings } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Download, ExternalLink, Search } from 'lucide-vue-next';
+import { Download, Search } from 'lucide-vue-next';
 import { computed, inject, type Ref } from 'vue';
 
 interface Props {
@@ -29,6 +32,7 @@ defineProps<Props>();
 
 const page = usePage();
 const siteSettings = computed(() => page.props.siteSettings as SiteSettings | undefined);
+const searchEnabled = computed(() => siteSettings.value?.advanced?.searchEnabled ?? true);
 
 const searchOpen = inject<Ref<boolean>>('searchOpen');
 
@@ -55,7 +59,7 @@ function openSearch() {
 
     <SidebarContent>
       <SidebarGroup class="px-2 py-0">
-        <div class="px-1 pb-3 group-data-[collapsible=icon]:hidden">
+        <div v-if="searchEnabled" class="px-1 pb-3 group-data-[collapsible=icon]:hidden">
           <Button
             variant="outline"
             class="w-full justify-start gap-2 text-muted-foreground"
@@ -98,11 +102,27 @@ function openSearch() {
             </a>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton as-child :tooltip="'View Docs'">
-            <a href="https://github.com/crony-io/docs-starter-kit" target="_blank" rel="noopener">
-              <ExternalLink class="h-4 w-4" />
-              <span>Docs Starter Kit</span>
+        <SidebarMenuItem v-if="siteSettings?.social?.twitter">
+          <SidebarMenuButton as-child :tooltip="'Twitter / X'">
+            <a :href="siteSettings.social.twitter" target="_blank" rel="noopener noreferrer">
+              <TwitterIcon class="h-4 w-4" />
+              <span>Twitter / X</span>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem v-if="siteSettings?.social?.discord">
+          <SidebarMenuButton as-child :tooltip="'Discord'">
+            <a :href="siteSettings.social.discord" target="_blank" rel="noopener noreferrer">
+              <DiscordIcon class="h-4 w-4" />
+              <span>Discord</span>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem v-if="siteSettings?.social?.linkedin">
+          <SidebarMenuButton as-child :tooltip="'LinkedIn'">
+            <a :href="siteSettings.social.linkedin" target="_blank" rel="noopener noreferrer">
+              <LinkedInIcon class="h-4 w-4" />
+              <span>LinkedIn</span>
             </a>
           </SidebarMenuButton>
         </SidebarMenuItem>

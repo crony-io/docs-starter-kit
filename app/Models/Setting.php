@@ -36,10 +36,20 @@ class Setting extends Model
             ['value' => $value, 'group' => $group]
         );
 
-        Cache::forget("setting.{$key}");
-        Cache::forget('settings.all');
+        self::clearAllCaches($key, $group);
 
         return $setting;
+    }
+
+    public static function clearAllCaches(?string $key = null, ?string $group = null): void
+    {
+        if ($key) {
+            Cache::forget("setting.{$key}");
+        }
+        if ($group) {
+            Cache::forget("settings.group.{$group}");
+        }
+        Cache::forget('settings.all');
     }
 
     public static function getByGroup(string $group): array
@@ -73,8 +83,6 @@ class Setting extends Model
 
     private function clearRelatedCaches(): void
     {
-        Cache::forget("setting.{$this->key}");
-        Cache::forget("settings.group.{$this->group}");
-        Cache::forget('settings.all');
+        self::clearAllCaches($this->key, $this->group);
     }
 }

@@ -4,11 +4,14 @@ import DocsContent from '@/components/docs/DocsContent.vue';
 import type { SidebarItem } from '@/components/docs/DocsNavigation.vue';
 import DocsTableOfContents from '@/components/docs/DocsTableOfContents.vue';
 import FeedbackWidget from '@/components/docs/FeedbackWidget.vue';
+import { useCspNonce } from '@/composables/useCspNonce';
 import DocsLayout from '@/layouts/DocsLayout.vue';
 import type { SiteSettings } from '@/types';
 import type { FeedbackForm } from '@/types/feedback';
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
+
+const cspNonce = useCspNonce();
 
 const page = usePage();
 const siteSettings = computed(() => page.props.siteSettings as SiteSettings | undefined);
@@ -97,14 +100,33 @@ const lastUpdatedAt = computed(() => {
 });
 
 const showBreadcrumbs = computed(() => siteSettings.value?.layout?.showBreadcrumbs ?? true);
-const showToc = computed(() => siteSettings.value?.layout?.showToc ?? true);
+const showToc = computed(() => {
+  return siteSettings.value?.layout?.showToc ?? true;
+});
 const tocPosition = computed(() => siteSettings.value?.layout?.tocPosition ?? 'right');
+
+//inject style with csp on head
+onMounted(() => {
+  if (!siteSettings.value?.theme?.customCss) {
+    return;
+  }
+  const style = document.createElement('style');
+  style.setAttribute('nonce', cspNonce ?? '');
+  style.textContent = siteSettings.value?.theme?.customCss ?? '';
+  document.head.appendChild(style);
+});
 </script>
 
 <template>
   <Head>
     <title>{{ pageTitle }}</title>
     <meta v-if="pageDescription" name="description" :content="pageDescription" />
+    <link v-if="siteSettings?.favicon" rel="icon" :href="siteSettings.favicon" />
+    <meta
+      v-if="siteSettings?.advanced?.metaRobots"
+      name="robots"
+      :content="siteSettings.advanced.metaRobots"
+    />
   </Head>
 
   <DocsLayout

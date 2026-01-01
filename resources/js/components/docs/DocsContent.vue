@@ -2,7 +2,6 @@
 import GithubIcon from '@/components/icons/GithubIcon.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { applyDynamicStyles } from '@/composables/useCspNonce';
 import type { SiteSettings } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import hljs from 'highlight.js';
@@ -123,23 +122,32 @@ const addCopyButtons = () => {
 };
 
 const addLineNumbers = () => {
-  if (!contentRef.value || !showCodeLineNumbers.value) {
+  if (!contentRef.value) {
     return;
   }
 
   const codeBlocks = contentRef.value.querySelectorAll('pre code');
   codeBlocks.forEach((code) => {
-    if (code.classList.contains('line-numbers-added')) {
+    if (code.classList.contains('line-numbers-processed')) {
       return;
     }
+    code.classList.add('line-numbers-processed');
+
+    if (!showCodeLineNumbers.value) {
+      return;
+    }
+
     code.classList.add('line-numbers-added');
-    const lines = code.textContent?.split('\n') || [];
+
+    // Wrap each line in a span for CSS counter
+    const html = code.innerHTML;
+    const lines = html.split('\n');
     if (lines.length > 1 && lines[lines.length - 1] === '') {
       lines.pop();
     }
-    applyDynamicStyles(code as HTMLElement, {
-      'counter-reset': `line ${lines.length > 1 ? '' : 'none'}`,
-    });
+
+    const wrappedLines = lines.map((line) => `<span class="code-line">${line}</span>`).join('\n');
+    code.innerHTML = wrappedLines;
   });
 };
 

@@ -67,6 +67,8 @@ class HandleInertiaRequests extends Middleware
                 'primaryColor' => $settings['theme_primary_color'] ?? '#3B82F6',
                 'secondaryColor' => $settings['theme_secondary_color'] ?? '#6366F1',
                 'accentColor' => $settings['theme_accent_color'] ?? '#F59E0B',
+                'backgroundColor' => $settings['theme_background_color'] ?? '#FFFFFF',
+                'textColor' => $settings['theme_text_color'] ?? '#1F2937',
                 'darkMode' => $settings['theme_dark_mode'] ?? 'system',
                 'customCss' => $settings['theme_custom_css'] ?? '',
             ],
@@ -74,16 +76,19 @@ class HandleInertiaRequests extends Middleware
                 'headingFont' => $settings['typography_heading_font'] ?? 'Inter',
                 'bodyFont' => $settings['typography_body_font'] ?? 'Inter',
                 'codeFont' => $settings['typography_code_font'] ?? 'JetBrains Mono',
-                'baseFontSize' => $settings['typography_base_font_size'] ?? 16,
-                'lineHeight' => $settings['typography_line_height'] ?? 1.6,
+                'baseFontSize' => (int) ($settings['typography_base_font_size'] ?? 16),
+                'headingScale' => (float) ($settings['typography_heading_scale'] ?? 1.25),
+                'lineHeight' => (float) ($settings['typography_line_height'] ?? 1.6),
+                'paragraphSpacing' => (float) ($settings['typography_paragraph_spacing'] ?? 1.5),
             ],
             'layout' => [
-                'sidebarWidth' => $settings['layout_sidebar_width'] ?? 280,
-                'contentWidth' => $settings['layout_content_width'] ?? 900,
-                'showToc' => $settings['layout_show_toc'] ?? true,
+                'sidebarWidth' => (int) ($settings['layout_sidebar_width'] ?? 280),
+                'contentWidth' => (int) ($settings['layout_content_width'] ?? 900),
+                'navigationStyle' => $settings['layout_navigation_style'] ?? 'sidebar',
+                'showToc' => $this->toBool($settings['layout_show_toc'] ?? false),
                 'tocPosition' => $settings['layout_toc_position'] ?? 'right',
-                'showBreadcrumbs' => $settings['layout_show_breadcrumbs'] ?? true,
-                'showFooter' => $settings['layout_show_footer'] ?? true,
+                'showBreadcrumbs' => $this->toBool($settings['layout_show_breadcrumbs'] ?? false),
+                'showFooter' => $this->toBool($settings['layout_show_footer'] ?? false),
                 'footerText' => $settings['layout_footer_text'] ?? '',
             ],
             'social' => [
@@ -93,11 +98,25 @@ class HandleInertiaRequests extends Middleware
                 'linkedin' => $settings['branding_social_linkedin'] ?? '',
             ],
             'advanced' => [
-                'searchEnabled' => $settings['advanced_search_enabled'] ?? true,
-                'codeCopyButton' => $settings['advanced_code_copy_button'] ?? true,
-                'codeLineNumbers' => $settings['advanced_code_line_numbers'] ?? true,
-                'llmTxtEnabled' => $settings['advanced_llm_txt_enabled'] ?? false,
+                'searchEnabled' => $this->toBool($settings['advanced_search_enabled'] ?? false),
+                'codeCopyButton' => $this->toBool($settings['advanced_code_copy_button'] ?? false),
+                'codeLineNumbers' => $this->toBool($settings['advanced_code_line_numbers'] ?? false),
+                'llmTxtEnabled' => $this->toBool($settings['advanced_llm_txt_enabled'] ?? false),
+                'metaRobots' => $settings['advanced_meta_robots'] ?? 'index, follow',
             ],
         ];
+    }
+
+    private function toBool(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            return in_array(strtolower($value), ['true', '1', 'yes', 'on'], true);
+        }
+
+        return (bool) $value;
     }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { computed } from 'vue';
 
 interface Props {
   label: string;
@@ -8,11 +9,16 @@ interface Props {
   modelValue: boolean;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
 }>();
+
+const checked = computed({
+  get: () => props.modelValue,
+  set: (value: boolean) => emit('update:modelValue', value),
+});
 </script>
 
 <template>
@@ -21,6 +27,6 @@ const emit = defineEmits<{
       <Label class="text-base">{{ label }}</Label>
       <p v-if="description" class="text-sm text-muted-foreground">{{ description }}</p>
     </div>
-    <Switch :checked="modelValue" @update:checked="emit('update:modelValue', $event)" />
+    <Switch v-model:checked="checked" />
   </div>
 </template>

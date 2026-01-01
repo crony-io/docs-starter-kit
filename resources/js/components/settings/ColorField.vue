@@ -2,6 +2,7 @@
 import InputError from '@/components/InputError.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { computed } from 'vue';
 
 interface Props {
   label: string;
@@ -10,39 +11,33 @@ interface Props {
   placeholder?: string;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
 }>();
 
-const handleColorChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  emit('update:modelValue', target.value);
-};
+const colorValue = computed({
+  get: () => props.modelValue || '#000000',
+  set: (value: string) => emit('update:modelValue', value),
+});
 
-const handleTextChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  emit('update:modelValue', target.value);
-};
+const textValue = computed({
+  get: () => props.modelValue || '',
+  set: (value: string) => emit('update:modelValue', value),
+});
 </script>
 
 <template>
   <div class="space-y-2">
     <Label>{{ label }}</Label>
     <div class="flex gap-2">
-      <Input
+      <input
         type="color"
-        :value="modelValue"
-        class="h-10 w-14 cursor-pointer p-1"
-        @input="handleColorChange"
+        v-model="colorValue"
+        class="h-10 w-14 cursor-pointer rounded border bg-background p-1"
       />
-      <Input
-        :value="modelValue"
-        :placeholder="placeholder"
-        class="flex-1 font-mono"
-        @input="handleTextChange"
-      />
+      <Input v-model="textValue" :placeholder="placeholder" class="flex-1 font-mono" />
     </div>
     <InputError :message="error" />
   </div>

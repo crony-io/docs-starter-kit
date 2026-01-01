@@ -117,6 +117,8 @@ export interface SiteSettings {
     primaryColor: string;
     secondaryColor: string;
     accentColor: string;
+    backgroundColor: string;
+    textColor: string;
     darkMode: 'light' | 'dark' | 'system';
     customCss: string;
   };
@@ -125,11 +127,14 @@ export interface SiteSettings {
     bodyFont: string;
     codeFont: string;
     baseFontSize: number;
+    headingScale: number;
     lineHeight: number;
+    paragraphSpacing: number;
   };
   layout: {
     sidebarWidth: number;
     contentWidth: number;
+    navigationStyle: 'sidebar' | 'topnav' | 'both';
     showToc: boolean;
     tocPosition: 'left' | 'right';
     showBreadcrumbs: boolean;
@@ -147,5 +152,6 @@ export interface SiteSettings {
     codeCopyButton: boolean;
     codeLineNumbers: boolean;
     llmTxtEnabled: boolean;
+    metaRobots: string;
   };
 }

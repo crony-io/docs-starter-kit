@@ -1322,3 +1322,31 @@ html:not(.dark) .prose pre {
   background: rgba(139, 148, 158, 0.1);
   border-bottom-left-radius: 0.25rem;
 }
+
+/* Code block line numbers */
+.prose pre code.line-numbers-added {
+  counter-reset: line;
+  padding-left: 3.5rem !important;
+  position: relative;
+}
+
+.prose pre code.line-numbers-added .code-line {
+  display: block;
+  position: relative;
+}
+
+.prose pre code.line-numbers-added .code-line::before {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  left: -3rem;
+  width: 2rem;
+  text-align: right;
+  color: #6e7781;
+  user-select: none;
+  pointer-events: none;
+}
+
+html.dark .prose pre code.line-numbers-added .code-line::before {
+  color: #8b949e;
+}

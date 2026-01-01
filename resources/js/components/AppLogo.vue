@@ -20,6 +20,7 @@ const page = usePage();
 const siteSettings = computed(() => page.props.siteSettings as SiteSettings | undefined);
 
 const siteName = computed(() => siteSettings.value?.siteName ?? 'Docs');
+const siteTagline = computed(() => siteSettings.value?.siteTagline ?? '');
 const logoLight = computed(() => siteSettings.value?.logoLight);
 const logoDark = computed(() => siteSettings.value?.logoDark);
 const hasCustomLogo = computed(() => logoLight.value || logoDark.value);
@@ -83,5 +84,13 @@ const hasCustomLogo = computed(() => logoLight.value || logoDark.value);
       v-bind="$attrs"
     />
   </template>
-  <img v-else src="/logo.png" :alt="siteName" :class="className" v-bind="$attrs" />
+  <div v-else class="flex flex-col">
+    <h1 :class="className" v-bind="$attrs">{{ siteName }}</h1>
+    <span
+      v-if="siteTagline"
+      class="text-xs text-muted-foreground group-data-[collapsible=icon]:hidden"
+    >
+      {{ siteTagline }}
+    </span>
+  </div>
 </template>

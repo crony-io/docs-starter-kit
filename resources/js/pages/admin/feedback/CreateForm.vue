@@ -2,9 +2,9 @@
 import FormBuilder from '@/components/feedback/FormBuilder.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import SwitchField from '@/components/settings/SwitchField.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -85,10 +85,11 @@ const submit = () => {
               <InputError :message="form.errors.trigger_type" />
             </div>
 
-            <div class="flex items-center gap-2">
-              <Checkbox id="is_active" v-model:checked="form.is_active" />
-              <Label for="is_active">Active (form will be shown to users)</Label>
-            </div>
+            <SwitchField
+              v-model="form.is_active"
+              label="Active"
+              description="Form will be shown to users"
+            />
           </CardContent>
         </Card>
 

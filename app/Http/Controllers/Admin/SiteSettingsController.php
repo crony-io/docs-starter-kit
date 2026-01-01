@@ -161,7 +161,6 @@ class SiteSettingsController extends Controller
     public function updateAdvanced(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'custom_domain' => ['nullable', 'string', 'max:255'],
             'analytics_ga4_id' => ['nullable', 'string', 'max:50'],
             'analytics_plausible_domain' => ['nullable', 'string', 'max:255'],
             'analytics_clarity_id' => ['nullable', 'string', 'max:50'],
@@ -270,7 +269,6 @@ class SiteSettingsController extends Controller
     private function getAdvancedDefaults(): array
     {
         return [
-            'custom_domain' => '',
             'analytics_ga4_id' => '',
             'analytics_plausible_domain' => '',
             'analytics_clarity_id' => '',

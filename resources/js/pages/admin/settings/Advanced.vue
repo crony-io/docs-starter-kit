@@ -28,6 +28,16 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const toBool = (value: unknown): boolean => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return ['true', '1', 'yes', 'on'].includes(value.toLowerCase());
+  }
+  return Boolean(value);
+};
+
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: dashboard().url },
   { title: 'Site Settings', href: settingsIndex().url },
@@ -35,7 +45,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const form = useForm({
-  custom_domain: String(props.settings.advanced_custom_domain ?? props.defaults.custom_domain),
   analytics_ga4_id: String(
     props.settings.advanced_analytics_ga4_id ?? props.defaults.analytics_ga4_id,
   ),
@@ -45,24 +54,24 @@ const form = useForm({
   analytics_clarity_id: String(
     props.settings.advanced_analytics_clarity_id ?? props.defaults.analytics_clarity_id,
   ),
-  search_enabled: Boolean(props.settings.advanced_search_enabled ?? props.defaults.search_enabled),
+  search_enabled: toBool(props.settings.advanced_search_enabled ?? props.defaults.search_enabled),
   search_provider: String(
     props.settings.advanced_search_provider ?? props.defaults.search_provider,
   ),
-  llm_txt_enabled: Boolean(
+  llm_txt_enabled: toBool(
     props.settings.advanced_llm_txt_enabled ?? props.defaults.llm_txt_enabled,
   ),
-  llm_txt_include_drafts: Boolean(
+  llm_txt_include_drafts: toBool(
     props.settings.advanced_llm_txt_include_drafts ?? props.defaults.llm_txt_include_drafts,
   ),
   llm_txt_max_tokens: Number(
     props.settings.advanced_llm_txt_max_tokens ?? props.defaults.llm_txt_max_tokens,
   ),
   meta_robots: String(props.settings.advanced_meta_robots ?? props.defaults.meta_robots),
-  code_copy_button: Boolean(
+  code_copy_button: toBool(
     props.settings.advanced_code_copy_button ?? props.defaults.code_copy_button,
   ),
-  code_line_numbers: Boolean(
+  code_line_numbers: toBool(
     props.settings.advanced_code_line_numbers ?? props.defaults.code_line_numbers,
   ),
 });
@@ -72,18 +81,17 @@ const submit = () => {
 };
 
 const resetToDefaults = () => {
-  form.custom_domain = String(props.defaults.custom_domain);
   form.analytics_ga4_id = String(props.defaults.analytics_ga4_id);
   form.analytics_plausible_domain = String(props.defaults.analytics_plausible_domain);
   form.analytics_clarity_id = String(props.defaults.analytics_clarity_id);
-  form.search_enabled = Boolean(props.defaults.search_enabled);
+  form.search_enabled = toBool(props.defaults.search_enabled);
   form.search_provider = String(props.defaults.search_provider);
-  form.llm_txt_enabled = Boolean(props.defaults.llm_txt_enabled);
-  form.llm_txt_include_drafts = Boolean(props.defaults.llm_txt_include_drafts);
+  form.llm_txt_enabled = toBool(props.defaults.llm_txt_enabled);
+  form.llm_txt_include_drafts = toBool(props.defaults.llm_txt_include_drafts);
   form.llm_txt_max_tokens = Number(props.defaults.llm_txt_max_tokens);
   form.meta_robots = String(props.defaults.meta_robots);
-  form.code_copy_button = Boolean(props.defaults.code_copy_button);
-  form.code_line_numbers = Boolean(props.defaults.code_line_numbers);
+  form.code_copy_button = toBool(props.defaults.code_copy_button);
+  form.code_line_numbers = toBool(props.defaults.code_line_numbers);
 };
 </script>
 
@@ -218,22 +226,9 @@ const resetToDefaults = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Domain & SEO</CardTitle>
-                <CardDescription>Configure domain and search engine settings</CardDescription>
+                <CardDescription>Configure search engine settings</CardDescription>
               </CardHeader>
               <CardContent class="space-y-4">
-                <div class="space-y-2">
-                  <Label for="custom_domain">Custom Domain</Label>
-                  <Input
-                    id="custom_domain"
-                    v-model="form.custom_domain"
-                    placeholder="docs.yourdomain.com"
-                  />
-                  <p class="text-xs text-muted-foreground">
-                    Configure DNS separately after setting this
-                  </p>
-                  <InputError :message="form.errors.custom_domain" />
-                </div>
-
                 <div class="space-y-2">
                   <Label>Search Engine Indexing</Label>
                   <Select v-model="form.meta_robots">

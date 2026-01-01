@@ -28,6 +28,16 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const toBool = (value: unknown): boolean => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return ['true', '1', 'yes', 'on'].includes(value.toLowerCase());
+  }
+  return Boolean(value);
+};
+
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: dashboard().url },
   { title: 'Site Settings', href: settingsIndex().url },
@@ -40,12 +50,12 @@ const form = useForm({
   navigation_style: String(
     props.settings.layout_navigation_style ?? props.defaults.navigation_style,
   ),
-  show_toc: Boolean(props.settings.layout_show_toc ?? props.defaults.show_toc),
+  show_toc: toBool(props.settings.layout_show_toc ?? props.defaults.show_toc),
   toc_position: String(props.settings.layout_toc_position ?? props.defaults.toc_position),
-  show_breadcrumbs: Boolean(
+  show_breadcrumbs: toBool(
     props.settings.layout_show_breadcrumbs ?? props.defaults.show_breadcrumbs,
   ),
-  show_footer: Boolean(props.settings.layout_show_footer ?? props.defaults.show_footer),
+  show_footer: toBool(props.settings.layout_show_footer ?? props.defaults.show_footer),
   footer_text: String(props.settings.layout_footer_text ?? props.defaults.footer_text),
 });
 
@@ -57,10 +67,10 @@ const resetToDefaults = () => {
   form.sidebar_width = Number(props.defaults.sidebar_width);
   form.content_width = Number(props.defaults.content_width);
   form.navigation_style = String(props.defaults.navigation_style);
-  form.show_toc = Boolean(props.defaults.show_toc);
+  form.show_toc = toBool(props.defaults.show_toc);
   form.toc_position = String(props.defaults.toc_position);
-  form.show_breadcrumbs = Boolean(props.defaults.show_breadcrumbs);
-  form.show_footer = Boolean(props.defaults.show_footer);
+  form.show_breadcrumbs = toBool(props.defaults.show_breadcrumbs);
+  form.show_footer = toBool(props.defaults.show_footer);
   form.footer_text = String(props.defaults.footer_text);
 };
 </script>

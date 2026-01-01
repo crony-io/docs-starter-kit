@@ -42,7 +42,7 @@
     },
     "dependencies": {
         "@headlessui/vue": "^1.7.23",
-        "@inertiajs/vue3": "^2.3.4",
+        "@inertiajs/vue3": "^2.3.6",
         "@tiptap/extension-code-block-lowlight": "^3.14.0",
         "@tiptap/extension-image": "^3.14.0",
         "@tiptap/pm": "^3.14.0",
