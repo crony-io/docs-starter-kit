@@ -8,8 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { MediaFilters } from '@/types/media';
-import { GridIcon, ListIcon, SearchIcon, Trash2Icon, UploadIcon } from 'lucide-vue-next';
+import {
+  FolderPlusIcon,
+  GridIcon,
+  ListIcon,
+  SearchIcon,
+  Trash2Icon,
+  UploadIcon,
+} from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 interface Props {
@@ -27,6 +35,7 @@ const emit = defineEmits<{
   'update:filters': [filters: MediaFilters];
   'update:viewMode': [mode: 'grid' | 'list'];
   upload: [];
+  createFolder: [];
   deleteSelected: [];
 }>();
 
@@ -90,9 +99,23 @@ const toggleViewMode = () => {
         Delete ({{ selectedCount }})
       </Button>
 
-      <Button variant="ghost" size="icon" @click="toggleViewMode">
-        <GridIcon v-if="viewMode === 'list'" class="h-4 w-4" />
-        <ListIcon v-else class="h-4 w-4" />
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <Button variant="ghost" size="icon" @click="toggleViewMode">
+              <GridIcon v-if="viewMode === 'list'" class="h-4 w-4" />
+              <ListIcon v-else class="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{{ viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view' }}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <Button variant="outline" @click="emit('createFolder')">
+        <FolderPlusIcon class="mr-2 h-4 w-4" />
+        New Folder
       </Button>
 
       <Button @click="emit('upload')">

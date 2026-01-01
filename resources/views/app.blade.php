@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="es-CL" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="en" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex nofollow noarchive nosnippet noimageindex">
     <meta name="csp-nonce" content="{{ app('csp-nonce') }}">
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script nonce="{{ app('csp-nonce') }}">

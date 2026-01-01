@@ -1,5 +1,9 @@
+export { default as CreateFolderDialog } from '@/components/FileManager/CreateFolderDialog.vue';
+export { default as FileDetailsDialog } from '@/components/FileManager/FileDetailsDialog.vue';
 export { default as FileManagerBrowser } from '@/components/FileManager/FileManagerBrowser.vue';
 export { default as FileManagerDialog } from '@/components/FileManager/FileManagerDialog.vue';
+export { default as FileManagerFolderItem } from '@/components/FileManager/FileManagerFolderItem.vue';
 export { default as FileManagerItem } from '@/components/FileManager/FileManagerItem.vue';
 export { default as FileManagerToolbar } from '@/components/FileManager/FileManagerToolbar.vue';
 export { default as FileManagerUploader } from '@/components/FileManager/FileManagerUploader.vue';
+export { default as MoveToFolderDialog } from '@/components/FileManager/MoveToFolderDialog.vue';

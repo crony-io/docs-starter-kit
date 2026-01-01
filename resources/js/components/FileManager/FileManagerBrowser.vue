@@ -1,13 +1,24 @@
 <script setup lang="ts">
+import CreateFolderDialog from '@/components/FileManager/CreateFolderDialog.vue';
+import FileDetailsDialog from '@/components/FileManager/FileDetailsDialog.vue';
+import FileManagerFolderItem from '@/components/FileManager/FileManagerFolderItem.vue';
 import FileManagerItem from '@/components/FileManager/FileManagerItem.vue';
 import FileManagerToolbar from '@/components/FileManager/FileManagerToolbar.vue';
 import FileManagerUploader from '@/components/FileManager/FileManagerUploader.vue';
+import MoveToFolderDialog from '@/components/FileManager/MoveToFolderDialog.vue';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { bulkDestroy, index as mediaIndex, store as mediaStore } from '@/routes/admin/media';
+import {
+  bulkDestroy,
+  destroy as destroyMedia,
+  index as mediaIndex,
+  store as mediaStore,
+  update as updateMedia,
+} from '@/routes/admin/media';
+import { destroy as destroyFolder, update as updateFolder } from '@/routes/admin/media/folders';
 import type { MediaFile, MediaFilters, MediaFolder } from '@/types/media';
-import axios from 'axios';
-import { ChevronLeftIcon, ChevronRightIcon, FolderIcon } from 'lucide-vue-next';
+import { router } from '@inertiajs/vue3';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Props {
@@ -41,41 +52,66 @@ const pagination = ref({
 
 const uploaderRef = ref<InstanceType<typeof FileManagerUploader>>();
 
+const showCreateFolderDialog = ref(false);
+const showFileDetailsDialog = ref(false);
+const showMoveDialog = ref(false);
+const selectedFileForAction = ref<MediaFile | null>(null);
+const selectedFolderForAction = ref<MediaFolder | null>(null);
+const moveDialogMode = ref<'file' | 'folder'>('file');
+
 const selectedIds = computed(() => new Set(selectedFiles.value.map((f) => f.id)));
 
-const fetchFiles = async (page = 1) => {
+interface FetchFilesResponse {
+  files: {
+    data: MediaFile[];
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
+  folders: MediaFolder[];
+  currentFolder: MediaFolder | null;
+}
+
+const fetchFiles = (page = 1) => {
   isLoading.value = true;
-  try {
-    const params = new URLSearchParams();
-    params.set('page', String(page));
 
-    if (filters.value.folder_id) {
-      params.set('folder_id', String(filters.value.folder_id));
-    }
-    if (filters.value.search) {
-      params.set('search', filters.value.search);
-    }
-    if (filters.value.type) {
-      params.set('type', filters.value.type);
-    }
+  const query: Record<string, string> = { page: String(page) };
 
-    const response = await axios.get(mediaIndex.url({ query: Object.fromEntries(params) }), {
-      headers: { Accept: 'application/json' },
-    });
-
-    files.value = response.data.files.data;
-    folders.value = response.data.folders ?? [];
-    currentFolder.value = response.data.currentFolder ?? null;
-    pagination.value = {
-      currentPage: response.data.files.current_page,
-      lastPage: response.data.files.last_page,
-      total: response.data.files.total,
-    };
-  } catch (error) {
-    console.error('Failed to fetch files:', error);
-  } finally {
-    isLoading.value = false;
+  if (filters.value.folder_id) {
+    query.folder_id = String(filters.value.folder_id);
   }
+  if (filters.value.search) {
+    query.search = filters.value.search;
+  }
+  if (filters.value.type) {
+    query.type = filters.value.type;
+  }
+
+  router.get(
+    mediaIndex.url({ query }),
+    {},
+    {
+      preserveState: true,
+      preserveScroll: true,
+      only: ['files', 'folders', 'currentFolder'],
+      onSuccess: (page) => {
+        const props = page.props as unknown as FetchFilesResponse;
+        files.value = props.files?.data ?? [];
+        folders.value = props.folders ?? [];
+        currentFolder.value = props.currentFolder ?? null;
+        pagination.value = {
+          currentPage: props.files?.current_page ?? 1,
+          lastPage: props.files?.last_page ?? 1,
+          total: props.files?.total ?? 0,
+        };
+        isLoading.value = false;
+      },
+      onError: () => {
+        console.error('Failed to fetch files');
+        isLoading.value = false;
+      },
+    },
+  );
 };
 
 const navigateToFolder = (folderId: number | null) => {
@@ -110,46 +146,145 @@ const handleFileToggle = (file: MediaFile) => {
   }
 };
 
-const handleUpload = async (uploadFiles: File[]) => {
+const handleUpload = (uploadFiles: File[]) => {
+  let uploadedCount = 0;
+  const totalFiles = uploadFiles.length;
+
   for (const file of uploadFiles) {
-    const formData = new FormData();
-    formData.append('file', file);
+    const formData: Record<string, File | string> = { file };
     if (filters.value.folder_id) {
-      formData.append('folder_id', String(filters.value.folder_id));
+      formData.folder_id = String(filters.value.folder_id);
     }
 
-    try {
-      const response = await axios.post(mediaStore().url, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      files.value.unshift(response.data.file);
-      pagination.value.total++;
-    } catch (error) {
-      console.error('Upload failed:', error);
-    }
+    router.post(mediaStore().url, formData, {
+      forceFormData: true,
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        uploadedCount++;
+        if (uploadedCount === totalFiles) {
+          fetchFiles(pagination.value.currentPage);
+          uploaderRef.value?.clearQueue();
+          showUploader.value = false;
+        }
+      },
+    });
   }
-
-  uploaderRef.value?.clearQueue();
-  showUploader.value = false;
 };
 
-const handleDeleteSelected = async () => {
+const handleDeleteSelected = () => {
   if (selectedFiles.value.length === 0) {
     return;
   }
 
-  try {
-    await axios.post(bulkDestroy().url, {
-      ids: selectedFiles.value.map((f) => f.id),
-    });
+  const count = selectedFiles.value.length;
+  const idsToDelete = selectedFiles.value.map((f) => f.id);
 
-    files.value = files.value.filter((f) => !selectedIds.value.has(f.id));
-    selectedFiles.value = [];
-    pagination.value.total -= selectedFiles.value.length;
-  } catch (error) {
-    console.error('Delete failed:', error);
+  router.post(
+    bulkDestroy().url,
+    { ids: idsToDelete },
+    {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        files.value = files.value.filter((f) => !selectedIds.value.has(f.id));
+        selectedFiles.value = [];
+        pagination.value.total -= count;
+      },
+    },
+  );
+};
+
+const openFileDetails = (file: MediaFile) => {
+  selectedFileForAction.value = file;
+  showFileDetailsDialog.value = true;
+};
+
+const openMoveDialog = (file: MediaFile) => {
+  selectedFileForAction.value = file;
+  selectedFolderForAction.value = null;
+  moveDialogMode.value = 'file';
+  showMoveDialog.value = true;
+};
+
+const openMoveFolderDialog = (folder: MediaFolder) => {
+  selectedFolderForAction.value = folder;
+  selectedFileForAction.value = null;
+  moveDialogMode.value = 'folder';
+  showMoveDialog.value = true;
+};
+
+const handleDeleteFile = (file: MediaFile) => {
+  router.delete(destroyMedia(file.id).url, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      files.value = files.value.filter((f) => f.id !== file.id);
+      pagination.value.total--;
+    },
+  });
+};
+
+const handleFileUpdated = (updatedFile: MediaFile) => {
+  const index = files.value.findIndex((f) => f.id === updatedFile.id);
+  if (index !== -1) {
+    files.value[index] = updatedFile;
   }
+};
+
+const handleFileDeleted = (fileId: number) => {
+  files.value = files.value.filter((f) => f.id !== fileId);
+  pagination.value.total--;
+};
+
+const handleItemMoved = () => {
+  fetchFiles(pagination.value.currentPage);
+};
+
+const handleDropFileOnFolder = (folder: MediaFolder, fileId: number) => {
+  router.patch(
+    updateMedia(fileId).url,
+    { folder_id: folder.id },
+    {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        files.value = files.value.filter((f) => f.id !== fileId);
+      },
+    },
+  );
+};
+
+const handleDropFolderOnFolder = (targetFolder: MediaFolder, sourceFolderId: number) => {
+  if (targetFolder.id === sourceFolderId) {
+    return;
+  }
+
+  router.patch(
+    updateFolder(sourceFolderId).url,
+    { parent_id: targetFolder.id },
+    {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        folders.value = folders.value.filter((f) => f.id !== sourceFolderId);
+      },
+    },
+  );
+};
+
+const handleFolderCreated = () => {
+  fetchFiles(pagination.value.currentPage);
+};
+
+const handleDeleteFolder = (folder: MediaFolder) => {
+  router.delete(destroyFolder(folder.id).url, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      folders.value = folders.value.filter((f) => f.id !== folder.id);
+    },
+  });
 };
 
 const goToPage = (page: number) => {
@@ -177,6 +312,7 @@ defineExpose({
       @update:filters="filters = $event"
       @update:view-mode="viewMode = $event"
       @upload="showUploader = !showUploader"
+      @create-folder="showCreateFolderDialog = true"
       @delete-selected="handleDeleteSelected"
     />
 
@@ -212,20 +348,22 @@ defineExpose({
         </div>
       </div>
 
-      <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        <div
+      <!-- Grid View -->
+      <div
+        v-else-if="viewMode === 'grid'"
+        class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+      >
+        <FileManagerFolderItem
           v-for="folder in folders"
           :key="`folder-${folder.id}`"
-          class="group cursor-pointer rounded-lg border bg-card p-2 transition-all hover:border-primary hover:shadow-sm"
-          @click="navigateToFolder(folder.id)"
-        >
-          <div class="flex aspect-square items-center justify-center rounded-md bg-muted">
-            <FolderIcon class="h-12 w-12 text-muted-foreground" />
-          </div>
-          <div class="mt-2">
-            <p class="truncate text-sm font-medium">{{ folder.name }}</p>
-          </div>
-        </div>
+          :folder="folder"
+          view-mode="grid"
+          @open="navigateToFolder(folder.id)"
+          @move="openMoveFolderDialog"
+          @delete="handleDeleteFolder"
+          @drop-file="handleDropFileOnFolder"
+          @drop-folder="handleDropFolderOnFolder"
+        />
 
         <FileManagerItem
           v-for="file in files"
@@ -233,8 +371,43 @@ defineExpose({
           :file="file"
           :selected="selectedIds.has(file.id)"
           :selectable="selectionMode === 'multiple'"
+          view-mode="grid"
           @select="handleFileSelect"
           @toggle="handleFileToggle"
+          @view-details="openFileDetails"
+          @rename="openFileDetails"
+          @move="openMoveDialog"
+          @delete="handleDeleteFile"
+        />
+      </div>
+
+      <!-- List View -->
+      <div v-else class="flex flex-col gap-2">
+        <FileManagerFolderItem
+          v-for="folder in folders"
+          :key="`folder-${folder.id}`"
+          :folder="folder"
+          view-mode="list"
+          @open="navigateToFolder(folder.id)"
+          @move="openMoveFolderDialog"
+          @delete="handleDeleteFolder"
+          @drop-file="handleDropFileOnFolder"
+          @drop-folder="handleDropFolderOnFolder"
+        />
+
+        <FileManagerItem
+          v-for="file in files"
+          :key="file.id"
+          :file="file"
+          :selected="selectedIds.has(file.id)"
+          :selectable="selectionMode === 'multiple'"
+          view-mode="list"
+          @select="handleFileSelect"
+          @toggle="handleFileToggle"
+          @view-details="openFileDetails"
+          @rename="openFileDetails"
+          @move="openMoveDialog"
+          @delete="handleDeleteFile"
         />
       </div>
     </div>
@@ -268,5 +441,26 @@ defineExpose({
         </Button>
       </div>
     </div>
+
+    <CreateFolderDialog
+      v-model:open="showCreateFolderDialog"
+      :parent-folder="currentFolder"
+      @created="handleFolderCreated"
+    />
+
+    <FileDetailsDialog
+      v-model:open="showFileDetailsDialog"
+      :file="selectedFileForAction"
+      @updated="handleFileUpdated"
+      @deleted="handleFileDeleted"
+    />
+
+    <MoveToFolderDialog
+      v-model:open="showMoveDialog"
+      :file="selectedFileForAction"
+      :folder="selectedFolderForAction"
+      :mode="moveDialogMode"
+      @moved="handleItemMoved"
+    />
   </div>
 </template>

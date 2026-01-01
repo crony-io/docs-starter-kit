@@ -109,6 +109,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
             Route::post('media/bulk-destroy', [MediaController::class, 'bulkDestroy'])->name('media.bulk-destroy');
             Route::post('media/folders', [MediaController::class, 'createFolder'])->name('media.folders.store');
+            Route::patch('media/folders/{folder}', [MediaController::class, 'updateFolder'])->name('media.folders.update');
             Route::delete('media/folders/{folder}', [MediaController::class, 'destroyFolder'])->name('media.folders.destroy');
 
             // Feedback Management

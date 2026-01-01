@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\MediaUploadRequest;
 use App\Models\Folder;
 use App\Models\Media;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class MediaController extends Controller
 {
-    public function index(Request $request): Response|JsonResponse
+    public function index(Request $request): Response
     {
         $query = Media::query()
             ->with(['folder', 'uploader:id,name'])
@@ -53,23 +53,21 @@ class MediaController extends Controller
             ? Folder::with('parent')->find($request->folder_id)
             : null;
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'files' => $files,
-                'folders' => $folders,
-                'currentFolder' => $currentFolder,
-            ]);
-        }
+        $allFolders = Folder::with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('admin/media/Index', [
             'files' => $files,
             'folders' => $folders,
             'currentFolder' => $currentFolder,
             'filters' => $request->only(['folder_id', 'search', 'type']),
+            'allFolders' => $this->buildFolderTree($allFolders),
         ]);
     }
 
-    public function store(MediaUploadRequest $request): JsonResponse
+    public function store(MediaUploadRequest $request): RedirectResponse
     {
         $file = $request->file('file');
         $user = auth()->user();
@@ -89,20 +87,43 @@ class MediaController extends Controller
 
         $media->refresh();
 
-        return response()->json([
-            'message' => 'File uploaded successfully.',
-            'file' => $media,
-        ], 201);
+        return back()->with('file', $media)->with('success', 'File uploaded successfully.');
     }
 
-    public function show(Media $media): JsonResponse
+    public function allFolders(): Response
     {
-        return response()->json([
-            'file' => $media->load(['folder', 'uploader:id,name']),
+        $folders = Folder::with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('admin/media/Index', [
+            'allFolders' => $this->buildFolderTree($folders),
         ]);
     }
 
-    public function update(Request $request, Media $media): JsonResponse
+    private function buildFolderTree($folders): array
+    {
+        return $folders->map(function ($folder) {
+            return [
+                'id' => $folder->id,
+                'name' => $folder->name,
+                'parent_id' => $folder->parent_id,
+                'children' => $folder->children->count() > 0
+                    ? $this->buildFolderTree($folder->children)
+                    : [],
+            ];
+        })->toArray();
+    }
+
+    public function show(Media $media): RedirectResponse
+    {
+        $media->load(['folder', 'uploader:id,name']);
+
+        return back()->with('file', $media)->with('success', 'File uploaded successfully.');
+    }
+
+    public function update(Request $request, Media $media): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
@@ -111,22 +132,17 @@ class MediaController extends Controller
 
         $media->update($validated);
 
-        return response()->json([
-            'message' => 'File updated successfully.',
-            'file' => $media,
-        ]);
+        return back()->with('file', $media)->with('success', 'File updated successfully.');
     }
 
-    public function destroy(Media $media): JsonResponse
+    public function destroy(Media $media): RedirectResponse
     {
         $media->delete();
 
-        return response()->json([
-            'message' => 'File deleted successfully.',
-        ]);
+        return back()->with('success', 'File deleted successfully.');
     }
 
-    public function bulkDestroy(Request $request): JsonResponse
+    public function bulkDestroy(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'ids' => ['required', 'array'],
@@ -135,12 +151,10 @@ class MediaController extends Controller
 
         Media::whereIn('id', $validated['ids'])->delete();
 
-        return response()->json([
-            'message' => count($validated['ids']).' file(s) deleted successfully.',
-        ]);
+        return back()->with('message', count($validated['ids']).' file(s) deleted successfully.');
     }
 
-    public function createFolder(Request $request): JsonResponse
+    public function createFolder(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -149,25 +163,49 @@ class MediaController extends Controller
 
         $folder = Folder::create($validated);
 
-        return response()->json([
-            'message' => 'Folder created successfully.',
-            'folder' => $folder,
-        ], 201);
+        return back()->with('folder', $folder)->with('success', 'Folder created successfully.');
     }
 
-    public function destroyFolder(Folder $folder): JsonResponse
+    public function updateFolder(Request $request, Folder $folder): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'parent_id' => ['nullable', 'exists:folders,id'],
+        ]);
+
+        // Prevent moving folder into itself or its descendants
+        if (isset($validated['parent_id'])) {
+            if ($validated['parent_id'] == $folder->id) {
+
+                return back()->withErrors(['parent_id' => 'Cannot move folder into itself.']);
+            }
+
+            // Check if target is a descendant of this folder
+            $targetFolder = Folder::find($validated['parent_id']);
+            $current = $targetFolder;
+            while ($current) {
+                if ($current->parent_id == $folder->id) {
+                    return back()->withErrors(['parent_id' => 'Cannot move folder into its own subfolder.']);
+                }
+                $current = $current->parent;
+            }
+        }
+
+        $folder->update($validated);
+        $folder->fresh();
+
+        return back()->with('folder', $folder)->with('success', 'Folder updated successfully.');
+    }
+
+    public function destroyFolder(Folder $folder): RedirectResponse
     {
         if ($folder->files()->exists() || $folder->children()->exists()) {
-            return response()->json([
-                'message' => 'Cannot delete folder with contents.',
-            ], 422);
+            return back()->withErrors(['folder' => 'Cannot delete folder with contents.']);
         }
 
         $folder->delete();
 
-        return response()->json([
-            'message' => 'Folder deleted successfully.',
-        ]);
+        return back()->with('success', 'Folder deleted successfully.');
     }
 
     private function generateFileName($file): string
