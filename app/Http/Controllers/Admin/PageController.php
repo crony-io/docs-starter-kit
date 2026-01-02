@@ -46,10 +46,16 @@ class PageController extends Controller
 
         $treeData = $this->buildPagesTree();
 
+        $potentialParents = Page::query()
+            ->whereIn('type', ['navigation', 'group'])
+            ->orderBy('order')
+            ->get(['id', 'title', 'slug', 'type', 'parent_id']);
+
         return Inertia::render('admin/pages/Index', [
             'pages' => $pages,
             'treeData' => $treeData,
             'navigationTabs' => $navigationTabs,
+            'potentialParents' => $potentialParents,
             'filters' => $request->only(['status', 'search', 'type', 'view']),
             'statuses' => [
                 ['value' => 'all', 'label' => 'All Statuses'],
@@ -106,11 +112,19 @@ class PageController extends Controller
     public function store(PageStoreRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $fromDialog = $validated['from_dialog'] ?? false;
+        unset($validated['from_dialog']);
+
         $validated['created_by'] = auth()->id();
         $validated['source'] = 'cms';
         $validated['order'] = Page::max('order') + 1;
 
         $page = Page::create($validated);
+
+        if ($fromDialog) {
+            return to_route('admin.pages.index')
+                ->with('success', "{$page->title} created successfully.");
+        }
 
         return to_route('admin.pages.edit', $page)
             ->with('success', 'Page created successfully.');
@@ -254,6 +268,78 @@ class PageController extends Controller
         }
 
         return back()->with('success', 'Pages reordered successfully.');
+    }
+
+    public function move(Request $request, Page $page): RedirectResponse
+    {
+        $request->validate([
+            'parent_id' => ['nullable', 'exists:pages,id'],
+            'position' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $newParentId = $request->parent_id;
+
+        // Navigation must stay at root level
+        if ($page->type === 'navigation' && $newParentId) {
+            return back()->with('error', 'Navigation tabs must stay at root level.');
+        }
+
+        // Documents cannot be at root level
+        if ($page->type === 'document' && !$newParentId) {
+            return back()->with('error', 'Documents must be inside a navigation or group.');
+        }
+
+        if ($newParentId) {
+            $newParent = Page::find($newParentId);
+
+            if (!$newParent) {
+                return back()->with('error', 'Target parent not found.');
+            }
+
+            if ($newParent->id === $page->id) {
+                return back()->with('error', 'Cannot move a page into itself.');
+            }
+
+            if ($newParent->type === 'document') {
+                return back()->with('error', 'Cannot move pages into a document.');
+            }
+
+            $descendants = $this->getAllDescendantIds($page);
+            if (in_array($newParentId, $descendants)) {
+                return back()->with('error', 'Cannot move a page into its own descendant.');
+            }
+        }
+
+        $page->parent_id = $newParentId;
+        $page->order = $request->position;
+        $page->save();
+
+        $siblings = Page::where('parent_id', $newParentId)
+            ->where('id', '!=', $page->id)
+            ->orderBy('order')
+            ->get();
+
+        $order = 0;
+        foreach ($siblings as $sibling) {
+            if ($order === $request->position) {
+                $order++;
+            }
+            $sibling->update(['order' => $order]);
+            $order++;
+        }
+
+        return back()->with('success', 'Page moved successfully.');
+    }
+
+    private function getAllDescendantIds(Page $page): array
+    {
+        $ids = [];
+        foreach ($page->children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $this->getAllDescendantIds($child));
+        }
+
+        return $ids;
     }
 
     public function publish(Page $page): RedirectResponse

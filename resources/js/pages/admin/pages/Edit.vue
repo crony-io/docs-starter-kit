@@ -311,7 +311,7 @@ const formatDate = (dateString: string) => {
   <Head :title="`Edit: ${page.title}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="px-4 py-6">
+    <div class="px-4 py-6 pb-20">
       <div class="mb-6 flex items-center justify-between">
         <div class="flex items-center gap-4">
           <Heading :title="page.title" description="Edit documentation page" />
@@ -560,6 +560,62 @@ const formatDate = (dateString: string) => {
           </div>
         </div>
       </form>
+    </div>
+
+    <div
+      class="fixed right-0 bottom-0 left-0 z-50 border-t bg-background/95 px-4 py-3 backdrop-blur supports-backdrop-filter:bg-background/60 md:left-(--sidebar-width)"
+    >
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4">
+        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+          <span v-if="autoSaveStatus === 'saving'" class="flex items-center gap-1">
+            <span class="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+            Saving...
+          </span>
+          <span
+            v-else-if="autoSaveStatus === 'saved'"
+            class="flex items-center gap-1 text-green-600"
+          >
+            <Check class="h-4 w-4" />
+            Saved
+          </span>
+          <span v-else-if="form.isDirty" class="flex items-center gap-1">
+            <span class="h-2 w-2 rounded-full bg-amber-500" />
+            Unsaved changes
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="page.status !== 'published'"
+            variant="outline"
+            size="sm"
+            @click="quickPublish"
+            :disabled="isPublishing"
+          >
+            <Globe class="mr-2 h-4 w-4" />
+            {{ isPublishing ? 'Publishing...' : 'Publish' }}
+          </Button>
+          <Button
+            v-else
+            variant="outline"
+            size="sm"
+            @click="quickUnpublish"
+            :disabled="isUnpublishing"
+          >
+            <EyeOff class="mr-2 h-4 w-4" />
+            Unpublish
+          </Button>
+          <Button size="sm" :disabled="form.processing || !canSubmit" @click="submit">
+            <Save class="mr-2 h-4 w-4" />
+            {{ form.processing ? 'Saving...' : 'Save Changes' }}
+            <kbd
+              class="ml-2 hidden rounded bg-primary-foreground/20 px-1.5 py-0.5 text-xs sm:inline-block"
+            >
+              Ctrl+S
+            </kbd>
+          </Button>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>

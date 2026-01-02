@@ -1350,3 +1350,22 @@ html:not(.dark) .prose pre {
 html.dark .prose pre code.line-numbers-added .code-line::before {
   color: #8b949e;
 }
+
+/* Sortable.js drag and drop styles */
+.sortable-ghost {
+  opacity: 0.3;
+  background: hsl(var(--primary) / 0.1);
+}
+
+.sortable-chosen {
+  box-shadow:
+    0 10px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  ring: 2px solid hsl(var(--primary));
+  transform: scale(1.02);
+}
+
+.sortable-drag {
+  transform: rotate(1deg);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}

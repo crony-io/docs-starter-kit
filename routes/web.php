@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('pages/{page}', [PageController::class, 'destroy'])->name('pages.destroy');
         Route::post('pages/{page}/duplicate', [PageController::class, 'duplicate'])->name('pages.duplicate');
         Route::post('pages/reorder', [PageController::class, 'reorder'])->name('pages.reorder');
+        Route::post('pages/{page}/move', [PageController::class, 'move'])->name('pages.move');
         Route::post('pages/{page}/publish', [PageController::class, 'publish'])->name('pages.publish');
         Route::post('pages/{page}/unpublish', [PageController::class, 'unpublish'])->name('pages.unpublish');
         Route::post('pages/{page}/restore-version/{versionId}', [PageController::class, 'restoreVersion'])->name('pages.restore-version');

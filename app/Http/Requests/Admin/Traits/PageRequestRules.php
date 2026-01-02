@@ -15,7 +15,12 @@ trait PageRequestRules
             'icon' => ['nullable', 'string', 'max:50'],
             'content' => ['nullable', 'string'],
             'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
-            'parent_id' => ['nullable', 'exists:pages,id'],
+            'parent_id' => ['nullable', 'exists:pages,id', function ($attribute, $value, $fail) {
+                if ($this->input('type') === 'document' && empty($value)) {
+                    $fail('Documents must have a parent (navigation or group).');
+                }
+            }],
+            'from_dialog' => ['nullable', 'boolean'],
             'is_default' => ['boolean'],
             'is_expanded' => ['boolean'],
             'seo_title' => ['nullable', 'string', 'max:255'],

@@ -49,7 +49,8 @@ const isValid = computed(() => {
       </div>
       <h1 class="text-2xl font-bold tracking-tight text-foreground">Site Settings</h1>
       <p class="mt-2 text-muted-foreground">
-        Configure the identity and display options for your documentation site. You can change these settings later from the admin panel.
+        Configure the identity and display options for your documentation site. You can change these
+        settings later from the admin panel.
       </p>
     </div>
 

@@ -5,7 +5,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "php artisan optimize:clear && php artisan view:clear && npm run format && vite build && vite build --ssr",
+        "build": "php artisan optimize:clear && php artisan view:clear && npm run format && npm run lint && vite build && vite build --ssr",
         "dev": "php artisan optimize:clear && npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185\" \"php artisan inertia:start-ssr\" \"php artisan schedule:work\" \"vite\" --names=ssr,schedule,vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
