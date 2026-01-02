@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PageStoreRequest;
 use App\Http\Requests\Admin\PageUpdateRequest;
+use App\Models\Folder;
+use App\Models\Media;
 use App\Models\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -97,6 +99,7 @@ class PageController extends Controller
             'potentialParents' => $potentialParents,
             'defaultParentId' => $parentId ? (int) $parentId : null,
             'defaultType' => $type,
+            'mediaBrowser' => Inertia::optional(fn () => $this->getMediaBrowserData($request)),
         ]);
     }
 
@@ -113,7 +116,7 @@ class PageController extends Controller
             ->with('success', 'Page created successfully.');
     }
 
-    public function edit(Page $page): Response
+    public function edit(Page $page, Request $request): Response
     {
         $page->load(['versions' => fn ($q) => $q->latest()->take(10), 'parent:id,title,type', 'children']);
 
@@ -132,7 +135,75 @@ class PageController extends Controller
             'page' => $pageData,
             'navigationTabs' => $navigationTabs,
             'potentialParents' => $potentialParents,
+            'mediaBrowser' => Inertia::optional(fn () => $this->getMediaBrowserData($request)),
         ]);
+    }
+
+    private function getMediaBrowserData(Request $request): array
+    {
+        $query = Media::query()
+            ->with(['folder', 'uploader:id,name'])
+            ->latest();
+
+        if ($request->filled('media_folder_id')) {
+            $query->where('folder_id', $request->media_folder_id);
+        } else {
+            $query->whereNull('folder_id');
+        }
+
+        if ($request->filled('media_search')) {
+            $query->where('name', 'like', '%'.$request->media_search.'%');
+        }
+
+        if ($request->filled('media_type')) {
+            match ($request->media_type) {
+                'image' => $query->images(),
+                'document' => $query->documents(),
+                'video' => $query->videos(),
+                'audio' => $query->audios(),
+                default => null,
+            };
+        }
+
+        $files = $query->paginate(24)->withQueryString();
+
+        $folders = Folder::query()
+            ->when($request->filled('media_folder_id'),
+                fn ($q) => $q->where('parent_id', $request->media_folder_id),
+                fn ($q) => $q->whereNull('parent_id')
+            )
+            ->orderBy('name')
+            ->get();
+
+        $currentFolder = $request->filled('media_folder_id')
+            ? Folder::with('parent')->find($request->media_folder_id)
+            : null;
+
+        $allFolders = Folder::with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get();
+
+        return [
+            'files' => $files,
+            'folders' => $folders,
+            'currentFolder' => $currentFolder,
+            'allFolders' => $this->buildFolderTree($allFolders),
+        ];
+    }
+
+    private function buildFolderTree($folders): array
+    {
+        return $folders->map(function ($folder) {
+            return [
+                'id' => $folder->id,
+                'name' => $folder->name,
+                'parent_id' => $folder->parent_id,
+                'children' => $folder->children->count() > 0
+                    ? $this->buildFolderTree($folder->children)
+                    : [],
+            ];
+        })->toArray();
     }
 
     public function update(PageUpdateRequest $request, Page $page): RedirectResponse

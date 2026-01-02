@@ -8,15 +8,28 @@ use Illuminate\Validation\Validator;
 class MediaUploadRequest extends FormRequest
 {
     private const ALLOWED_MIME_SIGNATURES = [
+        // Images
         'image/jpeg' => ["\xFF\xD8\xFF"],
         'image/png' => ["\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"],
         'image/gif' => ['GIF87a', 'GIF89a'],
         'image/webp' => ['RIFF'],
+        'image/bmp' => ['BM'],
+        'image/x-icon' => ["\x00\x00\x01\x00"],
+        'image/vnd.microsoft.icon' => ["\x00\x00\x01\x00"],
+        // Documents
         'application/pdf' => ['%PDF'],
+        'application/zip' => ["PK\x03\x04", "PK\x05\x06"],
+        'application/x-zip-compressed' => ["PK\x03\x04", "PK\x05\x06"],
+        // Videos
         'video/mp4' => ["\x00\x00\x00\x18ftypmp4", "\x00\x00\x00\x1Cftypisom", "\x00\x00\x00"],
         'video/webm' => ["\x1A\x45\xDF\xA3"],
+        'video/quicktime' => ["\x00\x00\x00"],
+        'video/x-msvideo' => ['RIFF'],
+        // Audio
         'audio/mpeg' => ["\xFF\xFB", "\xFF\xFA", "\xFF\xF3", 'ID3'],
         'audio/wav' => ['RIFF'],
+        'audio/ogg' => ['OggS'],
+        'audio/flac' => ['fLaC'],
     ];
 
     public function authorize(): bool

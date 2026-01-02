@@ -73,6 +73,7 @@ watch(
           ref="browserRef"
           :selection-mode="selectionMode"
           :accept-types="acceptTypes"
+          embedded
           @select="handleSelect"
         />
       </div>

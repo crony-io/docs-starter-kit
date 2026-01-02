@@ -17,7 +17,7 @@ import {
 } from '@/routes/admin/media';
 import { destroy as destroyFolder, update as updateFolder } from '@/routes/admin/media/folders';
 import type { MediaFile, MediaFilters, MediaFolder } from '@/types/media';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
@@ -25,11 +25,13 @@ interface Props {
   selectionMode?: 'single' | 'multiple';
   acceptTypes?: ('image' | 'document' | 'video' | 'audio')[];
   initialSelection?: MediaFile[];
+  embedded?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   selectionMode: 'single',
   acceptTypes: () => ['image', 'document', 'video', 'audio'],
+  embedded: false,
 });
 
 const emit = defineEmits<{
@@ -72,46 +74,92 @@ interface FetchFilesResponse {
   currentFolder: MediaFolder | null;
 }
 
-const fetchFiles = (page = 1) => {
+interface MediaBrowserResponse {
+  files: {
+    data: MediaFile[];
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
+  folders: MediaFolder[];
+  currentFolder: MediaFolder | null;
+  allFolders: Array<{ id: number; name: string; parent_id: number | null; children: unknown[] }>;
+}
+
+const page = usePage();
+
+const fetchFiles = (pageNum = 1) => {
   isLoading.value = true;
 
-  const query: Record<string, string> = { page: String(page) };
+  if (props.embedded) {
+    const data: Record<string, string | null> = {
+      media_page: String(pageNum),
+      media_folder_id: filters.value.folder_id ? String(filters.value.folder_id) : null,
+      media_search: filters.value.search || null,
+      media_type: filters.value.type || null,
+    };
 
-  if (filters.value.folder_id) {
-    query.folder_id = String(filters.value.folder_id);
-  }
-  if (filters.value.search) {
-    query.search = filters.value.search;
-  }
-  if (filters.value.type) {
-    query.type = filters.value.type;
-  }
-
-  router.get(
-    mediaIndex.url({ query }),
-    {},
-    {
-      preserveState: true,
-      preserveScroll: true,
-      only: ['files', 'folders', 'currentFolder'],
-      onSuccess: (page) => {
-        const props = page.props as unknown as FetchFilesResponse;
-        files.value = props.files?.data ?? [];
-        folders.value = props.folders ?? [];
-        currentFolder.value = props.currentFolder ?? null;
-        pagination.value = {
-          currentPage: props.files?.current_page ?? 1,
-          lastPage: props.files?.last_page ?? 1,
-          total: props.files?.total ?? 0,
-        };
+    router.reload({
+      data,
+      only: ['mediaBrowser'],
+      onSuccess: () => {
+        const mediaBrowser = page.props.mediaBrowser as MediaBrowserResponse | undefined;
+        if (mediaBrowser) {
+          files.value = mediaBrowser.files?.data ?? [];
+          folders.value = mediaBrowser.folders ?? [];
+          currentFolder.value = mediaBrowser.currentFolder ?? null;
+          pagination.value = {
+            currentPage: mediaBrowser.files?.current_page ?? 1,
+            lastPage: mediaBrowser.files?.last_page ?? 1,
+            total: mediaBrowser.files?.total ?? 0,
+          };
+        }
         isLoading.value = false;
       },
       onError: () => {
         console.error('Failed to fetch files');
         isLoading.value = false;
       },
-    },
-  );
+    });
+  } else {
+    const query: Record<string, string> = { page: String(pageNum) };
+
+    if (filters.value.folder_id) {
+      query.folder_id = String(filters.value.folder_id);
+    }
+    if (filters.value.search) {
+      query.search = filters.value.search;
+    }
+    if (filters.value.type) {
+      query.type = filters.value.type;
+    }
+
+    router.get(
+      mediaIndex.url({ query }),
+      {},
+      {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['files', 'folders', 'currentFolder'],
+        onSuccess: (pageResponse) => {
+          const responseProps = pageResponse.props as unknown as FetchFilesResponse;
+          files.value = responseProps.files?.data ?? [];
+          folders.value = responseProps.folders ?? [];
+          currentFolder.value = responseProps.currentFolder ?? null;
+          pagination.value = {
+            currentPage: responseProps.files?.current_page ?? 1,
+            lastPage: responseProps.files?.last_page ?? 1,
+            total: responseProps.files?.total ?? 0,
+          };
+          isLoading.value = false;
+        },
+        onError: () => {
+          console.error('Failed to fetch files');
+          isLoading.value = false;
+        },
+      },
+    );
+  }
 };
 
 const navigateToFolder = (folderId: number | null) => {

@@ -86,9 +86,39 @@ const handleMarkdownUpdate = (value: string) => {
   emit('update:modelValue', value);
 };
 
-const handleImageSelect = (files: MediaFile[]) => {
+const handleFileSelect = (files: MediaFile[]) => {
   if (files.length > 0 && files[0].url && editor.value) {
-    editor.value.chain().focus().setImage({ src: files[0].url, alt: files[0].name }).run();
+    const file = files[0];
+
+    switch (file.file_type) {
+      case 'image':
+        editor.value.chain().focus().setImage({ src: file.url, alt: file.name }).run();
+        break;
+      case 'video':
+        editor.value
+          .chain()
+          .focus()
+          .insertContent(
+            `<video controls class="rounded-md max-w-full"><source src="${file.url}" type="${file.mime_type}">Your browser does not support the video tag.</video>`,
+          )
+          .run();
+        break;
+      case 'audio':
+        editor.value
+          .chain()
+          .focus()
+          .insertContent(
+            `<audio controls class="w-full"><source src="${file.url}" type="${file.mime_type}">Your browser does not support the audio tag.</audio>`,
+          )
+          .run();
+        break;
+      default:
+        editor.value
+          .chain()
+          .focus()
+          .insertContent(`<a href="${file.url}" target="_blank">${file.name}</a>`)
+          .run();
+    }
   }
   showFileManager.value = false;
 };
@@ -126,11 +156,11 @@ watch(
 
     <FileManagerDialog
       v-model:open="showFileManager"
-      title="Insert Image"
-      description="Select an image from your media library to insert into the content"
+      title="Insert Media"
+      description="Select a file from your media library to insert into the content"
       selection-mode="single"
-      :accept-types="['image']"
-      @confirm="handleImageSelect"
+      :accept-types="['image', 'document', 'video', 'audio']"
+      @confirm="handleFileSelect"
     />
   </div>
 </template>
