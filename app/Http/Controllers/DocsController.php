@@ -10,7 +10,44 @@ use Inertia\Response;
 
 class DocsController extends Controller
 {
+    /**
+     * Determine the documentation structure mode:
+     * - 'navigation': Has navigation tabs (full hierarchy)
+     * - 'flat': No navigation tabs, but has root-level pages (simple flat structure)
+     * - 'empty': No pages at all
+     */
+    private function getStructureMode(): string
+    {
+        $hasNavTabs = Page::navigationTabs()->published()->exists();
+        if ($hasNavTabs) {
+            return 'navigation';
+        }
+
+        $hasRootPages = Page::rootLevel()->published()->exists();
+        if ($hasRootPages) {
+            return 'flat';
+        }
+
+        return 'empty';
+    }
+
     public function index(): Response
+    {
+        $mode = $this->getStructureMode();
+
+        if ($mode === 'empty') {
+            return $this->renderEmptyState();
+        }
+
+        if ($mode === 'navigation') {
+            return $this->handleNavigationMode();
+        }
+
+        // Flat mode: no navigation tabs, just root-level pages
+        return $this->handleFlatMode();
+    }
+
+    private function handleNavigationMode(): Response
     {
         $defaultNav = Page::navigationTabs()
             ->published()
@@ -21,17 +58,61 @@ class DocsController extends Controller
             $defaultNav = Page::navigationTabs()->published()->first();
         }
 
-        if (! $defaultNav) {
-            abort(404, 'No documentation available');
-        }
-
         $firstDoc = $this->findFirstDocument($defaultNav);
 
         if ($firstDoc) {
             return $this->show($firstDoc->getFullPath());
         }
 
-        return $this->renderDocsPage($defaultNav, null);
+        return $this->renderDocsPage($defaultNav, null, 'navigation');
+    }
+
+    private function handleFlatMode(): Response
+    {
+        // Find first document at root level or inside groups
+        $firstDoc = Page::rootLevel()
+            ->published()
+            ->where('type', 'document')
+            ->orderBy('order')
+            ->first();
+
+        if ($firstDoc) {
+            return $this->show($firstDoc->getFullPath());
+        }
+
+        // No direct documents, check inside groups
+        $rootGroups = Page::rootLevel()
+            ->published()
+            ->where('type', 'group')
+            ->orderBy('order')
+            ->get();
+
+        foreach ($rootGroups as $group) {
+            $doc = $this->findFirstDocument($group);
+            if ($doc) {
+                return $this->show($doc->getFullPath());
+            }
+        }
+
+        // Has pages but no documents yet (only empty groups)
+        return $this->renderDocsPage(null, null, 'flat');
+    }
+
+    private function renderEmptyState(): Response
+    {
+        $feedbackForms = FeedbackForm::active()->get(['id', 'name', 'trigger_type', 'fields']);
+
+        return Inertia::render('docs/Show', [
+            'navigationTabs' => [],
+            'activeNavId' => null,
+            'sidebarItems' => [],
+            'currentPage' => null,
+            'tableOfContents' => [],
+            'breadcrumbs' => [],
+            'feedbackForms' => $feedbackForms,
+            'isEmpty' => true,
+            'structureMode' => 'empty',
+        ]);
     }
 
     public function show(string $path): Response
@@ -43,18 +124,29 @@ class DocsController extends Controller
             abort(404, 'Page not found');
         }
 
-        return $this->renderDocsPage($page->getNavigationTab(), $page);
+        $mode = $this->getStructureMode();
+
+        return $this->renderDocsPage($page->getNavigationTab(), $page, $mode);
     }
 
-    private function renderDocsPage(?Page $activeNav, ?Page $currentPage): Response
+    private function renderDocsPage(?Page $activeNav, ?Page $currentPage, string $mode = 'navigation'): Response
     {
-        $navigationTabs = Page::navigationTabs()
-            ->published()
-            ->get(['id', 'title', 'slug', 'icon', 'is_default']);
+        $navigationTabs = [];
+        $sidebarItems = [];
 
-        $sidebarItems = $activeNav
-            ? $this->buildSidebarTree($activeNav)
-            : [];
+        if ($mode === 'navigation') {
+            // Full hierarchy mode with navigation tabs
+            $navigationTabs = Page::navigationTabs()
+                ->published()
+                ->get(['id', 'title', 'slug', 'icon', 'is_default']);
+
+            $sidebarItems = $activeNav
+                ? $this->buildSidebarTree($activeNav)
+                : [];
+        } else {
+            // Flat mode: show all root-level pages in sidebar
+            $sidebarItems = $this->buildFlatSidebarTree();
+        }
 
         $tableOfContents = $currentPage && $currentPage->isDocument()
             ? $this->extractTableOfContents($currentPage->content ?? '')
@@ -90,7 +182,31 @@ class DocsController extends Controller
             'tableOfContents' => $tableOfContents,
             'breadcrumbs' => $breadcrumbs,
             'feedbackForms' => $feedbackForms,
+            'structureMode' => $mode,
         ]);
+    }
+
+    /**
+     * Build sidebar tree for flat mode (no navigation tabs)
+     * Shows all root-level documents and groups with their children
+     */
+    private function buildFlatSidebarTree(): array
+    {
+        $allPages = Page::published()
+            ->orderBy('order')
+            ->get(['id', 'title', 'slug', 'type', 'icon', 'is_expanded', 'parent_id']);
+
+        return Page::buildTreeFromCollection($allPages, null, function ($child) {
+            return [
+                'id' => $child->id,
+                'title' => $child->title,
+                'slug' => $child->slug,
+                'type' => $child->type,
+                'icon' => $child->icon,
+                'path' => $child->getFullPath(),
+                'isExpanded' => $child->is_expanded,
+            ];
+        });
     }
 
     private function findPageByPath(array $segments, ?int $parentId = null): ?Page

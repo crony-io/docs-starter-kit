@@ -4,6 +4,7 @@ use App\Http\Middleware\DetectSessionTermination;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\LogUserActivity;
+use App\Http\Middleware\SetupMiddleware;
 use App\Models\GitSync;
 use App\Models\SystemConfig;
 use Illuminate\Console\Scheduling\Schedule;
@@ -36,16 +37,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             AddCspHeaders::class,
             HandleAppearance::class,
+            SetupMiddleware::class,
             DetectSessionTermination::class,
             LogUserActivity::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // Middleware aliases
-        $middleware->alias([
-            'setup.complete' => \App\Http\Middleware\EnsureSetupComplete::class,
-        ]);
     })
     ->withSchedule(function (Schedule $schedule) {
         // Git sync (only if in Git mode)

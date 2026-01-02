@@ -28,14 +28,14 @@ class MediaManagerTest extends TestCase
         Storage::fake('public');
     }
 
-    public function test_guests_cannot_access_media_index()
+    public function test_guests_cannot_access_media_index(): void
     {
         $response = $this->get(route('admin.media.index'));
 
         $response->assertRedirect(route('login'));
     }
 
-    public function test_authenticated_users_can_access_media_index()
+    public function test_authenticated_users_can_access_media_index(): void
     {
         $response = $this->actingAs($this->user)->get(route('admin.media.index'));
 
@@ -43,137 +43,239 @@ class MediaManagerTest extends TestCase
         $response->assertInertia(fn ($page) => $page->component('admin/media/Index'));
     }
 
-    public function test_media_index_returns_json_when_requested()
+    public function test_media_index_returns_expected_props(): void
     {
-        $response = $this->actingAs($this->user)
-            ->getJson(route('admin.media.index'));
+        $response = $this->actingAs($this->user)->get(route('admin.media.index'));
 
         $response->assertStatus(200);
-        $response->assertJsonStructure(['files', 'folders', 'currentFolder']);
+        $response->assertInertia(fn ($page) => $page
+            ->has('files')
+            ->has('folders')
+            ->has('currentFolder')
+            ->has('filters')
+            ->has('allFolders')
+        );
     }
 
-    public function test_media_index_can_filter_by_folder()
+    public function test_media_index_can_filter_by_folder(): void
     {
         $folder = Folder::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->getJson(route('admin.media.index', ['folder_id' => $folder->id]));
+            ->get(route('admin.media.index', ['folder_id' => $folder->id]));
 
         $response->assertStatus(200);
-        $response->assertJson(['currentFolder' => ['id' => $folder->id]]);
+        $response->assertInertia(fn ($page) => $page
+            ->where('currentFolder.id', $folder->id)
+        );
     }
 
-    public function test_users_can_upload_media()
+    public function test_media_index_can_filter_by_search(): void
+    {
+        $media = $this->createMedia();
+        $media->update(['name' => 'unique-searchable-name.jpg']);
+
+        $response = $this->actingAs($this->user)
+            ->get(route('admin.media.index', ['search' => 'unique-searchable']));
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->where('filters.search', 'unique-searchable')
+        );
+    }
+
+    public function test_media_index_can_filter_by_type(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->get(route('admin.media.index', ['type' => 'image']));
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->where('filters.type', 'image')
+        );
+    }
+
+    public function test_users_can_upload_media(): void
     {
         $file = UploadedFile::fake()->image('test-image.jpg', 100, 100);
 
         $response = $this->actingAs($this->user)
-            ->postJson(route('admin.media.store'), [
+            ->post(route('admin.media.store'), [
                 'file' => $file,
             ]);
 
-        $response->assertStatus(201);
-        $response->assertJson(['message' => 'File uploaded successfully.']);
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'File uploaded successfully.');
+
+        $this->assertDatabaseHas('media', [
+            'model_type' => User::class,
+            'model_id' => $this->user->id,
+        ]);
     }
 
-    public function test_upload_requires_file()
+    public function test_users_can_upload_media_to_folder(): void
+    {
+        $folder = Folder::factory()->create();
+        $file = UploadedFile::fake()->image('test-image.jpg', 100, 100);
+
+        $response = $this->actingAs($this->user)
+            ->post(route('admin.media.store'), [
+                'file' => $file,
+                'folder_id' => $folder->id,
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('media', [
+            'folder_id' => $folder->id,
+        ]);
+    }
+
+    public function test_upload_requires_file(): void
     {
         $response = $this->actingAs($this->user)
-            ->postJson(route('admin.media.store'), []);
+            ->post(route('admin.media.store'), []);
 
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('file');
+        $response->assertSessionHasErrors('file');
     }
 
-    public function test_users_can_view_media_details()
+    public function test_upload_validates_file_type(): void
+    {
+        $file = UploadedFile::fake()->create('malicious.exe', 100);
+
+        $response = $this->actingAs($this->user)
+            ->post(route('admin.media.store'), [
+                'file' => $file,
+            ]);
+
+        $response->assertSessionHasErrors('file');
+    }
+
+    public function test_users_can_view_media_details(): void
     {
         $media = $this->createMedia();
 
         $response = $this->actingAs($this->user)
-            ->getJson(route('admin.media.show', $media));
+            ->get(route('admin.media.show', $media));
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['file']);
+        $response->assertRedirect();
+        $response->assertSessionHas('file');
     }
 
-    public function test_users_can_update_media()
+    public function test_users_can_update_media_name(): void
     {
         $media = $this->createMedia();
 
         $response = $this->actingAs($this->user)
-            ->patchJson(route('admin.media.update', $media), [
+            ->patch(route('admin.media.update', $media), [
                 'name' => 'updated-name.jpg',
             ]);
 
-        $response->assertStatus(200);
-        $response->assertJson(['message' => 'File updated successfully.']);
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'File updated successfully.');
+
+        $media->refresh();
+        $this->assertEquals('updated-name.jpg', $media->name);
     }
 
-    public function test_users_can_move_media_to_folder()
+    public function test_users_can_move_media_to_folder(): void
     {
         $media = $this->createMedia();
         $folder = Folder::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->patchJson(route('admin.media.update', $media), [
+            ->patch(route('admin.media.update', $media), [
                 'folder_id' => $folder->id,
             ]);
 
-        $response->assertStatus(200);
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
 
         $media->refresh();
         $this->assertEquals($folder->id, $media->folder_id);
     }
 
-    public function test_users_can_delete_media()
+    public function test_users_can_move_media_to_root(): void
     {
-        $media = $this->createMedia();
+        $folder = Folder::factory()->create();
+        $media = $this->createMedia(['folder_id' => $folder->id]);
 
         $response = $this->actingAs($this->user)
-            ->deleteJson(route('admin.media.destroy', $media));
+            ->patch(route('admin.media.update', $media), [
+                'folder_id' => null,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertJson(['message' => 'File deleted successfully.']);
+        $response->assertRedirect();
+
+        $media->refresh();
+        $this->assertNull($media->folder_id);
     }
 
-    public function test_users_can_bulk_delete_media()
+    public function test_users_can_delete_media(): void
+    {
+        $media = $this->createMedia();
+        $mediaId = $media->id;
+
+        $response = $this->actingAs($this->user)
+            ->delete(route('admin.media.destroy', $media));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'File deleted successfully.');
+
+        $this->assertDatabaseMissing('media', ['id' => $mediaId]);
+    }
+
+    public function test_users_can_bulk_delete_media(): void
     {
         $media1 = $this->createMedia();
         $media2 = $this->createMedia();
 
         $response = $this->actingAs($this->user)
-            ->postJson(route('admin.media.bulk-destroy'), [
+            ->post(route('admin.media.bulk-destroy'), [
                 'ids' => [$media1->id, $media2->id],
             ]);
 
-        $response->assertStatus(200);
-        $response->assertJson(['message' => '2 file(s) deleted successfully.']);
+        $response->assertRedirect();
+        $response->assertSessionHas('message', '2 file(s) deleted successfully.');
+
+        $this->assertDatabaseMissing('media', ['id' => $media1->id]);
+        $this->assertDatabaseMissing('media', ['id' => $media2->id]);
     }
 
-    public function test_users_can_create_folder()
+    public function test_bulk_delete_requires_ids(): void
     {
         $response = $this->actingAs($this->user)
-            ->postJson(route('admin.media.folders.store'), [
+            ->post(route('admin.media.bulk-destroy'), []);
+
+        $response->assertSessionHasErrors('ids');
+    }
+
+    public function test_users_can_create_folder(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->post(route('admin.media.folders.store'), [
                 'name' => 'New Folder',
             ]);
 
-        $response->assertStatus(201);
-        $response->assertJson(['message' => 'Folder created successfully.']);
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Folder created successfully.');
 
         $this->assertDatabaseHas('folders', ['name' => 'New Folder']);
     }
 
-    public function test_users_can_create_nested_folder()
+    public function test_users_can_create_nested_folder(): void
     {
         $parentFolder = Folder::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->postJson(route('admin.media.folders.store'), [
+            ->post(route('admin.media.folders.store'), [
                 'name' => 'Child Folder',
                 'parent_id' => $parentFolder->id,
             ]);
 
-        $response->assertStatus(201);
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
 
         $this->assertDatabaseHas('folders', [
             'name' => 'Child Folder',
@@ -181,53 +283,160 @@ class MediaManagerTest extends TestCase
         ]);
     }
 
-    public function test_users_can_delete_empty_folder()
+    public function test_folder_creation_requires_name(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->post(route('admin.media.folders.store'), []);
+
+        $response->assertSessionHasErrors('name');
+    }
+
+    public function test_users_can_update_folder_name(): void
+    {
+        $folder = Folder::factory()->create(['name' => 'Original Name']);
+
+        $response = $this->actingAs($this->user)
+            ->patch(route('admin.media.folders.update', $folder), [
+                'name' => 'Updated Name',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Folder updated successfully.');
+
+        $folder->refresh();
+        $this->assertEquals('Updated Name', $folder->name);
+    }
+
+    public function test_users_can_move_folder_to_parent(): void
+    {
+        $parentFolder = Folder::factory()->create();
+        $childFolder = Folder::factory()->create();
+
+        $response = $this->actingAs($this->user)
+            ->patch(route('admin.media.folders.update', $childFolder), [
+                'parent_id' => $parentFolder->id,
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $childFolder->refresh();
+        $this->assertEquals($parentFolder->id, $childFolder->parent_id);
+    }
+
+    public function test_cannot_move_folder_into_itself(): void
     {
         $folder = Folder::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->deleteJson(route('admin.media.folders.destroy', $folder));
+            ->patch(route('admin.media.folders.update', $folder), [
+                'parent_id' => $folder->id,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertJson(['message' => 'Folder deleted successfully.']);
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('parent_id');
+
+        $folder->refresh();
+        $this->assertNull($folder->parent_id);
+    }
+
+    public function test_cannot_move_folder_into_own_subfolder(): void
+    {
+        $parentFolder = Folder::factory()->create();
+        $childFolder = Folder::factory()->create(['parent_id' => $parentFolder->id]);
+
+        $response = $this->actingAs($this->user)
+            ->patch(route('admin.media.folders.update', $parentFolder), [
+                'parent_id' => $childFolder->id,
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('parent_id');
+    }
+
+    public function test_users_can_delete_empty_folder(): void
+    {
+        $folder = Folder::factory()->create();
+
+        $response = $this->actingAs($this->user)
+            ->delete(route('admin.media.folders.destroy', $folder));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Folder deleted successfully.');
 
         $this->assertDatabaseMissing('folders', ['id' => $folder->id]);
     }
 
-    public function test_cannot_delete_folder_with_files()
+    public function test_cannot_delete_folder_with_files(): void
     {
         $folder = Folder::factory()->create();
         $this->createMedia(['folder_id' => $folder->id]);
 
         $response = $this->actingAs($this->user)
-            ->deleteJson(route('admin.media.folders.destroy', $folder));
+            ->delete(route('admin.media.folders.destroy', $folder));
 
-        $response->assertStatus(422);
-        $response->assertJson(['message' => 'Cannot delete folder with contents.']);
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('folder');
 
         $this->assertDatabaseHas('folders', ['id' => $folder->id]);
     }
 
-    public function test_cannot_delete_folder_with_subfolders()
+    public function test_cannot_delete_folder_with_subfolders(): void
     {
         $parentFolder = Folder::factory()->create();
         Folder::factory()->create(['parent_id' => $parentFolder->id]);
 
         $response = $this->actingAs($this->user)
-            ->deleteJson(route('admin.media.folders.destroy', $parentFolder));
+            ->delete(route('admin.media.folders.destroy', $parentFolder));
 
-        $response->assertStatus(422);
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('folder');
 
         $this->assertDatabaseHas('folders', ['id' => $parentFolder->id]);
     }
 
-    public function test_folder_creation_requires_name()
+    public function test_media_shows_in_correct_folder(): void
     {
-        $response = $this->actingAs($this->user)
-            ->postJson(route('admin.media.folders.store'), []);
+        $folder = Folder::factory()->create();
+        $mediaInFolder = $this->createMedia(['folder_id' => $folder->id]);
+        $mediaInRoot = $this->createMedia();
 
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('name');
+        $response = $this->actingAs($this->user)
+            ->get(route('admin.media.index', ['folder_id' => $folder->id]));
+
+        $response->assertInertia(fn ($page) => $page
+            ->where('currentFolder.id', $folder->id)
+            ->has('files.data', 1)
+        );
+
+        $response = $this->actingAs($this->user)
+            ->get(route('admin.media.index'));
+
+        $response->assertInertia(fn ($page) => $page
+            ->where('currentFolder', null)
+            ->has('files.data', 1)
+        );
+    }
+
+    public function test_folders_show_in_correct_parent(): void
+    {
+        $parentFolder = Folder::factory()->create();
+        $childFolder = Folder::factory()->create(['parent_id' => $parentFolder->id]);
+        $rootFolder = Folder::factory()->create();
+
+        $response = $this->actingAs($this->user)
+            ->get(route('admin.media.index'));
+
+        $response->assertInertia(fn ($page) => $page
+            ->has('folders', 2)
+        );
+
+        $response = $this->actingAs($this->user)
+            ->get(route('admin.media.index', ['folder_id' => $parentFolder->id]));
+
+        $response->assertInertia(fn ($page) => $page
+            ->has('folders', 1)
+        );
     }
 
     private function createMedia(array $attributes = []): Media
@@ -235,7 +444,7 @@ class MediaManagerTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         $media = $this->user->addMedia($file)
-            ->usingFileName('test-'.time().'.jpg')
+            ->usingFileName('test-'.uniqid().'.jpg')
             ->toMediaCollection('uploads');
 
         if (! empty($attributes)) {

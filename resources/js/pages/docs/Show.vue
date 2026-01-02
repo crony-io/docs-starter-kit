@@ -62,9 +62,12 @@ interface Props {
   tableOfContents: TocItem[];
   breadcrumbs: BreadcrumbItem[];
   feedbackForms: FeedbackForm[];
+  isEmpty?: boolean;
 }
 
 const props = defineProps<Props>();
+
+const isAuthenticated = computed(() => !!(page.props.auth as { user?: unknown } | undefined)?.user);
 
 const pageTitle = computed(() => {
   if (!props.currentPage) {
@@ -278,6 +281,66 @@ onUnmounted(() => {
         <div v-else-if="currentPage && currentPage.type === 'group'" class="space-y-4">
           <h1 class="text-3xl font-bold">{{ currentPage.title }}</h1>
           <p class="text-muted-foreground">Select a page from the sidebar to view its content.</p>
+        </div>
+
+        <div
+          v-else-if="isEmpty"
+          class="flex min-h-[60vh] flex-col items-center justify-center text-center"
+        >
+          <div class="mx-auto max-w-md space-y-6">
+            <div
+              class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-10 w-10 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-foreground">No Documentation Yet</h1>
+              <p class="mt-2 text-muted-foreground">
+                Your documentation site is ready! Create your first page to get started.
+              </p>
+            </div>
+            <a
+              v-if="isAuthenticated"
+              href="/admin/pages/create"
+              class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Create First Page
+            </a>
+            <a
+              v-else
+              href="/login"
+              class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Login to Get Started
+            </a>
+          </div>
         </div>
 
         <div v-else class="space-y-4">
