@@ -5,7 +5,14 @@ import GitConfigStep from '@/pages/setup/GitConfigStep.vue';
 import ReviewStep from '@/pages/setup/ReviewStep.vue';
 import SetupLayout from '@/pages/setup/SetupLayout.vue';
 import SetupProgress from '@/pages/setup/SetupProgress.vue';
-import type { AdminFormData, ContentMode, GitConfigData, SetupStep } from '@/pages/setup/types';
+import SiteSettingsStep from '@/pages/setup/SiteSettingsStep.vue';
+import type {
+  AdminFormData,
+  ContentMode,
+  GitConfigData,
+  SetupStep,
+  SiteSettingsData,
+} from '@/pages/setup/types';
 import { Head } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 
@@ -42,23 +49,39 @@ const gitConfig = reactive<GitConfigData>({
   webhookSecret: '',
 });
 
+const siteSettings = reactive<SiteSettingsData>({
+  siteName: 'My Documentation',
+  siteTagline: '',
+  showFooter: true,
+  footerText: '',
+  metaRobots: 'index',
+});
+
 const allSteps: StepInfo[] = [
   { id: 'admin', label: 'Account' },
   { id: 'mode', label: 'Mode' },
-  { id: 'git-config', label: 'Configure' },
+  { id: 'git-config', label: 'Git Config' },
+  { id: 'site-settings', label: 'Site Settings' },
   { id: 'review', label: 'Review' },
 ];
 
-const visibleSteps = computed(() =>
-  props.hasUsers ? allSteps.filter((s) => s.id !== 'admin') : allSteps,
-);
+const visibleSteps = computed(() => {
+  let steps = allSteps;
+  if (props.hasUsers) {
+    steps = steps.filter((s) => s.id !== 'admin');
+  }
+  if (contentMode.value === 'cms') {
+    steps = steps.filter((s) => s.id !== 'git-config');
+  }
+  return steps;
+});
 
 const currentStepIndex = computed(() => visibleSteps.value.findIndex((s) => s.id === step.current));
 
 const handleModeSelect = (mode: ContentMode) => {
   contentMode.value = mode;
   if (mode === 'cms') {
-    step.current = 'review';
+    step.current = 'site-settings';
   } else {
     step.current = 'git-config';
   }
@@ -67,10 +90,12 @@ const handleModeSelect = (mode: ContentMode) => {
 const goBack = () => {
   if (step.current === 'git-config') {
     step.current = 'mode';
-  } else if (step.current === 'review' && contentMode.value === 'cms') {
+  } else if (step.current === 'site-settings' && contentMode.value === 'cms') {
     step.current = 'mode';
-  } else if (step.current === 'review' && contentMode.value === 'git') {
+  } else if (step.current === 'site-settings' && contentMode.value === 'git') {
     step.current = 'git-config';
+  } else if (step.current === 'review') {
+    step.current = 'site-settings';
   } else if (step.current === 'mode' && !props.hasUsers) {
     step.current = 'admin';
   }
@@ -103,16 +128,25 @@ const goBack = () => {
     <GitConfigStep
       v-if="step.current === 'git-config'"
       v-model="gitConfig"
-      @continue="step.current = 'review'"
+      @continue="step.current = 'site-settings'"
       @back="step.current = 'mode'"
     />
 
-    <!-- Step 4: Review & Complete -->
+    <!-- Step 4: Site Settings -->
+    <SiteSettingsStep
+      v-if="step.current === 'site-settings'"
+      v-model="siteSettings"
+      @continue="step.current = 'review'"
+      @back="goBack"
+    />
+
+    <!-- Step 5: Review & Complete -->
     <ReviewStep
       v-if="step.current === 'review'"
       :content-mode="contentMode.value"
       :admin="adminForm"
       :git="gitConfig"
+      :site-settings="siteSettings"
       :has-users="hasUsers"
       @back="goBack"
     />

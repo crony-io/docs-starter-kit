@@ -90,6 +90,11 @@ const mainNavItems = computed<NavItem[]>(() => {
 
 const footerNavItems: NavItem[] = [
   {
+    title: 'Frontend Docs',
+    href: '/',
+    icon: FileText,
+  },
+  {
     title: 'Github',
     href: 'https://github.com/crony-io/docs-starter-kit',
     icon: ExternalLink,

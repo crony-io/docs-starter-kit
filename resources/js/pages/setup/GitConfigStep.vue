@@ -32,11 +32,12 @@ defineEmits<{
 const testing = ref(false);
 const testResult = ref<ConnectionTestResult | null>(null);
 
-// Direct access to form - works because parent passes a reactive object
 const form = computed(() => props.modelValue);
 
-// Directly mutate the reactive object (works with Vue 3 reactive)
-const updateField = <K extends keyof GitConfigData>(field: K, value: GitConfigData[K]) => {
+const updateField = <FieldKey extends keyof GitConfigData>(
+  field: FieldKey,
+  value: GitConfigData[FieldKey],
+) => {
   (props.modelValue as GitConfigData)[field] = value;
 };
 

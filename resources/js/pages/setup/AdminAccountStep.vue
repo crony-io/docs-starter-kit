@@ -18,11 +18,12 @@ defineEmits<{
 const showPassword = ref(false);
 const showPasswordConfirm = ref(false);
 
-// Direct access to form - works because parent passes a reactive object
 const form = computed(() => props.modelValue);
 
-// Directly mutate the reactive object (works with Vue 3 reactive)
-const updateField = <K extends keyof AdminFormData>(field: K, value: AdminFormData[K]) => {
+const updateField = <FieldKey extends keyof AdminFormData>(
+  field: FieldKey,
+  value: AdminFormData[FieldKey],
+) => {
   (props.modelValue as AdminFormData)[field] = value;
 };
 

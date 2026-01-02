@@ -4,19 +4,28 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import type { AdminFormData, ContentMode, GitConfigData } from '@/pages/setup/types';
+import type {
+  AdminFormData,
+  ContentMode,
+  GitConfigData,
+  SiteSettingsData,
+} from '@/pages/setup/types';
 import { store } from '@/routes/setup';
 import { Form } from '@inertiajs/vue3';
 import {
   ArrowLeft,
+  Building2,
   Check,
   Clock,
   Edit3,
   GitBranch,
+  Globe,
   Key,
   Loader2,
   Mail,
+  PanelBottom,
   Rocket,
+  Type,
   User,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -25,6 +34,7 @@ const props = defineProps<{
   contentMode: ContentMode | null;
   admin: AdminFormData;
   git: GitConfigData;
+  siteSettings: SiteSettingsData;
   hasUsers: boolean;
 }>();
 
@@ -43,6 +53,11 @@ const formData = computed(() => ({
   admin_email: !props.hasUsers ? props.admin.email : undefined,
   admin_password: !props.hasUsers ? props.admin.password : undefined,
   admin_password_confirmation: !props.hasUsers ? props.admin.passwordConfirmation : undefined,
+  site_name: props.siteSettings.siteName,
+  site_tagline: props.siteSettings.siteTagline,
+  show_footer: props.siteSettings.showFooter,
+  footer_text: props.siteSettings.footerText,
+  meta_robots: props.siteSettings.metaRobots,
 }));
 
 const canSubmit = computed(() => {
@@ -64,6 +79,10 @@ const canSubmit = computed(() => {
     if (!props.git.repositoryUrl || !props.git.branch) {
       return false;
     }
+  }
+
+  if (!props.siteSettings.siteName.trim()) {
+    return false;
   }
 
   return true;
@@ -102,6 +121,11 @@ const canSubmit = computed(() => {
           :value="admin.passwordConfirmation"
         />
       </template>
+      <input type="hidden" name="site_name" :value="siteSettings.siteName" />
+      <input type="hidden" name="site_tagline" :value="siteSettings.siteTagline" />
+      <input type="hidden" name="show_footer" :value="siteSettings.showFooter" />
+      <input type="hidden" name="footer_text" :value="siteSettings.footerText" />
+      <input type="hidden" name="meta_robots" :value="siteSettings.metaRobots" />
 
       <Card class="overflow-hidden rounded-xl border-0 shadow-lg">
         <CardContent class="p-0">
@@ -210,6 +234,55 @@ const canSubmit = computed(() => {
               <InputError :message="errors.git_branch" class="mt-2" />
             </div>
           </template>
+
+          <Separator />
+
+          <!-- Site Settings Summary -->
+          <div class="p-6">
+            <div class="mb-4 flex items-center gap-2">
+              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
+                <Building2 class="h-4 w-4 text-purple-500" />
+              </div>
+              <h3 class="font-semibold">Site Settings</h3>
+            </div>
+            <div class="space-y-3 rounded-lg bg-muted/50 p-4">
+              <div class="flex items-center gap-3">
+                <Type class="h-4 w-4 text-muted-foreground" />
+                <span class="text-sm text-muted-foreground">Site Name</span>
+                <span class="ml-auto text-sm font-medium">{{ siteSettings.siteName }}</span>
+              </div>
+              <div v-if="siteSettings.siteTagline" class="flex items-center gap-3">
+                <Type class="h-4 w-4 text-muted-foreground" />
+                <span class="text-sm text-muted-foreground">Tagline</span>
+                <span class="ml-auto text-sm font-medium">{{ siteSettings.siteTagline }}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <PanelBottom class="h-4 w-4 text-muted-foreground" />
+                <span class="text-sm text-muted-foreground">Footer</span>
+                <Badge
+                  :variant="siteSettings.showFooter ? 'default' : 'secondary'"
+                  class="ml-auto text-xs"
+                >
+                  {{ siteSettings.showFooter ? 'Enabled' : 'Disabled' }}
+                </Badge>
+              </div>
+              <div class="flex items-center gap-3">
+                <Globe class="h-4 w-4 text-muted-foreground" />
+                <span class="text-sm text-muted-foreground">Search Engines</span>
+                <Badge
+                  :class="
+                    siteSettings.metaRobots === 'index'
+                      ? 'bg-green-500/10 text-green-600'
+                      : 'bg-orange-500/10 text-orange-600'
+                  "
+                  class="ml-auto text-xs"
+                >
+                  {{ siteSettings.metaRobots === 'index' ? 'Indexed' : 'Not Indexed' }}
+                </Badge>
+              </div>
+            </div>
+            <InputError :message="errors.site_name" class="mt-2" />
+          </div>
         </CardContent>
       </Card>
 

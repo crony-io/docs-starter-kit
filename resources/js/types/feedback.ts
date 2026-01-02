@@ -1,11 +1,22 @@
+/**
+ * Structured form_data that includes responses and field definitions snapshot
+ */
+export interface StructuredFormData {
+  form_name: string | null;
+  fields: FeedbackFormField[];
+  responses: Record<string, unknown>;
+}
+
 export interface FeedbackResponse {
   id: number;
   page_id: number;
   feedback_form_id: number | null;
   is_helpful: boolean;
-  form_data: Record<string, unknown> | null;
-  ip_address: string;
+  form_data: StructuredFormData | null;
+  ip_address: string | null;
+  user_agent: string | null;
   created_at: string;
+  updated_at: string;
   page?: { id: number; title: string; slug: string };
   feedback_form?: { id: number; name: string };
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Models\SystemConfig;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -44,6 +45,11 @@ class SetupController extends Controller
             'git_access_token' => 'nullable|string',
             'git_webhook_secret' => 'nullable|string',
             'git_sync_frequency' => 'nullable|integer|min:5',
+            'site_name' => 'required|string|max:100',
+            'site_tagline' => 'nullable|string|max:200',
+            'show_footer' => 'required',
+            'footer_text' => 'nullable|string|max:500',
+            'meta_robots' => 'required|string|in:index,noindex',
         ];
 
         // Add user validation rules if no users exist
@@ -85,6 +91,13 @@ class SetupController extends Controller
         if ($validated['content_mode'] === 'git') {
             \App\Jobs\SyncGitRepositoryJob::dispatch();
         }
+
+        // Save site settings
+        Setting::set('branding_site_name', $validated['site_name'], 'branding');
+        Setting::set('branding_site_tagline', $validated['site_tagline'] ?? '', 'branding');
+        Setting::set('layout_show_footer', filter_var($validated['show_footer'], FILTER_VALIDATE_BOOLEAN), 'layout');
+        Setting::set('layout_footer_text', $validated['footer_text'] ?? '', 'layout');
+        Setting::set('advanced_meta_robots', $validated['meta_robots'], 'advanced');
 
         return redirect()->route('dashboard')
             ->with('success', 'Setup completed successfully!');

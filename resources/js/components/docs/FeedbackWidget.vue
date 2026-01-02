@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DynamicFormField from '@/components/docs/DynamicFormField.vue';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { store as feedbackStore } from '@/routes/feedback';
 import type { FeedbackForm, FeedbackFormField } from '@/types/feedback';
 import { useForm } from '@inertiajs/vue3';
@@ -17,6 +18,7 @@ const props = defineProps<Props>();
 const feedbackState = ref<'idle' | 'form' | 'submitted'>('idle');
 const isHelpful = ref<boolean | null>(null);
 const formData = reactive<Record<string, string | number | string[]>>({});
+const defaultComment = ref('');
 
 interface FeedbackFormData {
   page_id: number;
@@ -50,7 +52,9 @@ const handleVote = (helpful: boolean) => {
   isHelpful.value = helpful;
   form.is_helpful = helpful;
 
+  // Reset form data
   Object.keys(formData).forEach((key) => delete formData[key]);
+  defaultComment.value = '';
 
   if (activeForm.value) {
     form.feedback_form_id = activeForm.value.id;
@@ -63,8 +67,16 @@ const handleVote = (helpful: boolean) => {
 };
 
 const submitFeedback = () => {
-  const hasData = Object.values(formData).some((v) => (Array.isArray(v) ? v.length > 0 : v !== ''));
-  form.form_data = hasData ? { ...formData } : null;
+  // If using custom form, use formData; otherwise use defaultComment
+  if (activeForm.value) {
+    const hasData = Object.values(formData).some((v) =>
+      Array.isArray(v) ? v.length > 0 : v !== '',
+    );
+    form.form_data = hasData ? { ...formData } : null;
+  } else {
+    // No custom form - use default comment field
+    form.form_data = defaultComment.value.trim() ? { comment: defaultComment.value.trim() } : null;
+  }
 
   form.post(feedbackStore.url(), {
     preserveScroll: true,
@@ -99,12 +111,26 @@ const submitFeedback = () => {
         }}
       </p>
       <div class="w-full max-w-md space-y-4">
+        <!-- Custom form fields -->
         <template v-if="activeForm">
           <DynamicFormField
             v-for="(field, index) in activeForm.fields"
             :key="index"
             :field="field"
             v-model="formData[field.label]"
+          />
+        </template>
+        <!-- Default comment textarea when no form exists -->
+        <template v-else>
+          <Textarea
+            v-model="defaultComment"
+            :placeholder="
+              isHelpful
+                ? 'Tell us what you found helpful...'
+                : 'Tell us how we can improve this page...'
+            "
+            rows="3"
+            class="resize-none"
           />
         </template>
         <div class="flex justify-center gap-2">

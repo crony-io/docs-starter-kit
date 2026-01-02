@@ -20,7 +20,7 @@ class FeedbackController extends Controller
     public function index(Request $request): Response
     {
         $query = FeedbackResponse::query()
-            ->with(['page:id,title,slug', 'feedbackForm:id,name']);
+            ->with(['page:id,title,slug']);
 
         $this->applyFilters($query, $request);
 
@@ -87,7 +87,7 @@ class FeedbackController extends Controller
     public function export(Request $request): StreamedResponse|JsonResponse
     {
         $query = FeedbackResponse::query()
-            ->with(['page:id,title,slug', 'feedbackForm:id,name']);
+            ->with(['page:id,title,slug']);
 
         $this->applyFilters($query, $request);
 
@@ -115,18 +115,21 @@ class FeedbackController extends Controller
                 'Page',
                 'Is Helpful',
                 'Form Name',
-                'Form Data',
+                'Responses',
                 'IP Address',
                 'Date',
             ]);
 
             foreach ($responses as $response) {
+                $formName = $response->form_data['form_name'] ?? 'Default';
+                $responses_data = $response->form_data['responses'] ?? [];
+
                 fputcsv($file, [
                     $response->id,
                     $response->page?->title ?? 'N/A',
                     $response->is_helpful ? 'Yes' : 'No',
-                    $response->feedbackForm?->name ?? 'N/A',
-                    json_encode($response->form_data),
+                    $formName,
+                    json_encode($responses_data),
                     $response->ip_address,
                     $response->created_at->format('Y-m-d H:i:s'),
                 ]);

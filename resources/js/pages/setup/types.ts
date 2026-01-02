@@ -1,4 +1,4 @@
-export type SetupStep = 'admin' | 'mode' | 'git-config' | 'review';
+export type SetupStep = 'admin' | 'mode' | 'git-config' | 'site-settings' | 'review';
 export type ContentMode = 'git' | 'cms';
 
 export interface AdminFormData {
@@ -16,10 +16,19 @@ export interface GitConfigData {
   webhookSecret: string;
 }
 
+export interface SiteSettingsData {
+  siteName: string;
+  siteTagline: string;
+  showFooter: boolean;
+  footerText: string;
+  metaRobots: 'index' | 'noindex';
+}
+
 export interface SetupFormData {
   contentMode: ContentMode | null;
   admin: AdminFormData;
   git: GitConfigData;
+  siteSettings: SiteSettingsData;
 }
 
 export interface ConnectionTestResult {
