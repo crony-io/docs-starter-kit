@@ -50,9 +50,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('docs:sync')
             ->everyMinute()
             ->when(function () {
-                if (! config('docs.git_enabled', true)) {
-                    return false;
-                }
 
                 if (! SystemConfig::isGitMode()) {
                     return false;

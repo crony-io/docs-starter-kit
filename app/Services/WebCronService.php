@@ -23,15 +23,18 @@ class WebCronService
             'jobs_processed' => 0,
         ];
 
+        // Always use sync for queue (more reliable on Windows/shared hosting)
+        // Scheduler can use async if supported
         if ($this->isAsyncSupported()) {
             $results['scheduler'] = $this->runSchedulerAsync();
-            $results['queue'] = $this->runQueueAsync();
         } else {
             $results['scheduler'] = $this->runSchedulerSync();
-            $queueResult = $this->runQueueSync();
-            $results['queue'] = $queueResult['success'];
-            $results['jobs_processed'] = $queueResult['processed'];
         }
+
+        // Always process queue synchronously for reliability
+        $queueResult = $this->runQueueSync();
+        $results['queue'] = $queueResult['success'];
+        $results['jobs_processed'] = $queueResult['processed'];
 
         return $results;
     }
@@ -113,13 +116,17 @@ class WebCronService
             $stopWhenEmpty = '--stop-when-empty';
             $maxTime = '--max-time=60';
 
+            // Process all queues in priority order
+            $queues = $this->getActiveQueues();
+            $queueArg = count($queues) > 0 ? '--queue='.implode(',', $queues) : '';
+
             if (DIRECTORY_SEPARATOR === '\\') {
                 // Windows: use popen for true background execution
-                $command = sprintf('start /B %s %s queue:work %s %s', $phpBinary, $artisan, $stopWhenEmpty, $maxTime);
+                $command = sprintf('start /B %s %s queue:work %s %s %s', $phpBinary, $artisan, $queueArg, $stopWhenEmpty, $maxTime);
                 pclose(popen($command, 'r'));
             } else {
                 // Unix: redirect output and background
-                $command = sprintf('%s %s queue:work %s %s >> /dev/null 2>&1 &', $phpBinary, $artisan, $stopWhenEmpty, $maxTime);
+                $command = sprintf('%s %s queue:work %s %s %s >> /dev/null 2>&1 &', $phpBinary, $artisan, $queueArg, $stopWhenEmpty, $maxTime);
                 exec($command);
             }
 
@@ -171,9 +178,14 @@ class WebCronService
 
         try {
             $startTime = time();
-            $queue = app('queue');
-            $connection = $queue->connection();
-            $queueName = config('queue.connections.'.config('queue.default').'.queue', 'default');
+            $queueManager = app('queue');
+            $connection = $queueManager->connection();
+
+            // Get all active queue names in priority order
+            $queueNames = $this->getActiveQueues();
+            if (empty($queueNames)) {
+                $queueNames = [config('queue.connections.'.config('queue.default').'.queue', 'default')];
+            }
 
             for ($i = 0; $i < $maxJobs; $i++) {
                 // Check time limit
@@ -185,11 +197,16 @@ class WebCronService
                     break;
                 }
 
-                // Get next job
-                $job = $connection->pop($queueName);
+                // Try to get a job from any queue (in priority order)
+                $job = null;
+                foreach ($queueNames as $queueName) {
+                    $job = $connection->pop($queueName);
+                    if ($job !== null) {
+                        break;
+                    }
+                }
 
                 if ($job === null) {
-                    // No more jobs in queue
                     break;
                 }
 
@@ -200,6 +217,7 @@ class WebCronService
                     Log::error('Web-cron: Job processing failed', [
                         'job' => get_class($job),
                         'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
                     ]);
                     // Release job back to queue for retry
                     $job->release(60);
@@ -209,6 +227,7 @@ class WebCronService
         } catch (\Exception $e) {
             Log::error('Web-cron: Queue processing failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             $result['success'] = false;
         }
@@ -290,6 +309,40 @@ class WebCronService
             return DB::table('failed_jobs')->count();
         } catch (\Exception) {
             return -1;
+        }
+    }
+
+    private function getActiveQueues(): array
+    {
+        try {
+            // Get distinct queue names from jobs table, ordered by priority
+            $queues = DB::table('jobs')
+                ->select('queue')
+                ->distinct()
+                ->pluck('queue')
+                ->toArray();
+
+            // Sort with high-priority first
+            usort($queues, function ($a, $b) {
+                if ($a === 'high-priority') {
+                    return -1;
+                }
+                if ($b === 'high-priority') {
+                    return 1;
+                }
+                if ($a === 'default') {
+                    return 1;
+                }
+                if ($b === 'default') {
+                    return -1;
+                }
+
+                return strcmp($a, $b);
+            });
+
+            return $queues;
+        } catch (\Exception) {
+            return ['default'];
         }
     }
 

@@ -136,6 +136,9 @@ class GitSyncService
         // Set meta data on importer for use during import
         $this->importer->setMetaData($metaData);
 
+        // Update existing navigation/group ordering from meta data
+        $this->importer->updateNavigationOrdering();
+
         // Get all markdown files
         $markdownFiles = collect($tree)
             ->filter(fn ($item) => str_ends_with($item['path'], '.md'))
@@ -193,6 +196,9 @@ class GitSyncService
 
         // Set meta data on importer for use during import
         $this->importer->setMetaData($metaData);
+
+        // Update existing navigation/group ordering from meta data
+        $this->importer->updateNavigationOrdering();
 
         $processedPaths = [];
         $deletedPaths = [];

@@ -72,7 +72,7 @@ class WebhookController extends Controller
         }
 
         $payload = $request->getContent();
-        $expectedSignature = 'sha256='.hash_hmac('sha256', $payload, $secret);
+        $expectedSignature = 'sha256='.hash_hmac('sha256', $payload, (string) $secret);
 
         return hash_equals($expectedSignature, $signature);
     }

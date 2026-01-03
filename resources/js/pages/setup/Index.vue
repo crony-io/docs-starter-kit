@@ -14,7 +14,7 @@ import type {
   SiteSettingsData,
 } from '@/pages/setup/types';
 import { Head } from '@inertiajs/vue3';
-import { computed, reactive } from 'vue';
+import { computed, nextTick, reactive } from 'vue';
 
 interface StepInfo {
   id: SetupStep;
@@ -78,26 +78,37 @@ const visibleSteps = computed(() => {
 
 const currentStepIndex = computed(() => visibleSteps.value.findIndex((s) => s.id === step.current));
 
+const scrollToTop = () => {
+  nextTick(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+};
+
+const goToStep = (newStep: SetupStep) => {
+  step.current = newStep;
+  scrollToTop();
+};
+
 const handleModeSelect = (mode: ContentMode) => {
   contentMode.value = mode;
   if (mode === 'cms') {
-    step.current = 'site-settings';
+    goToStep('site-settings');
   } else {
-    step.current = 'git-config';
+    goToStep('git-config');
   }
 };
 
 const goBack = () => {
   if (step.current === 'git-config') {
-    step.current = 'mode';
+    goToStep('mode');
   } else if (step.current === 'site-settings' && contentMode.value === 'cms') {
-    step.current = 'mode';
+    goToStep('mode');
   } else if (step.current === 'site-settings' && contentMode.value === 'git') {
-    step.current = 'git-config';
+    goToStep('git-config');
   } else if (step.current === 'review') {
-    step.current = 'site-settings';
+    goToStep('site-settings');
   } else if (step.current === 'mode' && !props.hasUsers) {
-    step.current = 'admin';
+    goToStep('admin');
   }
 };
 </script>
@@ -112,7 +123,7 @@ const goBack = () => {
     <AdminAccountStep
       v-if="step.current === 'admin' && !hasUsers"
       v-model="adminForm"
-      @continue="step.current = 'mode'"
+      @continue="goToStep('mode')"
     />
 
     <!-- Step 2: Content Mode Selection -->
@@ -121,22 +132,22 @@ const goBack = () => {
       v-model="contentMode.value"
       :show-back-button="!hasUsers"
       @select="handleModeSelect"
-      @back="step.current = 'admin'"
+      @back="goToStep('admin')"
     />
 
     <!-- Step 3: Git Configuration -->
     <GitConfigStep
       v-if="step.current === 'git-config'"
       v-model="gitConfig"
-      @continue="step.current = 'site-settings'"
-      @back="step.current = 'mode'"
+      @continue="goToStep('site-settings')"
+      @back="goToStep('mode')"
     />
 
     <!-- Step 4: Site Settings -->
     <SiteSettingsStep
       v-if="step.current === 'site-settings'"
       v-model="siteSettings"
-      @continue="step.current = 'review'"
+      @continue="goToStep('review')"
       @back="goBack"
     />
 

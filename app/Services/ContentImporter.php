@@ -63,6 +63,48 @@ class ContentImporter
         return $this->pageImporterService->cleanupMissingPages('git', $currentGitPaths);
     }
 
+    public function updateNavigationOrdering(): void
+    {
+        // Update navigation tabs and groups from _meta.json files
+        foreach ($this->metaData as $path => $meta) {
+            if ($path === '_root') {
+                continue;
+            }
+
+            // Extract slug from path (e.g., 'docs/documentation' => 'documentation')
+            $slug = basename($path);
+
+            // Update navigation tab if this is a root-level _meta.json (e.g., docs/documentation)
+            $pathParts = explode('/', $path);
+            if (count($pathParts) === 2 && $pathParts[0] === 'docs') {
+                // This is a navigation tab's _meta.json
+                Page::where('slug', $slug)
+                    ->where('type', 'navigation')
+                    ->where('source', 'git')
+                    ->update([
+                        'order' => $meta['order'] ?? 0,
+                        'title' => $meta['title'] ?? null,
+                        'seo_description' => $meta['description'] ?? null,
+                        'icon' => $meta['icon'] ?? null,
+                        'is_default' => $meta['is_default'] ?? false,
+                    ]);
+            }
+
+            // Update child items (groups/documents) from the items array
+            if (isset($meta['items'])) {
+                foreach ($meta['items'] as $itemSlug => $itemMeta) {
+                    Page::where('slug', $itemSlug)
+                        ->where('source', 'git')
+                        ->whereIn('type', ['group', 'document'])
+                        ->update([
+                            'order' => $itemMeta['order'] ?? 0,
+                            'title' => $itemMeta['title'] ?? null,
+                        ]);
+                }
+            }
+        }
+    }
+
     public function cleanupOrphanedPages(): array
     {
         return $this->pageImporterService->cleanupOrphanedContainers('git');
@@ -121,26 +163,13 @@ class ContentImporter
 
     private function getNavigationMeta(string $slug): array
     {
-        $result = [];
-
-        // First get data from the navigation's own _meta.json (has title, description, icon, is_default)
+        // Get data from the navigation's own _meta.json
         $metaPath = 'docs/'.$slug;
         if (isset($this->metaData[$metaPath])) {
-            $result = $this->metaData[$metaPath];
+            return $this->metaData[$metaPath];
         }
 
-        // Then merge/override with docs-config.json navigation array (has ordering)
-        if (isset($this->metaData['_root']['navigation'])) {
-            foreach ($this->metaData['_root']['navigation'] as $nav) {
-                if (($nav['slug'] ?? '') === $slug) {
-                    // Merge: docs-config.json order takes precedence
-                    $result = array_merge($result, $nav);
-                    break;
-                }
-            }
-        }
-
-        return $result;
+        return [];
     }
 
     private function getGroupMeta(array $currentPath, string $segment): array
