@@ -15,16 +15,9 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { show } from '@/routes/docs';
+import type { NavigationTab } from '@/types/docs';
 import { Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
-
-interface NavigationTab {
-  id: number;
-  title: string;
-  slug: string;
-  icon: string | null;
-  is_default: boolean;
-}
 
 interface Props {
   tabs: NavigationTab[];

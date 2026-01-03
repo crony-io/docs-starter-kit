@@ -37,23 +37,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PaginationLink, User } from '@/types';
 import { Form, Head, Link, router } from '@inertiajs/vue3';
 import { Pencil, Trash2, UserPlus } from 'lucide-vue-next';
 import { ref } from 'vue';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  created_at: string;
-}
-
-interface PaginationLink {
-  url: string | null;
-  label: string;
-  active: boolean;
-}
 
 interface Props {
   users: {

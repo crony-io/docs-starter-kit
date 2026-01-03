@@ -18,6 +18,11 @@ return new class extends Migration
             $table->unsignedInteger('git_sync_frequency')->default(15);
             $table->timestamp('last_synced_at')->nullable();
             $table->boolean('setup_completed')->default(false);
+
+            // Web-Cron columns (global scheduler)
+            $table->boolean('web_cron_enabled')->default(false);
+            $table->timestamp('last_web_cron_at')->nullable();
+
             $table->timestamps();
         });
     }

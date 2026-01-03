@@ -195,32 +195,13 @@ class GitSyncService
 
         // Clean up orphaned groups/navigation pages
         if (count($deletedPaths) > 0) {
-            $this->cleanupOrphanedPages();
+            $this->importer->cleanupOrphanedPages();
         }
 
         return [
             'processed' => $processedPaths,
             'deleted' => $deletedPaths,
         ];
-    }
-
-    private function cleanupOrphanedPages(): void
-    {
-        // Remove groups with no children
-        do {
-            $deletedGroups = Page::query()
-                ->where('source', 'git')
-                ->where('type', 'group')
-                ->whereDoesntHave('children')
-                ->delete();
-        } while ($deletedGroups > 0);
-
-        // Remove navigation tabs with no children
-        Page::query()
-            ->where('source', 'git')
-            ->where('type', 'navigation')
-            ->whereDoesntHave('children')
-            ->delete();
     }
 
     public function rollback(GitSync $sync): void

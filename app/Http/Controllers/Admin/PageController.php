@@ -285,14 +285,14 @@ class PageController extends Controller
         }
 
         // Documents cannot be at root level
-        if ($page->type === 'document' && !$newParentId) {
+        if ($page->type === 'document' && ! $newParentId) {
             return back()->with('error', 'Documents must be inside a navigation or group.');
         }
 
         if ($newParentId) {
             $newParent = Page::find($newParentId);
 
-            if (!$newParent) {
+            if (! $newParent) {
                 return back()->with('error', 'Target parent not found.');
             }
 

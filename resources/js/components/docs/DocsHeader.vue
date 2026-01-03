@@ -12,6 +12,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAppearance } from '@/composables/useAppearance';
 import { dashboard } from '@/routes';
 import type { SiteSettings } from '@/types';
+import type { NavigationTab } from '@/types/docs';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Monitor, Moon, Sun } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -20,14 +21,6 @@ const page = usePage();
 const siteSettings = computed(() => page.props.siteSettings as SiteSettings | undefined);
 const darkModeSetting = computed(() => siteSettings.value?.theme?.darkMode ?? 'system');
 const canToggleTheme = computed(() => darkModeSetting.value === 'system');
-
-interface NavigationTab {
-  id: number;
-  title: string;
-  slug: string;
-  icon: string | null;
-  is_default: boolean;
-}
 
 interface Props {
   navigationTabs: NavigationTab[];

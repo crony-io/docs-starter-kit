@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import { SettingsNav, SwitchField } from '@/components/settings';
+import { SettingsNav, SwitchField, WebCronSettings } from '@/components/settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,9 +21,13 @@ import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, RotateCcw, Save } from 'lucide-vue-next';
 
+import type { ServerCompatibility, WebCronSettings as WebCronSettingsType } from '@/types/web-cron';
+
 interface Props {
   settings: Record<string, unknown>;
   defaults: Record<string, unknown>;
+  webCron: WebCronSettingsType;
+  serverCheck: ServerCompatibility;
 }
 
 const props = defineProps<Props>();
@@ -74,6 +78,7 @@ const form = useForm({
   code_line_numbers: toBool(
     props.settings.advanced_code_line_numbers ?? props.defaults.code_line_numbers,
   ),
+  web_cron_enabled: props.webCron.web_cron_enabled,
 });
 
 const submit = () => {
@@ -92,6 +97,7 @@ const resetToDefaults = () => {
   form.meta_robots = String(props.defaults.meta_robots);
   form.code_copy_button = toBool(props.defaults.code_copy_button);
   form.code_line_numbers = toBool(props.defaults.code_line_numbers);
+  form.web_cron_enabled = false;
 };
 </script>
 
@@ -263,6 +269,12 @@ const resetToDefaults = () => {
                 />
               </CardContent>
             </Card>
+
+            <WebCronSettings
+              v-model="form.web_cron_enabled"
+              :last-web-cron-at="webCron.last_web_cron_at"
+              :server-check="serverCheck"
+            />
 
             <div class="flex gap-3">
               <Button

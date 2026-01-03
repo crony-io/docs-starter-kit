@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import DocsBreadcrumb from '@/components/docs/DocsBreadcrumb.vue';
 import DocsContent from '@/components/docs/DocsContent.vue';
-import type { SidebarItem } from '@/components/docs/DocsNavigation.vue';
 import DocsTableOfContents from '@/components/docs/DocsTableOfContents.vue';
 import FeedbackWidget from '@/components/docs/FeedbackWidget.vue';
 import { useCspNonce } from '@/composables/useCspNonce';
 import DocsLayout from '@/layouts/DocsLayout.vue';
 import type { SiteSettings } from '@/types';
+import type { BreadcrumbItem, NavigationTab, SidebarItem, TocItem } from '@/types/docs';
 import type { FeedbackForm } from '@/types/feedback';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted } from 'vue';
@@ -15,14 +15,6 @@ const cspNonce = useCspNonce();
 
 const page = usePage();
 const siteSettings = computed(() => page.props.siteSettings as SiteSettings | undefined);
-
-interface NavigationTab {
-  id: number;
-  title: string;
-  slug: string;
-  icon: string | null;
-  is_default: boolean;
-}
 
 interface CurrentPage {
   id: number;
@@ -40,18 +32,6 @@ interface CurrentPage {
   git_last_author?: string | null;
   edit_on_github_url?: string | null;
   canonical_url?: string | null;
-}
-
-interface TocItem {
-  id: string;
-  text: string;
-  level: number;
-}
-
-interface BreadcrumbItem {
-  title: string;
-  path: string;
-  type: 'navigation' | 'group' | 'document';
 }
 
 interface Props {

@@ -3,14 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { vCspStyle } from '@/directives/vCspStyle';
 import { cn } from '@/lib/utils';
+import type { TocItem } from '@/types/docs';
 import { List } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-
-interface TocItem {
-  id: string;
-  text: string;
-  level: number;
-}
 
 interface Props {
   items: TocItem[];

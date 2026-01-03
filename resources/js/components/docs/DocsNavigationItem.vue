@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { SidebarItem } from '@/components/docs/DocsNavigation.vue';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarMenuButton,
@@ -8,6 +7,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
+import type { SidebarItem } from '@/types/docs';
 import { Link } from '@inertiajs/vue3';
 import { ChevronRight } from 'lucide-vue-next';
 import { computed, ref } from 'vue';

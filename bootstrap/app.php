@@ -5,7 +5,7 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\LogUserActivity;
 use App\Http\Middleware\SetupMiddleware;
-use App\Models\GitSync;
+use App\Http\Middleware\WebCronMiddleware;
 use App\Models\SystemConfig;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -13,7 +13,6 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Spatie\Csp\AddCspHeaders;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             LogUserActivity::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            WebCronMiddleware::class,
         ]);
 
     })
@@ -77,13 +77,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $config->last_synced_at->diffInMinutes(now()) >= $frequency;
             })
             ->withoutOverlapping()
-            ->runInBackground()
-            ->onFailure(function () {
-                Log::error('Scheduled git sync failed');
-            })
-            ->onSuccess(function () {
-                Log::info('Scheduled git sync completed');
-            });
+            ->runInBackground();
 
         // Generate LLM files daily
         $schedule->command('docs:generate-llm')
@@ -92,23 +86,19 @@ return Application::configure(basePath: dirname(__DIR__))
             ->withoutOverlapping();
 
         // Clean old git syncs (keep last 100)
-        $schedule->call(function () {
-            GitSync::orderBy('created_at', 'desc')
-                ->skip(100)
-                ->delete();
-        })->weekly()->sundays()->at('03:00');
+        $schedule->command('git-sync:cleanup')
+            ->weekly()
+            ->sundays()
+            ->at('03:00');
 
         // Anonymize old IP addresses for GDPR compliance (runs daily at 3:30 AM)
         $schedule->command('privacy:anonymize-ips --days=30')
             ->daily()
             ->at('03:30')
-            ->withoutOverlapping()
-            ->onSuccess(function () {
-                Log::info('Scheduled IP anonymization completed');
-            })
-            ->onFailure(function () {
-                Log::error('Scheduled IP anonymization failed');
-            });
+            ->withoutOverlapping();
+
+        // Clean expired sessions (runs daily at 4:00 AM)
+        $schedule->command('session:clean')->daily()->at('04:00');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {

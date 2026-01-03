@@ -46,14 +46,9 @@ class GitSync extends Model
         return $query->latest()->limit($limit);
     }
 
-    public function isSuccessful(): bool
-    {
-        return $this->sync_status === 'success';
-    }
-
     public function isSuccess(): bool
     {
-        return $this->isSuccessful();
+        return $this->sync_status === 'success';
     }
 
     public function isFailed(): bool

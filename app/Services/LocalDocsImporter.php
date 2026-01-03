@@ -10,13 +10,16 @@ class LocalDocsImporter
 {
     private MarkdownParser $parser;
 
+    private PageImporterService $pageImporterService;
+
     private string $basePath;
 
     private array $metaCache = [];
 
-    public function __construct(MarkdownParser $parser)
+    public function __construct(MarkdownParser $parser, PageImporterService $pageImporterService)
     {
         $this->parser = $parser;
+        $this->pageImporterService = $pageImporterService;
         $this->basePath = base_path('docs');
     }
 
@@ -53,16 +56,18 @@ class LocalDocsImporter
         $navSlug = basename($navDir);
         $navMeta = $this->loadMeta($navDir);
 
-        $navigation = Page::create([
-            'title' => $navMeta['title'] ?? Str::title(str_replace('-', ' ', $navSlug)),
-            'slug' => $navSlug,
-            'type' => 'navigation',
+        $attributes = [
             'icon' => $navMeta['icon'] ?? 'file-text',
-            'status' => 'published',
             'order' => $navMeta['order'] ?? 0,
             'is_default' => $navMeta['is_default'] ?? false,
             'source' => 'cms',
-        ]);
+        ];
+
+        if (isset($navMeta['title'])) {
+            $attributes['title'] = $navMeta['title'];
+        }
+
+        $navigation = $this->pageImporterService->syncNavigation($navSlug, $attributes);
 
         $stats['navigation']++;
 
@@ -102,19 +107,22 @@ class LocalDocsImporter
 
         $itemMeta = $parentMeta['items'][$groupSlug] ?? [];
         $order = $itemMeta['order'] ?? $groupMeta['order'] ?? 0;
-        $title = $itemMeta['title'] ?? $groupMeta['title'] ?? Str::title(str_replace('-', ' ', $groupSlug));
 
-        $group = Page::create([
-            'title' => $title,
-            'slug' => $groupSlug,
-            'type' => 'group',
+        $attributes = [
             'icon' => $groupMeta['icon'] ?? null,
-            'parent_id' => $parent->id,
-            'status' => 'published',
             'order' => $order,
             'is_expanded' => $groupMeta['is_expanded'] ?? true,
             'source' => 'cms',
-        ]);
+        ];
+
+        // Priority: parent item meta > group meta > default (null, handled by service)
+        if (isset($itemMeta['title'])) {
+            $attributes['title'] = $itemMeta['title'];
+        } elseif (isset($groupMeta['title'])) {
+            $attributes['title'] = $groupMeta['title'];
+        }
+
+        $group = $this->pageImporterService->syncGroup($groupSlug, $parent, $attributes);
 
         $stats['groups']++;
 
@@ -134,11 +142,8 @@ class LocalDocsImporter
 
         $status = $parsed['status'] ?? 'published';
 
-        Page::create([
+        $this->pageImporterService->syncDocument($filename, $parent, [
             'title' => $title,
-            'slug' => $filename,
-            'type' => 'document',
-            'parent_id' => $parent->id,
             'content' => $parsed['content'],
             'status' => $status,
             'order' => $order,

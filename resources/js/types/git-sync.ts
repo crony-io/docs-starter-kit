@@ -23,3 +23,16 @@ export interface SystemConfig {
   setup_completed: boolean;
   webhook_url: string;
 }
+
+export interface GitSyncStatus {
+  enabled: boolean;
+  lastSync: {
+    status: 'success' | 'failed' | 'in_progress';
+    commitHash: string | null;
+    commitMessage: string | null;
+    syncedAt: string | null;
+    filesChanged: number;
+    error: string | null;
+  } | null;
+  lastSyncedAt: string | null;
+}

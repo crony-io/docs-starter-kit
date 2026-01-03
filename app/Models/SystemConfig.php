@@ -18,6 +18,8 @@ class SystemConfig extends Model
         'git_sync_frequency',
         'last_synced_at',
         'setup_completed',
+        'web_cron_enabled',
+        'last_web_cron_at',
     ];
 
     protected function casts(): array
@@ -28,6 +30,8 @@ class SystemConfig extends Model
             'last_synced_at' => 'datetime',
             'setup_completed' => 'boolean',
             'git_sync_frequency' => 'integer',
+            'web_cron_enabled' => 'boolean',
+            'last_web_cron_at' => 'datetime',
         ];
     }
 

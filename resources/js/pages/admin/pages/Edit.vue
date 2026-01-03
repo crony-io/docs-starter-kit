@@ -27,7 +27,8 @@ import {
   unpublish,
   update,
 } from '@/routes/admin/pages';
-import type { BreadcrumbItem, Page, PageType, PageVersion } from '@/types';
+import type { BreadcrumbItem } from '@/types';
+import type { Page, PageType, PageVersion } from '@/types/pages';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { useDebounceFn, useLocalStorage } from '@vueuse/core';
 import {

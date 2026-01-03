@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import DocsHeader from '@/components/docs/DocsHeader.vue';
-import type { SidebarItem } from '@/components/docs/DocsNavigation.vue';
 import DocsSidebar from '@/components/docs/DocsSidebar.vue';
 import SearchDialog from '@/components/SearchDialog.vue';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import type { SiteSettings } from '@/types';
+import type { NavigationTab, SidebarItem } from '@/types/docs';
 import { usePage } from '@inertiajs/vue3';
 import { computed, provide, ref } from 'vue';
 
@@ -15,14 +15,6 @@ const isOpen = page.props.sidebarOpen;
 const searchOpen = ref(false);
 
 provide('searchOpen', searchOpen);
-
-interface NavigationTab {
-  id: number;
-  title: string;
-  slug: string;
-  icon: string | null;
-  is_default: boolean;
-}
 
 interface Props {
   navigationTabs: NavigationTab[];

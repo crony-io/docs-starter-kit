@@ -1,3 +1,5 @@
+import type { User } from '@/types';
+
 export type PageStatus = 'draft' | 'published' | 'archived';
 export type PageSource = 'cms' | 'git';
 export type PageType = 'navigation' | 'group' | 'document';
@@ -40,8 +42,11 @@ export interface Page {
   created_at: string;
   updated_at: string;
   full_path?: string;
+  author?: User;
+  parent?: Page;
   children?: Page[];
   children_count?: number;
+  versions?: PageVersion[];
 }
 
 export interface PageVersion {

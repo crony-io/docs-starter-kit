@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppLogo from '@/components/AppLogo.vue';
-import type { SidebarItem } from '@/components/docs/DocsNavigation.vue';
 import DocsNavigationItem from '@/components/docs/DocsNavigationItem.vue';
 import DiscordIcon from '@/components/icons/DiscordIcon.vue';
 import GithubIcon from '@/components/icons/GithubIcon.vue';
@@ -19,6 +18,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import type { SiteSettings } from '@/types';
+import type { SidebarItem } from '@/types/docs';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Download, Search } from 'lucide-vue-next';
 import { computed, inject, type Ref } from 'vue';

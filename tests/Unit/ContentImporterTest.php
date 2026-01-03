@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Page;
 use App\Services\ContentImporter;
+use App\Services\PageImporterService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +17,7 @@ class ContentImporterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->importer = new ContentImporter;
+        $this->importer = new ContentImporter(new PageImporterService);
     }
 
     public function test_import_creates_page_from_parsed_content()

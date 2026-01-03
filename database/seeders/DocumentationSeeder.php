@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Services\LocalDocsImporter;
 use App\Services\MarkdownParser;
+use App\Services\PageImporterService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 
@@ -12,7 +13,8 @@ class DocumentationSeeder extends Seeder
     public function run(): void
     {
         $parser = new MarkdownParser;
-        $importer = new LocalDocsImporter($parser);
+        $pageImporterService = new PageImporterService;
+        $importer = new LocalDocsImporter($parser, $pageImporterService);
 
         if (! $importer->hasDocumentation()) {
             Log::warning('No documentation found in docs directory. Skipping documentation seeding.');

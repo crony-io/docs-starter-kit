@@ -2,9 +2,7 @@
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import FeedbackChart from '@/components/dashboard/FeedbackChart.vue';
 import RecentPages from '@/components/dashboard/RecentPages.vue';
-import GitSyncStatusIndicator, {
-  type GitSyncStatus,
-} from '@/components/GitSyncStatusIndicator.vue';
+import GitSyncStatusIndicator from '@/components/GitSyncStatusIndicator.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -12,7 +10,9 @@ import { dashboard } from '@/routes';
 import { forms as feedbackForms } from '@/routes/admin/feedback';
 import { create as pagesCreate } from '@/routes/admin/pages';
 import { theme as settingsTheme } from '@/routes/admin/settings';
-import type { BreadcrumbItem, Page } from '@/types';
+import type { BreadcrumbItem } from '@/types';
+import type { GitSyncStatus } from '@/types/git-sync';
+import type { Page } from '@/types/pages';
 import { Head, Link } from '@inertiajs/vue3';
 import { FileText, FolderTree, MessageSquare, Plus, Settings } from 'lucide-vue-next';
 

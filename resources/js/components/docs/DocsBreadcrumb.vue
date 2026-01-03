@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import type { BreadcrumbItem } from '@/types/docs';
 import { computed } from 'vue';
-
-interface BreadcrumbItem {
-  title: string;
-  path: string;
-  type: 'navigation' | 'group' | 'document';
-}
 
 interface Props {
   items: BreadcrumbItem[];

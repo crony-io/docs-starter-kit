@@ -2,21 +2,9 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { index as gitSyncIndex } from '@/routes/admin/git-sync';
+import type { GitSyncStatus } from '@/types/git-sync';
 import { AlertCircle, CheckCircle2, GitBranch, Loader2, RefreshCw } from 'lucide-vue-next';
 import { computed } from 'vue';
-
-export interface GitSyncStatus {
-  enabled: boolean;
-  lastSync: {
-    status: 'success' | 'failed' | 'in_progress';
-    commitHash: string | null;
-    commitMessage: string | null;
-    syncedAt: string | null;
-    filesChanged: number;
-    error: string | null;
-  } | null;
-  lastSyncedAt: string | null;
-}
 
 interface Props {
   gitSyncStatus: GitSyncStatus | null;

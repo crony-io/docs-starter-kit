@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { index } from '@/routes/activity-logs';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, User } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import {
   AppWindow,
@@ -31,12 +31,6 @@ import {
 } from 'lucide-vue-next';
 import { UAParser } from 'ua-parser-js';
 import { computed } from 'vue';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
 
 interface IpInfo {
   ip?: string;

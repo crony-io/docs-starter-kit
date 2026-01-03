@@ -8,6 +8,7 @@ use App\Models\SystemConfig;
 use App\Services\ContentImporter;
 use App\Services\GitSyncService;
 use App\Services\MarkdownParser;
+use App\Services\PageImporterService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -26,7 +27,7 @@ class GitSyncServiceTest extends TestCase
         parent::setUp();
 
         $this->parser = new MarkdownParser;
-        $this->importer = new ContentImporter;
+        $this->importer = new ContentImporter(new PageImporterService);
         $this->service = new GitSyncService($this->parser, $this->importer);
     }
 

@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\SystemConfig;
+use App\Services\WebCronService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -150,11 +153,18 @@ class SiteSettingsController extends Controller
         return back()->with('success', 'Branding settings updated.');
     }
 
-    public function advanced(): Response
+    public function advanced(WebCronService $webCronService): Response
     {
+        $config = SystemConfig::instance();
+
         return Inertia::render('admin/settings/Advanced', [
             'settings' => Setting::getByGroup('advanced'),
             'defaults' => $this->getAdvancedDefaults(),
+            'webCron' => [
+                'web_cron_enabled' => $config->web_cron_enabled,
+                'last_web_cron_at' => $config->last_web_cron_at?->toIso8601String(),
+            ],
+            'serverCheck' => $webCronService->getServerCompatibility(),
         ]);
     }
 
@@ -172,7 +182,16 @@ class SiteSettingsController extends Controller
             'meta_robots' => ['required', 'string', 'in:index,noindex'],
             'code_copy_button' => ['required', 'boolean'],
             'code_line_numbers' => ['required', 'boolean'],
+            'web_cron_enabled' => ['sometimes', 'boolean'],
         ]);
+
+        // Handle web_cron_enabled separately (stored in SystemConfig)
+        if (array_key_exists('web_cron_enabled', $validated)) {
+            $config = SystemConfig::instance();
+            $config->update(['web_cron_enabled' => $validated['web_cron_enabled']]);
+            Cache::forget('system_config');
+            unset($validated['web_cron_enabled']);
+        }
 
         foreach ($validated as $key => $value) {
             Setting::set("advanced_{$key}", $value, 'advanced');

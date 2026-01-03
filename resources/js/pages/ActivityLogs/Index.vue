@@ -16,16 +16,10 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { clean, exportMethod, index, show } from '@/routes/activity-logs';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PaginationLink, User } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Download, Filter, Trash2 } from 'lucide-vue-next';
 import { reactive, ref, watch } from 'vue';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
 
 interface ActivityLog {
   id: number;
@@ -57,12 +51,6 @@ interface FilterOptions {
   actions: string[];
   routes: string[];
   users: Record<number, string>;
-}
-
-interface PaginationLink {
-  url: string | null;
-  label: string;
-  active: boolean;
 }
 
 interface FilterValues {
