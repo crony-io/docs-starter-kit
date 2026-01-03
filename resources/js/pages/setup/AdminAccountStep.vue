@@ -58,7 +58,7 @@ const passwordStrength = computed(() => {
 
   const levels = [
     { level: 0, text: '', color: '' },
-    { level: 1, text: 'Weak', color: 'bg-red-500' },
+    { level: 1, text: 'Weak, better pick another one', color: 'bg-red-500' },
     { level: 2, text: 'Fair', color: 'bg-orange-500' },
     { level: 3, text: 'Good', color: 'bg-yellow-500' },
     { level: 4, text: 'Strong', color: 'bg-green-500' },
@@ -74,20 +74,20 @@ const passwordStrength = computed(() => {
         <User class="h-7 w-7 text-primary" />
       </div>
       <div>
-        <CardTitle class="text-2xl font-bold">Create Admin Account</CardTitle>
+        <CardTitle class="text-2xl font-bold">Create admin account</CardTitle>
         <CardDescription class="mt-2">
-          Set up your administrator account to get started
+          First, set up your administrator account to get started.
         </CardDescription>
       </div>
     </CardHeader>
     <CardContent class="space-y-5 px-8 pb-8">
       <div class="space-y-2">
-        <Label for="admin_name">Full Name</Label>
+        <Label for="admin_name">Full name</Label>
         <Input
           id="admin_name"
           :model-value="form.name"
           type="text"
-          placeholder="John Doe"
+          placeholder="Tony Black"
           required
           autofocus
           class="h-11"
@@ -96,7 +96,7 @@ const passwordStrength = computed(() => {
       </div>
 
       <div class="space-y-2">
-        <Label for="admin_email">Email Address</Label>
+        <Label for="admin_email">Email address</Label>
         <Input
           id="admin_email"
           :model-value="form.email"
@@ -155,7 +155,7 @@ const passwordStrength = computed(() => {
       </div>
 
       <div class="space-y-2">
-        <Label for="admin_password_confirmation">Confirm Password</Label>
+        <Label for="admin_password_confirmation">Confirm password</Label>
         <div class="relative">
           <Input
             id="admin_password_confirmation"

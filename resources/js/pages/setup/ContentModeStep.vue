@@ -21,17 +21,15 @@ const selectMode = (mode: ContentMode) => {
 };
 
 const gitFeatures = [
-  'Automatic sync from GitHub',
-  'Version control with Git',
   'Pull request workflow',
-  'Webhook support',
+  'Automatic sync from GitHub',
+  'Webhook support for GitHub Actions',
 ];
 
 const cmsFeatures = [
-  'Visual WYSIWYG editor',
-  'Drag & drop organization',
   'Built-in file manager',
-  'No Git knowledge needed',
+  'Drag & drop organization',
+  'No-code, visual WYSIWYG editor',
 ];
 </script>
 
@@ -43,8 +41,13 @@ const cmsFeatures = [
       >
         <Sparkles class="h-7 w-7 text-primary" />
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">Choose Content Mode</h1>
-      <p class="mt-2 text-muted-foreground">How do you want to manage your documentation?</p>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">
+        Now choose how to manage your content.
+      </h1>
+      <p class="mt-2 text-muted-foreground">
+        Pick one of these two Content Modes for updating and managing your documentation.
+        <br/>Which one works best for you and your team?
+      </p>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
@@ -79,13 +82,18 @@ const cmsFeatures = [
           </div>
           <div>
             <h3 class="text-lg font-semibold text-foreground">Git Mode</h3>
-            <Badge variant="secondary" class="mt-1 text-xs">For Developers</Badge>
+            <Badge variant="secondary" class="mt-1 text-xs">best for developers</Badge>
           </div>
         </div>
 
         <p class="mb-4 text-sm text-muted-foreground">
-          Sync documentation from your GitHub repository. Perfect for developers and teams using
-          version control.
+          This mode lets you sync your documentation by simply connecting your GitHub
+          repository. 
+          <br/>
+          Start writing, push your changes, and they will be automatically synced to your documentation. 
+        </p>
+        <p class="mb-4 text-sm text-muted-foreground">
+          Perfect for people who are most comfortable writing code, and using version control.
         </p>
 
         <ul class="mt-auto space-y-2">
@@ -131,12 +139,15 @@ const cmsFeatures = [
           </div>
           <div>
             <h3 class="text-lg font-semibold text-foreground">CMS Mode</h3>
-            <Badge variant="secondary" class="mt-1 text-xs">For Everyone</Badge>
+            <Badge variant="secondary" class="mt-1 text-xs">best for visual writers</Badge>
           </div>
         </div>
 
         <p class="mb-4 text-sm text-muted-foreground">
-          Visual editor with full admin panel. Perfect for non-technical teams and content writers.
+          This mode lets you format your text, drag & drop media files, and re-arrange your documentation pages as you like. All from an admin panel, without ever looking at a single line of code. 
+        </p>
+        <p class="mb-4 text-sm text-muted-foreground">
+          Perfect for non-technical teams, and content writers.
         </p>
 
         <ul class="mt-auto space-y-2">

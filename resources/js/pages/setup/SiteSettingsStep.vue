@@ -47,10 +47,10 @@ const isValid = computed(() => {
       >
         <Building2 class="h-7 w-7 text-primary" />
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">Site Settings</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">Now, configure your site settings.</h1>
       <p class="mt-2 text-muted-foreground">
-        Configure the identity and display options for your documentation site. You can change these
-        settings later from the admin panel.
+        This means to setup the identity and display options for your documentation site. You can change these
+        settings later.
       </p>
     </div>
 
@@ -62,34 +62,34 @@ const isValid = computed(() => {
               <Building2 class="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <CardTitle class="text-lg">Site Identity</CardTitle>
-              <CardDescription>Your site name and tagline</CardDescription>
+              <CardTitle class="text-lg">Docs site identity</CardTitle>
+              <CardDescription>You can think of this as the first impression of your documentation site</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="space-y-2">
-            <Label for="site_name">Site Name <span class="text-destructive">*</span></Label>
+            <Label for="site_name">Docs site name <span class="text-destructive">*</span></Label>
             <Input
               id="site_name"
               :model-value="form.siteName"
-              placeholder="My Documentation"
+              placeholder="My app's documentation"
               class="h-11"
               @update:model-value="updateField('siteName', $event as string)"
             />
           </div>
 
           <div class="space-y-2">
-            <Label for="site_tagline">Tagline</Label>
+            <Label for="site_tagline">Optional tagline</Label>
             <Input
               id="site_tagline"
               :model-value="form.siteTagline"
-              placeholder="Building great things together"
+              placeholder="e.g. Building great things together"
               class="h-11"
               @update:model-value="updateField('siteTagline', $event as string)"
             />
             <p class="text-xs text-muted-foreground">
-              A short description shown below your site name
+              You may add here a short description or catchphrase to be displayed below your site name
             </p>
           </div>
         </CardContent>
@@ -103,15 +103,15 @@ const isValid = computed(() => {
             </div>
             <div>
               <CardTitle class="text-lg">Footer</CardTitle>
-              <CardDescription>Configure footer content</CardDescription>
+              <CardDescription>You may like to have a footer configured</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="flex items-center justify-between">
             <div class="space-y-0.5">
-              <Label>Show Footer</Label>
-              <p class="text-sm text-muted-foreground">Display footer on documentation pages</p>
+              <Label>Show footer</Label>
+              <p class="text-sm text-muted-foreground">By activating this toggle, you will display a footer on your documentation site</p>
             </div>
             <Switch
               :checked="form.showFooter"
@@ -120,15 +120,15 @@ const isValid = computed(() => {
           </div>
 
           <div v-if="form.showFooter" class="space-y-2">
-            <Label for="footer_text">Footer Text</Label>
+            <Label for="footer_text">Footer text</Label>
             <Textarea
               id="footer_text"
               :model-value="form.footerText"
-              placeholder="© 2024 Your Company. All rights reserved."
+              placeholder="e.g. Your Company © 2026. All rights reserved."
               rows="2"
               @update:model-value="updateField('footerText', $event as string)"
             />
-            <p class="text-xs text-muted-foreground">Supports basic HTML tags</p>
+            <p class="text-xs text-muted-foreground">It also supports basic HTML tags</p>
           </div>
         </CardContent>
       </Card>
@@ -140,14 +140,14 @@ const isValid = computed(() => {
               <Globe class="h-5 w-5 text-orange-500" />
             </div>
             <div>
-              <CardTitle class="text-lg">Search Engine</CardTitle>
-              <CardDescription>Configure search engine indexing</CardDescription>
+              <CardTitle class="text-lg">Search engine indexing</CardTitle>
+              <CardDescription>You control whether search engines can index your documentation or not</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div class="space-y-2">
-            <Label>Search Engine Indexing</Label>
+            <Label>Which one do you prefer?</Label>
             <Select
               :model-value="form.metaRobots"
               @update:model-value="updateField('metaRobots', $event as 'index' | 'noindex')"
@@ -156,12 +156,12 @@ const isValid = computed(() => {
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="index">Index (allow search engines)</SelectItem>
-                <SelectItem value="noindex">No Index (block search engines)</SelectItem>
+                <SelectItem value="index">Index allowed (allow search engines)</SelectItem>
+                <SelectItem value="noindex">No index allowed (block search engines)</SelectItem>
               </SelectContent>
             </Select>
             <p class="text-xs text-muted-foreground">
-              Controls whether search engines can index your documentation
+              Control whether to allow or block search engines from indexing your documentation
             </p>
           </div>
         </CardContent>

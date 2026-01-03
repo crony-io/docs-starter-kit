@@ -59,7 +59,7 @@ const handleTestConnection = () => {
     {
       preserveScroll: true,
       onSuccess: () => {
-        testResult.value = { success: true, message: 'Connection successful!' };
+        testResult.value = { success: true, message: 'There you go!' };
       },
       onError: (errors: Record<string, string>) => {
         testResult.value = {
@@ -67,7 +67,7 @@ const handleTestConnection = () => {
           message:
             errors.git_repository_url ||
             errors.git_branch ||
-            'Connection failed. Please check your settings.',
+            'The connection failed, please check your URL, branch, and/or access token.',
         };
       },
       onFinish: () => {
@@ -86,33 +86,34 @@ const handleTestConnection = () => {
       >
         <GitBranch class="h-7 w-7 text-blue-500" />
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">Configure Git Repository</h1>
-      <p class="mt-2 text-muted-foreground">Connect your GitHub repository to sync documentation</p>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">Let's configure your Git Mode.</h1>
+      <p class="mt-2 text-muted-foreground">This will sync your documentation by connecting to your GitHub repo
+      </p>
     </div>
 
     <Card class="rounded-xl border-0 shadow-lg">
       <CardHeader class="pb-4">
-        <CardTitle class="text-lg">Repository Settings</CardTitle>
-        <CardDescription>Enter your repository details below</CardDescription>
+        <CardTitle class="text-lg">Repository settings</CardTitle>
+        <CardDescription>Enter your GitHub repository details to connect it to your documentation</CardDescription>
       </CardHeader>
       <CardContent class="space-y-5">
         <div class="space-y-2">
-          <Label for="git_repository_url">Repository URL *</Label>
+          <Label for="git_repository_url">Your repository URL *</Label>
           <Input
             id="git_repository_url"
             :model-value="form.repositoryUrl"
             type="url"
-            placeholder="https://github.com/username/repository"
+            placeholder="https://github.com/username/your-repository"
             required
             class="h-11"
             @update:model-value="updateField('repositoryUrl', $event as string)"
           />
-          <p class="text-xs text-muted-foreground">Public or private GitHub repository URL</p>
+          <p class="text-xs text-muted-foreground">It works for both public and private GitHub repos</p>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="space-y-2">
-            <Label for="git_branch">Branch *</Label>
+            <Label for="git_branch">Branch name *</Label>
             <Input
               id="git_branch"
               :model-value="form.branch"
@@ -125,7 +126,7 @@ const handleTestConnection = () => {
           </div>
 
           <div class="space-y-2">
-            <Label for="git_sync_frequency">Sync Frequency</Label>
+            <Label for="git_sync_frequency">Sync frequency</Label>
             <div class="relative">
               <Input
                 id="git_sync_frequency"
@@ -146,7 +147,7 @@ const handleTestConnection = () => {
         <Separator />
 
         <div class="space-y-2">
-          <Label for="git_access_token">Access Token</Label>
+          <Label for="git_access_token">Access token</Label>
           <Input
             id="git_access_token"
             :model-value="form.accessToken"
@@ -156,31 +157,31 @@ const handleTestConnection = () => {
             @update:model-value="updateField('accessToken', $event as string)"
           />
           <p class="flex items-center gap-1 text-xs text-muted-foreground">
-            Required for private repositories.
+            Required only for private repositories. You can
             <a
               href="https://github.com/settings/tokens"
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center gap-0.5 text-primary hover:underline"
             >
-              Generate token
+              generate a token here
               <ExternalLink class="h-3 w-3" />
             </a>
           </p>
         </div>
 
         <div class="space-y-2">
-          <Label for="git_webhook_secret">Webhook Secret</Label>
+          <Label for="git_webhook_secret">Webhook secret</Label>
           <Input
             id="git_webhook_secret"
             :model-value="form.webhookSecret"
             type="text"
-            placeholder="Optional - for instant updates"
+            placeholder="Optional, for GitHub Actions"
             class="h-11"
             @update:model-value="updateField('webhookSecret', $event as string)"
           />
           <p class="text-xs text-muted-foreground">
-            For instant updates via webhook. Configure in GitHub repository settings.
+            This allows instant updates via webhook. Configure it in your GitHub repository settings.
           </p>
         </div>
 
@@ -188,7 +189,7 @@ const handleTestConnection = () => {
         <div class="rounded-lg border bg-muted/50 p-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p class="text-sm font-medium">Test Connection</p>
+              <p class="text-sm font-medium">Test connection</p>
               <p class="text-xs text-muted-foreground">Verify your repository settings</p>
             </div>
             <Button
