@@ -97,8 +97,8 @@ const canSubmit = computed(() => {
       >
         <Rocket class="h-7 w-7 text-green-500" />
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">Review & Complete</h1>
-      <p class="mt-2 text-muted-foreground">Review your settings and launch your documentation</p>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">Finally, review & complete.</h1>
+      <p class="mt-2 text-muted-foreground">Review your settings one last time before launching your documentation,  to ensure everything is configured correctly</p>
     </div>
 
     <Form v-bind="store.form()" :data="formData" v-slot="{ errors, processing }">
@@ -133,15 +133,15 @@ const canSubmit = computed(() => {
           <div v-if="!hasUsers" class="p-6">
             <div class="mb-4 flex items-center gap-2">
               <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <User class="h-4 w-4 text-primary" />
+                <User class="h-4 w-4 text-primary" /> 
               </div>
-              <h3 class="font-semibold">Admin Account</h3>
-              <Badge variant="secondary" class="ml-auto">New</Badge>
+              <h3 class="font-semibold">Admin account</h3>
+              <Badge variant="secondary" class="ml-auto">New admin</Badge>
             </div>
             <div class="space-y-3 rounded-lg bg-muted/50 p-4">
               <div class="flex items-center gap-3">
                 <User class="h-4 w-4 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">Name</span>
+                <span class="text-sm text-muted-foreground">Your name</span>
                 <span class="ml-auto text-sm font-medium">{{ admin.name }}</span>
               </div>
               <div class="flex items-center gap-3">
@@ -167,7 +167,7 @@ const canSubmit = computed(() => {
                 <GitBranch v-if="contentMode === 'git'" class="h-4 w-4 text-blue-500" />
                 <Edit3 v-else class="h-4 w-4 text-green-500" />
               </div>
-              <h3 class="font-semibold">Content Mode</h3>
+              <h3 class="font-semibold">Content mode</h3>
               <Badge
                 :class="
                   contentMode === 'git'
@@ -182,8 +182,8 @@ const canSubmit = computed(() => {
             <p class="text-sm text-muted-foreground">
               {{
                 contentMode === 'git'
-                  ? 'Your documentation will be synced from a GitHub repository.'
-                  : 'You will manage content using the built-in visual editor.'
+                  ? 'You`ve chosen to sync your documentation content from a GitHub repository'
+                  : 'You`ll manage your documentation content using the built-in visual editor'
               }}
             </p>
             <InputError :message="errors.content_mode" class="mt-2" />
@@ -197,31 +197,31 @@ const canSubmit = computed(() => {
                 <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                   <GitBranch class="h-4 w-4 text-muted-foreground" />
                 </div>
-                <h3 class="font-semibold">Repository Settings</h3>
+                <h3 class="font-semibold">Repository settings</h3>
               </div>
               <div class="space-y-3 rounded-lg bg-muted/50 p-4">
                 <div class="flex items-start gap-3">
                   <GitBranch class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                   <div class="min-w-0 flex-1">
-                    <span class="text-sm text-muted-foreground">Repository</span>
+                    <span class="text-sm text-muted-foreground">Connected repo: </span>
                     <p class="truncate text-sm font-medium">{{ git.repositoryUrl }}</p>
                   </div>
                 </div>
                 <div class="flex items-center gap-3">
                   <Check class="h-4 w-4 text-muted-foreground" />
-                  <span class="text-sm text-muted-foreground">Branch</span>
+                  <span class="text-sm text-muted-foreground">Branch name: </span>
                   <Badge variant="outline" class="ml-auto font-mono text-xs">
                     {{ git.branch }}
                   </Badge>
                 </div>
                 <div class="flex items-center gap-3">
                   <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span class="text-sm text-muted-foreground">Sync Frequency</span>
-                  <span class="ml-auto text-sm font-medium">Every {{ git.syncFrequency }} min</span>
+                  <span class="text-sm text-muted-foreground">Sync frequency: </span>
+                  <span class="ml-auto text-sm font-medium">every {{ git.syncFrequency }} min</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <Key class="h-4 w-4 text-muted-foreground" />
-                  <span class="text-sm text-muted-foreground">Access Token</span>
+                  <span class="text-sm text-muted-foreground">Access token:</span>
                   <Badge
                     :variant="git.accessToken ? 'default' : 'secondary'"
                     class="ml-auto text-xs"
@@ -243,22 +243,27 @@ const canSubmit = computed(() => {
               <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
                 <Building2 class="h-4 w-4 text-purple-500" />
               </div>
-              <h3 class="font-semibold">Site Settings</h3>
+              <h3 class="font-semibold">Documentation site settings</h3>
             </div>
             <div class="space-y-3 rounded-lg bg-muted/50 p-4">
               <div class="flex items-center gap-3">
                 <Type class="h-4 w-4 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">Site Name</span>
+                <span class="text-sm text-muted-foreground">Your site name: </span>
                 <span class="ml-auto text-sm font-medium">{{ siteSettings.siteName }}</span>
               </div>
               <div v-if="siteSettings.siteTagline" class="flex items-center gap-3">
                 <Type class="h-4 w-4 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">Tagline</span>
+                <span class="text-sm text-muted-foreground">Tagline: </span>
                 <span class="ml-auto text-sm font-medium">{{ siteSettings.siteTagline }}</span>
+              </div>
+              <div v-else class="flex items-center gap-3">
+                <Type class="h-4 w-4 text-muted-foreground" />
+                <span class="text-sm text-muted-foreground">Tagline content: </span>
+                <Badge variant="secondary" class="ml-auto text-xs">Not set</Badge>
               </div>
               <div class="flex items-center gap-3">
                 <PanelBottom class="h-4 w-4 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">Footer</span>
+                <span class="text-sm text-muted-foreground">Footer content: </span>
                 <Badge
                   :variant="siteSettings.showFooter ? 'default' : 'secondary'"
                   class="ml-auto text-xs"
@@ -268,7 +273,7 @@ const canSubmit = computed(() => {
               </div>
               <div class="flex items-center gap-3">
                 <Globe class="h-4 w-4 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">Search Engines</span>
+                <span class="text-sm text-muted-foreground">Search engines indexing:</span>
                 <Badge
                   :class="
                     siteSettings.metaRobots === 'index'

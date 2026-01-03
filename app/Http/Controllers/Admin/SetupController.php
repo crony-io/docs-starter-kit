@@ -131,7 +131,7 @@ class SetupController extends Controller
 
             if (! $success) {
                 throw ValidationException::withMessages([
-                    'git_repository_url' => 'Failed to connect to repository. Please check your URL, branch, and access token.',
+                    'git_repository_url' => 'The connection failed, please check your URL, branch, and/or access token.',
                 ]);
             }
 

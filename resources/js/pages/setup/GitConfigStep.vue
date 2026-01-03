@@ -67,7 +67,7 @@ const handleTestConnection = () => {
           message:
             errors.git_repository_url ||
             errors.git_branch ||
-            'The connection failed, please check your settings.',
+            'The connection failed, please check your URL, branch, and/or access token.',
         };
       },
       onFinish: () => {
