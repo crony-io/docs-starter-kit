@@ -116,8 +116,30 @@ class GitSyncService
 
     private function performFullSync(GitHubApiClient $client, array $latestCommit): array
     {
-        // Get all markdown files from docs directory
+        // Get all files from docs directory
         $tree = $client->getDirectoryTree('docs');
+
+        // First, load all _meta.json files to build ordering map
+        $metaFiles = collect($tree)
+            ->filter(fn ($item) => str_ends_with($item['path'], '_meta.json'))
+            ->pluck('path')
+            ->toArray();
+
+        $metaData = $this->loadMetaFiles($client, $metaFiles);
+
+        // Also load docs-config.json for root navigation ordering
+        $docsConfig = $this->loadDocsConfig($client);
+        if ($docsConfig) {
+            $metaData['_root'] = $docsConfig;
+        }
+
+        // Set meta data on importer for use during import
+        $this->importer->setMetaData($metaData);
+
+        // Update existing navigation/group ordering from meta data
+        $this->importer->updateNavigationOrdering();
+
+        // Get all markdown files
         $markdownFiles = collect($tree)
             ->filter(fn ($item) => str_ends_with($item['path'], '.md'))
             ->pluck('path')
@@ -156,6 +178,27 @@ class GitSyncService
     ): array {
         // Get changed files between commits
         $changedFiles = $client->getChangedFiles($fromCommit, $latestCommit['sha']);
+
+        // Load all meta files for ordering (always needed for proper hierarchy)
+        $tree = $client->getDirectoryTree('docs');
+        $metaFiles = collect($tree)
+            ->filter(fn ($item) => str_ends_with($item['path'], '_meta.json'))
+            ->pluck('path')
+            ->toArray();
+
+        $metaData = $this->loadMetaFiles($client, $metaFiles);
+
+        // Also load docs-config.json for root navigation ordering
+        $docsConfig = $this->loadDocsConfig($client);
+        if ($docsConfig) {
+            $metaData['_root'] = $docsConfig;
+        }
+
+        // Set meta data on importer for use during import
+        $this->importer->setMetaData($metaData);
+
+        // Update existing navigation/group ordering from meta data
+        $this->importer->updateNavigationOrdering();
 
         $processedPaths = [];
         $deletedPaths = [];
@@ -267,5 +310,40 @@ class GitSyncService
         return GitSync::where('commit_hash', $commitHash)
             ->where('sync_status', 'success')
             ->exists();
+    }
+
+    private function loadMetaFiles(GitHubApiClient $client, array $metaPaths): array
+    {
+        $metaData = [];
+
+        foreach ($metaPaths as $path) {
+            try {
+                $content = $client->getFileContent($path);
+                if ($content) {
+                    $parsed = $this->parser->parseMetaFile($content);
+                    // Key by directory path (e.g., 'docs/documentation' => meta data)
+                    $dirPath = dirname($path);
+                    $metaData[$dirPath] = $parsed;
+                }
+            } catch (\Exception $e) {
+                Log::warning("Failed to load meta file {$path}: ".$e->getMessage());
+            }
+        }
+
+        return $metaData;
+    }
+
+    private function loadDocsConfig(GitHubApiClient $client): ?array
+    {
+        try {
+            $content = $client->getFileContent('docs/docs-config.json');
+            if ($content) {
+                return json_decode($content, true);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to load docs-config.json: '.$e->getMessage());
+        }
+
+        return null;
     }
 }

@@ -57,8 +57,8 @@ class WebCronMiddleware
             // Update timestamp BEFORE running
             $config->update(['last_web_cron_at' => now()]);
             SystemConfig::clearCache();
-            // Run the scheduler (handles ALL scheduled tasks)
-            $this->webCron->runScheduler();
+            // Run both scheduler and queue worker
+            $this->webCron->run();
 
         } catch (\Exception $e) {
             Log::error('Web-cron: Trigger failed', ['error' => $e->getMessage()]);

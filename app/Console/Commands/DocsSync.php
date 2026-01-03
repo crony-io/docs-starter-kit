@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\SystemConfig;
 use App\Services\GitSyncService;
 use Illuminate\Console\Command;
 
@@ -13,7 +14,9 @@ class DocsSync extends Command
 
     public function handle(GitSyncService $syncService): int
     {
-        if (! config('docs.git_enabled', true)) {
+
+        $config = SystemConfig::where('key', 'content_mode')->first();
+        if ($config->value !== 'git') {
             $this->error('Git sync is disabled');
 
             return self::FAILURE;
