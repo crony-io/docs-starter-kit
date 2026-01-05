@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Requests\LoginRequest;
+use App\Models\SystemConfig;
 use App\Models\User;
 use App\Turnstile;
 use Illuminate\Auth\Events\Authenticated;
@@ -47,10 +48,15 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn (Request $request) => Inertia::render('auth/Login', [
-            'canResetPassword' => Features::enabled(Features::resetPasswords()),
-            'status' => $request->hasSession() ? $request->session()->get('status') : null,
-        ]));
+        Fortify::loginView(function (Request $request) {
+            $config = SystemConfig::instance();
+
+            return Inertia::render('auth/Login', [
+                'canResetPassword' => Features::enabled(Features::resetPasswords()),
+                'status' => $request->hasSession() ? $request->session()->get('status') : null,
+                'turnstileSiteKey' => $config->turnstile_site_key,
+            ]);
+        });
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/TwoFactorChallenge'));
 
@@ -80,7 +86,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureTurnstileValidator(): void
     {
-        if (! empty(config('turnstile.secret_key'))) {
+        $config = SystemConfig::instance();
+
+        if (! empty($config->turnstile_secret_key)) {
             Validator::extend('turnstile', function ($attribute, $value, $parameters, $validator) {
                 $turnstile = new Turnstile;
                 $validationResult = $turnstile->validate($value);

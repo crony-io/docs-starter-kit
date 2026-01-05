@@ -24,6 +24,8 @@ class ActivityLogService
         'access_token',
         'refresh_token',
         '_token',
+        'git_access_token',
+        'git_webhook_secret',
     ];
 
     private array $sensitiveHeaders = [

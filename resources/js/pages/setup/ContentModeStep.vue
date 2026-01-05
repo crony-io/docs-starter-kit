@@ -46,7 +46,7 @@ const cmsFeatures = [
       </h1>
       <p class="mt-2 text-muted-foreground">
         Pick one of these two Content Modes for updating and managing your documentation.
-        <br/>Which one works best for you and your team?
+        <br />Which one works best for you and your team?
       </p>
     </div>
 
@@ -87,10 +87,10 @@ const cmsFeatures = [
         </div>
 
         <p class="mb-4 text-sm text-muted-foreground">
-          This mode lets you sync your documentation by simply connecting your GitHub
-          repository. 
-          <br/>
-          Start writing, push your changes, and they will be automatically synced to your documentation. 
+          This mode lets you sync your documentation by simply connecting your GitHub repository.
+          <br />
+          Start writing, push your changes, and they will be automatically synced to your
+          documentation.
         </p>
         <p class="mb-4 text-sm text-muted-foreground">
           Perfect for people who are most comfortable writing code, and using version control.
@@ -144,7 +144,9 @@ const cmsFeatures = [
         </div>
 
         <p class="mb-4 text-sm text-muted-foreground">
-          This mode lets you format your text, drag & drop media files, and re-arrange your documentation pages as you like. All from an admin panel, without ever looking at a single line of code. 
+          This mode lets you format your text, drag & drop media files, and re-arrange your
+          documentation pages as you like. All from an admin panel, without ever looking at a single
+          line of code.
         </p>
         <p class="mb-4 text-sm text-muted-foreground">
           Perfect for non-technical teams, and content writers.

@@ -98,7 +98,10 @@ const canSubmit = computed(() => {
         <Rocket class="h-7 w-7 text-green-500" />
       </div>
       <h1 class="text-2xl font-bold tracking-tight text-foreground">Finally, review & complete.</h1>
-      <p class="mt-2 text-muted-foreground">Review your settings one last time before launching your documentation,  to ensure everything is configured correctly</p>
+      <p class="mt-2 text-muted-foreground">
+        Review your settings one last time before launching your documentation, to ensure everything
+        is configured correctly
+      </p>
     </div>
 
     <Form v-bind="store.form()" :data="formData" v-slot="{ errors, processing }">
@@ -133,7 +136,7 @@ const canSubmit = computed(() => {
           <div v-if="!hasUsers" class="p-6">
             <div class="mb-4 flex items-center gap-2">
               <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <User class="h-4 w-4 text-primary" /> 
+                <User class="h-4 w-4 text-primary" />
               </div>
               <h3 class="font-semibold">Admin account</h3>
               <Badge variant="secondary" class="ml-auto">New admin</Badge>

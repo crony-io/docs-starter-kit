@@ -2,13 +2,17 @@
 
 namespace App;
 
+use App\Models\SystemConfig;
 use Illuminate\Support\Facades\Http;
 
 class Turnstile
 {
     public function validate(string $response): array
     {
-        if (! empty(config('turnstile.secret_key'))) {
+        $config = SystemConfig::instance();
+        $secretKey = $config->turnstile_secret_key;
+
+        if (! empty($secretKey)) {
             $url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
             $http = app()->environment('local')
@@ -19,7 +23,7 @@ class Turnstile
             $response = $http
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post($url, [
-                    'secret' => config('turnstile.secret_key'),
+                    'secret' => $secretKey,
                     'response' => $response,
                 ]);
 

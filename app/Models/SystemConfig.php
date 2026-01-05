@@ -20,6 +20,8 @@ class SystemConfig extends Model
         'setup_completed',
         'web_cron_enabled',
         'last_web_cron_at',
+        'turnstile_site_key',
+        'turnstile_secret_key',
     ];
 
     protected function casts(): array
@@ -32,6 +34,8 @@ class SystemConfig extends Model
             'git_sync_frequency' => 'integer',
             'web_cron_enabled' => 'boolean',
             'last_web_cron_at' => 'datetime',
+            'turnstile_site_key' => 'encrypted',
+            'turnstile_secret_key' => 'encrypted',
         ];
     }
 

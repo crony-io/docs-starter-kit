@@ -86,15 +86,20 @@ const handleTestConnection = () => {
       >
         <GitBranch class="h-7 w-7 text-blue-500" />
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">Let's configure your Git Mode.</h1>
-      <p class="mt-2 text-muted-foreground">This will sync your documentation by connecting to your GitHub repo
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">
+        Let's configure your Git Mode.
+      </h1>
+      <p class="mt-2 text-muted-foreground">
+        This will sync your documentation by connecting to your GitHub repo
       </p>
     </div>
 
     <Card class="rounded-xl border-0 shadow-lg">
       <CardHeader class="pb-4">
         <CardTitle class="text-lg">Repository settings</CardTitle>
-        <CardDescription>Enter your GitHub repository details to connect it to your documentation</CardDescription>
+        <CardDescription
+          >Enter your GitHub repository details to connect it to your documentation</CardDescription
+        >
       </CardHeader>
       <CardContent class="space-y-5">
         <div class="space-y-2">
@@ -108,7 +113,9 @@ const handleTestConnection = () => {
             class="h-11"
             @update:model-value="updateField('repositoryUrl', $event as string)"
           />
-          <p class="text-xs text-muted-foreground">It works for both public and private GitHub repos</p>
+          <p class="text-xs text-muted-foreground">
+            It works for both public and private GitHub repos
+          </p>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
@@ -181,7 +188,8 @@ const handleTestConnection = () => {
             @update:model-value="updateField('webhookSecret', $event as string)"
           />
           <p class="text-xs text-muted-foreground">
-            This allows instant updates via webhook. Configure it in your GitHub repository settings.
+            This allows instant updates via webhook. Configure it in your GitHub repository
+            settings.
           </p>
         </div>
 

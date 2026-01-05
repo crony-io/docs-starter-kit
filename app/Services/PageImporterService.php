@@ -107,20 +107,22 @@ class PageImporterService
         // Cleanup groups that became empty
         $deletedGroups = 0;
         do {
-            $deletedThisPass = Page::query()
+            $idsToDelete = Page::query()
                 ->where('source', $source)
                 ->where('type', 'group')
                 ->whereDoesntHave('children')
-                ->delete();
+                ->pluck('id');
+            $deletedThisPass = Page::whereIn('id', $idsToDelete)->delete();
             $deletedGroups += $deletedThisPass;
         } while ($deletedThisPass > 0);
 
         // Cleanup navigation that became empty
-        $deletedNavigation = Page::query()
+        $navIdsToDelete = Page::query()
             ->where('source', $source)
             ->where('type', 'navigation')
             ->whereDoesntHave('children')
-            ->delete();
+            ->pluck('id');
+        $deletedNavigation = Page::whereIn('id', $navIdsToDelete)->delete();
 
         return [
             'groups' => $deletedGroups,

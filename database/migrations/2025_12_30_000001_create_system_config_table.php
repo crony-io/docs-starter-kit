@@ -23,6 +23,10 @@ return new class extends Migration
             $table->boolean('web_cron_enabled')->default(false);
             $table->timestamp('last_web_cron_at')->nullable();
 
+            // Turnstile (Cloudflare CAPTCHA)
+            $table->text('turnstile_site_key')->nullable();
+            $table->text('turnstile_secret_key')->nullable();
+
             $table->timestamps();
         });
     }

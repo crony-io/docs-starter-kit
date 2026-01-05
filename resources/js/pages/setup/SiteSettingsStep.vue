@@ -47,10 +47,12 @@ const isValid = computed(() => {
       >
         <Building2 class="h-7 w-7 text-primary" />
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">Now, configure your site settings.</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">
+        Now, configure your site settings.
+      </h1>
       <p class="mt-2 text-muted-foreground">
-        This means to setup the identity and display options for your documentation site. You can change these
-        settings later.
+        This means to setup the identity and display options for your documentation site. You can
+        change these settings later.
       </p>
     </div>
 
@@ -63,7 +65,10 @@ const isValid = computed(() => {
             </div>
             <div>
               <CardTitle class="text-lg">Docs site identity</CardTitle>
-              <CardDescription>You can think of this as the first impression of your documentation site</CardDescription>
+              <CardDescription
+                >You can think of this as the first impression of your documentation
+                site</CardDescription
+              >
             </div>
           </div>
         </CardHeader>
@@ -89,7 +94,8 @@ const isValid = computed(() => {
               @update:model-value="updateField('siteTagline', $event as string)"
             />
             <p class="text-xs text-muted-foreground">
-              You may add here a short description or catchphrase to be displayed below your site name
+              You may add here a short description or catchphrase to be displayed below your site
+              name
             </p>
           </div>
         </CardContent>
@@ -111,7 +117,9 @@ const isValid = computed(() => {
           <div class="flex items-center justify-between">
             <div class="space-y-0.5">
               <Label>Show footer</Label>
-              <p class="text-sm text-muted-foreground">By activating this toggle, you will display a footer on your documentation site</p>
+              <p class="text-sm text-muted-foreground">
+                By activating this toggle, you will display a footer on your documentation site
+              </p>
             </div>
             <Switch
               :checked="form.showFooter"
@@ -141,7 +149,10 @@ const isValid = computed(() => {
             </div>
             <div>
               <CardTitle class="text-lg">Search engine indexing</CardTitle>
-              <CardDescription>You control whether search engines can index your documentation or not</CardDescription>
+              <CardDescription
+                >You control whether search engines can index your documentation or
+                not</CardDescription
+              >
             </div>
           </div>
         </CardHeader>

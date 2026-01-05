@@ -165,6 +165,10 @@ class SiteSettingsController extends Controller
                 'last_web_cron_at' => $config->last_web_cron_at?->toIso8601String(),
             ],
             'serverCheck' => $webCronService->getServerCompatibility(),
+            'turnstile' => [
+                'site_key' => $config->turnstile_site_key ?? '',
+                'has_secret' => ! empty($config->turnstile_secret_key),
+            ],
         ]);
     }
 
@@ -183,14 +187,35 @@ class SiteSettingsController extends Controller
             'code_copy_button' => ['required', 'boolean'],
             'code_line_numbers' => ['required', 'boolean'],
             'web_cron_enabled' => ['sometimes', 'boolean'],
+            'turnstile_site_key' => ['nullable', 'string', 'max:255'],
+            'turnstile_secret_key' => ['nullable', 'string', 'max:255'],
         ]);
 
-        // Handle web_cron_enabled separately (stored in SystemConfig)
+        // Handle SystemConfig fields separately
+        $config = SystemConfig::instance();
+        $configUpdates = [];
+
         if (array_key_exists('web_cron_enabled', $validated)) {
-            $config = SystemConfig::instance();
-            $config->update(['web_cron_enabled' => $validated['web_cron_enabled']]);
-            Cache::forget('system_config');
+            $configUpdates['web_cron_enabled'] = $validated['web_cron_enabled'];
             unset($validated['web_cron_enabled']);
+        }
+
+        if (array_key_exists('turnstile_site_key', $validated)) {
+            $configUpdates['turnstile_site_key'] = $validated['turnstile_site_key'] ?: null;
+            unset($validated['turnstile_site_key']);
+        }
+
+        if (array_key_exists('turnstile_secret_key', $validated)) {
+            // Only update if a new value is provided (not empty placeholder)
+            if (! empty($validated['turnstile_secret_key'])) {
+                $configUpdates['turnstile_secret_key'] = $validated['turnstile_secret_key'];
+            }
+            unset($validated['turnstile_secret_key']);
+        }
+
+        if (! empty($configUpdates)) {
+            $config->update($configUpdates);
+            Cache::forget('system_config');
         }
 
         foreach ($validated as $key => $value) {

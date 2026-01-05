@@ -11,11 +11,12 @@ import { Form, Head } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   status?: string;
   flash?: {
     info?: string;
   };
+  turnstileSiteKey?: string | null;
 }>();
 
 const nonce = ref<string | null>(null);
@@ -30,7 +31,7 @@ const turnstileTheme = computed<'light' | 'dark' | 'auto'>(() => {
   return appearance.value as 'light' | 'dark';
 });
 
-const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || null;
+const turnstileSiteKey = props.turnstileSiteKey ?? null;
 let turnstileInstance: string | null = null;
 let turnstileScript: HTMLScriptElement | null = null;
 

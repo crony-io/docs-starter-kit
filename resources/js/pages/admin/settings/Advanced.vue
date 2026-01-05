@@ -23,11 +23,17 @@ import { ArrowLeft, RotateCcw, Save } from 'lucide-vue-next';
 
 import type { ServerCompatibility, WebCronSettings as WebCronSettingsType } from '@/types/web-cron';
 
+interface TurnstileConfig {
+  site_key: string;
+  has_secret: boolean;
+}
+
 interface Props {
   settings: Record<string, unknown>;
   defaults: Record<string, unknown>;
   webCron: WebCronSettingsType;
   serverCheck: ServerCompatibility;
+  turnstile: TurnstileConfig;
 }
 
 const props = defineProps<Props>();
@@ -79,6 +85,8 @@ const form = useForm({
     props.settings.advanced_code_line_numbers ?? props.defaults.code_line_numbers,
   ),
   web_cron_enabled: props.webCron.web_cron_enabled,
+  turnstile_site_key: props.turnstile.site_key,
+  turnstile_secret_key: '',
 });
 
 const submit = () => {
@@ -98,6 +106,8 @@ const resetToDefaults = () => {
   form.code_copy_button = toBool(props.defaults.code_copy_button);
   form.code_line_numbers = toBool(props.defaults.code_line_numbers);
   form.web_cron_enabled = false;
+  form.turnstile_site_key = '';
+  form.turnstile_secret_key = '';
 };
 </script>
 
@@ -275,6 +285,41 @@ const resetToDefaults = () => {
               :last-web-cron-at="webCron.last_web_cron_at"
               :server-check="serverCheck"
             />
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Cloudflare Turnstile</CardTitle>
+                <CardDescription>CAPTCHA protection for login</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="space-y-2">
+                  <Label for="turnstile_site_key">Site Key</Label>
+                  <Input
+                    id="turnstile_site_key"
+                    v-model="form.turnstile_site_key"
+                    placeholder="0x4AAAAAAA..."
+                  />
+                  <p class="text-xs text-muted-foreground">
+                    Get your keys from the Cloudflare dashboard
+                  </p>
+                  <InputError :message="form.errors.turnstile_site_key" />
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="turnstile_secret_key">Secret Key</Label>
+                  <Input
+                    id="turnstile_secret_key"
+                    v-model="form.turnstile_secret_key"
+                    type="password"
+                    :placeholder="turnstile.has_secret ? '••••••••••••••••' : 'Enter secret key'"
+                  />
+                  <p v-if="turnstile.has_secret" class="text-xs text-muted-foreground">
+                    Secret key is configured. Leave empty to keep current value.
+                  </p>
+                  <InputError :message="form.errors.turnstile_secret_key" />
+                </div>
+              </CardContent>
+            </Card>
 
             <div class="flex gap-3">
               <Button
