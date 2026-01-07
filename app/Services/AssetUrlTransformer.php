@@ -110,25 +110,26 @@ class AssetUrlTransformer
 
     private function resolvePath(string $baseDir, string $relativePath): string
     {
-        // If path starts with /, it's from docs root
         if (str_starts_with($relativePath, '/')) {
             return 'docs'.$relativePath;
         }
 
-        // Combine base directory with relative path
-        $parts = explode('/', $baseDir.'/'.$relativePath);
-        $resolved = [];
+        $resolved = collect(explode('/', $baseDir.'/'.$relativePath))
+            ->reduce(function (array $resolved, string $part) {
+                if ($part === '' || $part === '.') {
+                    return $resolved;
+                }
 
-        foreach ($parts as $part) {
-            if ($part === '' || $part === '.') {
-                continue;
-            }
-            if ($part === '..') {
-                array_pop($resolved);
-            } else {
+                if ($part === '..') {
+                    array_pop($resolved);
+
+                    return $resolved;
+                }
+
                 $resolved[] = $part;
-            }
-        }
+
+                return $resolved;
+            }, []);
 
         return implode('/', $resolved);
     }

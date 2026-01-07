@@ -65,44 +65,37 @@ class ContentImporter
 
     public function updateNavigationOrdering(): void
     {
-        // Update navigation tabs and groups from _meta.json files
-        foreach ($this->metaData as $path => $meta) {
-            if ($path === '_root') {
-                continue;
-            }
+        collect($this->metaData)
+            ->except('_root')
+            ->each(function (array $meta, string $path) {
+                $slug = basename($path);
+                $pathParts = explode('/', $path);
 
-            // Extract slug from path (e.g., 'docs/documentation' => 'documentation')
-            $slug = basename($path);
-
-            // Update navigation tab if this is a root-level _meta.json (e.g., docs/documentation)
-            $pathParts = explode('/', $path);
-            if (count($pathParts) === 2 && $pathParts[0] === 'docs') {
-                // This is a navigation tab's _meta.json
-                Page::where('slug', $slug)
-                    ->where('type', 'navigation')
-                    ->where('source', 'git')
-                    ->update([
-                        'order' => $meta['order'] ?? 0,
-                        'title' => $meta['title'] ?? null,
-                        'seo_description' => $meta['description'] ?? null,
-                        'icon' => $meta['icon'] ?? null,
-                        'is_default' => $meta['is_default'] ?? false,
-                    ]);
-            }
-
-            // Update child items (groups/documents) from the items array
-            if (isset($meta['items'])) {
-                foreach ($meta['items'] as $itemSlug => $itemMeta) {
-                    Page::where('slug', $itemSlug)
+                if (count($pathParts) === 2 && $pathParts[0] === 'docs') {
+                    Page::where('slug', $slug)
+                        ->where('type', 'navigation')
                         ->where('source', 'git')
-                        ->whereIn('type', ['group', 'document'])
                         ->update([
-                            'order' => $itemMeta['order'] ?? 0,
-                            'title' => $itemMeta['title'] ?? null,
+                            'order' => $meta['order'] ?? 0,
+                            'title' => $meta['title'] ?? null,
+                            'seo_description' => $meta['description'] ?? null,
+                            'icon' => $meta['icon'] ?? null,
+                            'is_default' => $meta['is_default'] ?? false,
                         ]);
                 }
-            }
-        }
+
+                if (isset($meta['items'])) {
+                    collect($meta['items'])->each(function (array $itemMeta, string $itemSlug) {
+                        Page::where('slug', $itemSlug)
+                            ->where('source', 'git')
+                            ->whereIn('type', ['group', 'document'])
+                            ->update([
+                                'order' => $itemMeta['order'] ?? 0,
+                                'title' => $itemMeta['title'] ?? null,
+                            ]);
+                    });
+                }
+            });
     }
 
     public function cleanupOrphanedPages(): array

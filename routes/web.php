@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\GitSyncController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WebhookController;
-use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Middleware\RequireCmsMode;
 use App\Http\Middleware\RequireGitMode;
 use Illuminate\Support\Facades\Route;

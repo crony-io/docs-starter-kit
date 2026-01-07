@@ -188,23 +188,17 @@ class ActivityLogService
      */
     private function sanitizeRequestData(Request $request): array
     {
-        $data = $request->all();
-
-        foreach ($this->sensitiveFields as $field) {
-            unset($data[$field]);
-        }
-        if ($request->hasFile('*')) {
-            $files = $request->allFiles();
-            foreach ($files as $key => $file) {
-                if (is_array($file)) {
-                    $data[$key] = array_map(fn ($f) => $f->getClientOriginalName(), $file);
-                } else {
-                    $data[$key] = $file->getClientOriginalName();
-                }
-            }
-        }
-
-        return $data;
+        return collect($request->all())
+            ->except($this->sensitiveFields)
+            ->when($request->hasFile('*'), function ($collection) use ($request) {
+                return $collection->merge(
+                    collect($request->allFiles())->map(fn ($file) => is_array($file)
+                        ? collect($file)->map(fn ($f) => $f->getClientOriginalName())->all()
+                        : $file->getClientOriginalName()
+                    )
+                );
+            })
+            ->all();
     }
 
     /**

@@ -17,6 +17,18 @@ class IpDetectionService
         'ipify' => 'https://api.ipify.org?format=json',
         'ip-api' => 'http://ip-api.com/json/',
         'ipinfo' => 'https://ipinfo.io/json',
+        'ip-guide' => 'https://ip.guide/',
+    ];
+
+    /**
+     * IP info services with fallbacks (in order of priority).
+     */
+    private array $ipInfoServices = [
+        'ipapi',
+        'ipwhois',
+        'ip-api',
+        'ip-guide',
+        'ipinfo',
     ];
 
     /**
@@ -69,111 +81,135 @@ class IpDetectionService
      */
     public function getIpInfo(string $ip): ?array
     {
-        // Try to get from cache first (cache for 24 hours)
         $cacheKey = 'ip_info_'.$ip;
 
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
 
-        // Try ipapi.co first (most detailed free tier)
-        try {
-            /** @var \Illuminate\Http\Client\Response $response */
-            $response = Http::timeout(5)->get("https://ipapi.co/{$ip}/json/");
+        foreach ($this->ipInfoServices as $serviceName) {
+            try {
+                $info = $this->fetchIpInfo($serviceName, $ip);
 
-            if ($response->successful()) {
-                $data = $response->json();
-
-                $info = [
-                    'ip' => $data['ip'] ?? $ip,
-                    'city' => $data['city'] ?? null,
-                    'region' => $data['region'] ?? null,
-                    'country' => $data['country_name'] ?? null,
-                    'country_code' => $data['country_code'] ?? null,
-                    'postal' => $data['postal'] ?? null,
-                    'latitude' => $data['latitude'] ?? null,
-                    'longitude' => $data['longitude'] ?? null,
-                    'timezone' => $data['timezone'] ?? null,
-                    'isp' => $data['org'] ?? null,
-                    'asn' => $data['asn'] ?? null,
-                    'service' => 'ipapi.co',
-                ];
-
-                Cache::put($cacheKey, $info, now()->addDay());
-
-                return $info;
-            }
-        } catch (\Exception $e) {
-            Log::debug('ipapi.co failed for IP info', ['error' => $e->getMessage()]);
-        }
-
-        // Fallback to ipwhois
-        try {
-            /** @var \Illuminate\Http\Client\Response $response */
-            $response = Http::timeout(5)->get("https://ipwho.is/{$ip}");
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                if ($data['success'] ?? false) {
-                    $info = [
-                        'ip' => $data['ip'] ?? $ip,
-                        'city' => $data['city'] ?? null,
-                        'region' => $data['region'] ?? null,
-                        'country' => $data['country'] ?? null,
-                        'country_code' => $data['country_code'] ?? null,
-                        'postal' => $data['postal'] ?? null,
-                        'latitude' => $data['latitude'] ?? null,
-                        'longitude' => $data['longitude'] ?? null,
-                        'timezone' => $data['timezone']['id'] ?? null,
-                        'isp' => $data['connection']['isp'] ?? null,
-                        'asn' => $data['connection']['asn'] ?? null,
-                        'service' => 'ipwhois',
-                    ];
-
+                if ($info) {
                     Cache::put($cacheKey, $info, now()->addDay());
 
                     return $info;
                 }
+            } catch (\Exception $e) {
+                Log::debug("{$serviceName} failed for IP info", ['error' => $e->getMessage()]);
+
+                continue;
             }
-        } catch (\Exception $e) {
-            Log::debug('ipwhois failed for IP info', ['error' => $e->getMessage()]);
-        }
-
-        // Fallback to ip-api.com
-        try {
-            /** @var \Illuminate\Http\Client\Response $response */
-            $response = Http::timeout(5)->get("http://ip-api.com/json/{$ip}");
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                if (($data['status'] ?? '') === 'success') {
-                    $info = [
-                        'ip' => $data['query'] ?? $ip,
-                        'city' => $data['city'] ?? null,
-                        'region' => $data['regionName'] ?? null,
-                        'country' => $data['country'] ?? null,
-                        'country_code' => $data['countryCode'] ?? null,
-                        'postal' => $data['zip'] ?? null,
-                        'latitude' => $data['lat'] ?? null,
-                        'longitude' => $data['lon'] ?? null,
-                        'timezone' => $data['timezone'] ?? null,
-                        'isp' => $data['isp'] ?? null,
-                        'asn' => $data['as'] ?? null,
-                        'service' => 'ip-api.com',
-                    ];
-
-                    Cache::put($cacheKey, $info, now()->addDay());
-
-                    return $info;
-                }
-            }
-        } catch (\Exception $e) {
-            Log::debug('ip-api.com failed for IP info', ['error' => $e->getMessage()]);
         }
 
         return null;
+    }
+
+    /**
+     * Fetch IP info from a specific service.
+     */
+    private function fetchIpInfo(string $serviceName, string $ip): ?array
+    {
+        /** @var \Illuminate\Http\Client\Response|null $response */
+        $response = match ($serviceName) {
+            'ipapi' => Http::timeout(5)->get("https://ipapi.co/{$ip}/json/"),
+            'ipwhois' => Http::timeout(5)->get("https://ipwho.is/{$ip}"),
+            'ip-api' => Http::timeout(5)->get("http://ip-api.com/json/{$ip}"),
+            'ip-guide' => Http::timeout(5)->get("https://ip.guide/{$ip}"),
+            'ipinfo' => Http::timeout(5)->get("https://ipinfo.io/{$ip}/json"),
+            default => null,
+        };
+
+        if (! $response || ! $response->successful()) {
+            return null;
+        }
+
+        $data = $response->json();
+
+        return $this->normalizeIpInfo($serviceName, $ip, $data);
+    }
+
+    /**
+     * Normalize IP info response from different services to a common format.
+     */
+    private function normalizeIpInfo(string $serviceName, string $ip, array $data): ?array
+    {
+        return match ($serviceName) {
+            'ipapi' => [
+                'ip' => $data['ip'] ?? $ip,
+                'city' => $data['city'] ?? null,
+                'region' => $data['region'] ?? null,
+                'country' => $data['country_name'] ?? null,
+                'country_code' => $data['country_code'] ?? null,
+                'postal' => $data['postal'] ?? null,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
+                'timezone' => $data['timezone'] ?? null,
+                'isp' => $data['org'] ?? null,
+                'asn' => $data['asn'] ?? null,
+                'service' => 'ipapi.co',
+            ],
+            'ipwhois' => ($data['success'] ?? false) ? [
+                'ip' => $data['ip'] ?? $ip,
+                'city' => $data['city'] ?? null,
+                'region' => $data['region'] ?? null,
+                'country' => $data['country'] ?? null,
+                'country_code' => $data['country_code'] ?? null,
+                'postal' => $data['postal'] ?? null,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
+                'timezone' => $data['timezone']['id'] ?? null,
+                'isp' => $data['connection']['isp'] ?? null,
+                'asn' => $data['connection']['asn'] ?? null,
+                'service' => 'ipwhois',
+            ] : null,
+            'ip-api' => (($data['status'] ?? '') === 'success') ? [
+                'ip' => $data['query'] ?? $ip,
+                'city' => $data['city'] ?? null,
+                'region' => $data['regionName'] ?? null,
+                'country' => $data['country'] ?? null,
+                'country_code' => $data['countryCode'] ?? null,
+                'postal' => $data['zip'] ?? null,
+                'latitude' => $data['lat'] ?? null,
+                'longitude' => $data['lon'] ?? null,
+                'timezone' => $data['timezone'] ?? null,
+                'isp' => $data['isp'] ?? null,
+                'asn' => $data['as'] ?? null,
+                'service' => 'ip-api.com',
+            ] : null,
+            'ip-guide' => isset($data['ip']) ? [
+                'ip' => $data['ip'] ?? $ip,
+                'city' => $data['location']['city'] ?? null,
+                'region' => null,
+                'country' => $data['location']['country'] ?? null,
+                'country_code' => $data['network']['autonomous_system']['country'] ?? null,
+                'postal' => null,
+                'latitude' => $data['location']['latitude'] ?? null,
+                'longitude' => $data['location']['longitude'] ?? null,
+                'timezone' => $data['location']['timezone'] ?? null,
+                'isp' => $data['network']['autonomous_system']['organization'] ?? null,
+                'asn' => isset($data['network']['autonomous_system']['asn'])
+                    ? 'AS'.$data['network']['autonomous_system']['asn']
+                    : null,
+                'service' => 'ip.guide',
+            ] : null,
+            'ipinfo' => isset($data['ip']) ? [
+                'ip' => $data['ip'] ?? $ip,
+                'city' => $data['city'] ?? null,
+                'region' => $data['region'] ?? null,
+                'country' => $data['country'] ?? null,
+                'country_code' => $data['country'] ?? null,
+                'postal' => $data['postal'] ?? null,
+                'latitude' => isset($data['loc']) ? (float) explode(',', $data['loc'])[0] : null,
+                'longitude' => isset($data['loc']) ? (float) explode(',', $data['loc'])[1] : null,
+                'timezone' => $data['timezone'] ?? null,
+                'isp' => $data['org'] ?? null,
+                'asn' => null,
+                'service' => 'ipinfo.io',
+            ] : null,
+            default => null,
+        };
     }
 
     /**
@@ -187,6 +223,7 @@ class IpDetectionService
             'ipify' => $data['ip'] ?? null,
             'ip-api' => $data['query'] ?? null,
             'ipinfo' => $data['ip'] ?? null,
+            'ip-guide' => $data['ip'] ?? null,
             default => null,
         };
     }
@@ -196,28 +233,18 @@ class IpDetectionService
      */
     public function getServerIps(\Illuminate\Http\Request $request): array
     {
-        $serverIps = [];
+        $hostname = gethostname();
+        $hostIp = $hostname ? gethostbyname($hostname) : null;
 
-        // Get SERVER_ADDR
-        if ($serverAddr = $request->server('SERVER_ADDR')) {
-            $serverIps[] = $serverAddr;
-        }
-
-        // Get from gethostbyname
-        if ($hostname = gethostname()) {
-            $hostIp = gethostbyname($hostname);
-            if ($hostIp && $hostIp !== $hostname) {
-                $serverIps[] = $hostIp;
-            }
-        }
-
-        // Add known server IPs from config (optional)
-        $configuredIps = config('activity-log.server_ips', []);
-        if (is_array($configuredIps)) {
-            $serverIps = array_merge($serverIps, $configuredIps);
-        }
-
-        return array_unique(array_filter($serverIps));
+        return collect([
+            $request->server('SERVER_ADDR'),
+            ($hostIp && $hostIp !== $hostname) ? $hostIp : null,
+        ])
+            ->merge(config('activity-log.server_ips', []))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**
