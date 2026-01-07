@@ -2,7 +2,6 @@
 title: CMS Mode Overview
 description: Complete guide to using database CMS for documentation
 seo_title: CMS Mode Overview - Docs Starter Kit
-order: 1
 status: published
 ---
 
@@ -172,6 +171,8 @@ Each save creates a version:
 | File Uploads | ✅ | Read-only |
 | PR Workflow | ❌ | ✅ |
 | Offline Editing | ❌ | ✅ |
+
+> **Note**: Content mode is chosen during initial setup and cannot be changed without a database reset (`php artisan migrate:fresh`). See [Content Modes](/docs/documentation/configuration/content-modes) for details.
 
 ## Next Steps
 

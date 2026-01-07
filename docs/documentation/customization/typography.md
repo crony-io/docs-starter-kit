@@ -2,7 +2,6 @@
 title: Typography
 description: Configure fonts and text styling
 seo_title: Typography Settings - Docs Starter Kit
-order: 2
 status: published
 ---
 

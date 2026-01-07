@@ -2,7 +2,6 @@
 title: Content Modes
 description: Understanding CMS Mode and Git Mode
 seo_title: Content Modes - Docs Starter Kit
-order: 2
 status: published
 ---
 
@@ -27,11 +26,9 @@ In CMS Mode, all content is stored in the database and managed through the admin
 
 ### How to Enable
 
-CMS Mode is the default. During setup or in your configuration:
+CMS Mode is the default. Select it during the initial setup wizard at `/admin/setup`.
 
-```env
-DOCS_CONTENT_MODE=cms
-```
+> **Note**: Content mode is configured during setup and stored in the database. It cannot be changed via environment variables.
 
 ### Creating Content
 
@@ -64,17 +61,17 @@ In Git Mode, content is synchronized from a GitHub repository.
 
 ### How to Enable
 
-1. Set environment variable:
+Select Git Mode during the initial setup wizard at `/admin/setup`:
 
-```env
-DOCS_CONTENT_MODE=git
-```
+1. Choose **Git-Based** documentation
+2. Enter your repository details:
+   - **Repository URL**: `https://github.com/username/repo`
+   - **Branch**: Your documentation branch (e.g., `main`)
+   - **Access Token**: Required for private repositories
+   - **Webhook Secret**: For secure webhook triggers
+3. Complete the setup wizard
 
-2. Configure through admin panel:
-   - Repository URL
-   - Branch name
-   - Access token (for private repos)
-   - Webhook secret
+After setup, you can update Git settings (but not the mode) in **Git Sync** settings.
 
 ### Repository Structure
 
@@ -83,16 +80,18 @@ Your documentation repository should follow this structure:
 ```
 your-docs-repo/
 ├── docs/
-│   ├── section-name/
+│   ├── assets/           # Reserved folder for images/files
+│   │   └── images/
+│   ├── section-name/     # Navigation tab
 │   │   ├── _meta.json
 │   │   ├── page-one.md
 │   │   └── page-two.md
-│   └── another-section/
+│   └── another-section/  # Navigation tab
 │       └── page.md
-├── assets/
-│   └── images/
 └── docs-config.json
 ```
+
+> **Note**: The `assets` folder inside `docs/` is reserved for static files and won't appear as navigation.
 
 ### Markdown Format
 
@@ -143,12 +142,22 @@ Use `_meta.json` files to configure folder titles and ordering:
 
 ## Switching Modes
 
-> **Warning**: Switching modes after content is created may result in data loss. Plan your content mode before creating documentation.
+> **Important**: Content mode is set during initial setup and **cannot be changed** through the admin panel. This is by design to prevent data inconsistencies.
 
-If you need to switch:
+### To Switch Modes
 
-1. **CMS to Git**: Export your content to markdown files, set up repository, then switch mode
-2. **Git to CMS**: Your Git-synced content will remain, but new edits will be CMS-based
+Switching content modes requires a fresh database reset:
+
+```bash
+php artisan migrate:fresh
+```
+
+This will:
+- Drop all existing tables
+- Re-run all migrations
+- Redirect you to the setup wizard where you can choose a different mode
+
+> **Warning**: This deletes all content, users, and settings. Back up any important data before resetting.
 
 ## Comparison Table
 

@@ -2,7 +2,6 @@
 title: Introduction
 description: Welcome to Docs Starter Kit - an open-source documentation platform
 seo_title: Introduction - Docs Starter Kit
-order: 1
 status: published
 ---
 
@@ -55,6 +54,8 @@ Docs Starter Kit uses Inertia.js to combine the best of both worlds:
 
 ## Content Management Modes
 
+You choose your content mode during initial setup. This choice is permanent unless you reset the database.
+
 ### Git Mode
 Perfect for developers who prefer writing documentation in their favorite editor and managing content through Git workflows.
 
@@ -70,6 +71,8 @@ Ideal for teams who prefer a visual editor and don't need Git-based workflows.
 - Drag-and-drop organization
 - File manager with uploads
 - Version history in database
+
+> **Note**: See [Content Modes](/docs/documentation/configuration/content-modes) for detailed comparison and setup instructions.
 
 ## Next Steps
 

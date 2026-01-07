@@ -2,7 +2,6 @@
 title: Webhooks
 description: Set up GitHub webhooks for instant documentation updates
 seo_title: Webhook Configuration - Docs Starter Kit
-order: 3
 status: published
 ---
 
@@ -190,7 +189,6 @@ on:
       - main
     paths:
       - 'docs/**'
-      - 'assets/**'
 
 jobs:
   trigger-sync:
@@ -206,5 +204,5 @@ jobs:
 ```
 
 Add secrets to your repository:
-- `DOCS_WEBHOOK_URL`: Your webhook URL
-- `WEBHOOK_SECRET`: Your webhook secret
+- `DOCS_WEBHOOK_URL`: Your webhook URL (e.g., `https://yourdomain.com/webhook/github`)
+- `WEBHOOK_SECRET`: Your webhook secret from admin panel

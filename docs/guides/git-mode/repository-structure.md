@@ -2,7 +2,6 @@
 title: Repository Structure
 description: How to structure your documentation repository for Git sync
 seo_title: Repository Structure - Docs Starter Kit
-order: 2
 status: published
 ---
 
@@ -17,6 +16,9 @@ Docs Starter Kit expects a specific folder structure in your repository:
 ```
 your-docs-repo/
 ├── docs/                    # All documentation content
+│   ├── assets/              # Reserved folder for media files
+│   │   ├── images/
+│   │   └── downloads/
 │   ├── navigation-tab/      # Top-level navigation
 │   │   ├── _meta.json       # Folder configuration
 │   │   ├── group/           # Sidebar group
@@ -25,10 +27,7 @@ your-docs-repo/
 │   │   └── standalone.md    # Direct child document
 │   └── another-tab/
 │       └── ...
-├── assets/                  # Media files
-│   ├── images/
-│   └── downloads/
-└── docs-config.json         # Global configuration
+└── docs-config.json         # Global configuration (inside docs/)
 ```
 
 ## Folder Hierarchy
@@ -203,28 +202,39 @@ Global configuration at repository root:
 
 ## Assets Directory
 
-Store media files in the `assets/` folder:
+Store media files in the `docs/assets/` folder. This is a **reserved folder** that is automatically excluded from navigation processing.
 
 ```
-assets/
-├── images/
-│   ├── logo.png
-│   ├── screenshot-1.png
-│   └── diagrams/
-│       └── architecture.svg
-├── downloads/
-│   └── example.zip
-└── videos/
-    └── demo.mp4
+docs/
+├── assets/              # Reserved - not treated as navigation
+│   ├── images/
+│   │   ├── logo.png
+│   │   ├── screenshot-1.png
+│   │   └── diagrams/
+│   │       └── architecture.svg
+│   ├── downloads/
+│   │   └── example.zip
+│   └── videos/
+│       └── demo.mp4
+├── documentation/       # Navigation tab
+│   └── ...
+└── guides/              # Navigation tab
+    └── ...
 ```
 
-Reference in markdown:
+> **Important**: The `assets` folder inside `docs/` is reserved for static files. Any folder named `assets` at the navigation level will be skipped during sync and won't appear in your documentation sidebar.
+
+Reference assets in markdown using relative or absolute paths:
 
 ```markdown
 ![Screenshot](/assets/images/screenshot-1.png)
 
+![Relative](../assets/images/screenshot-1.png)
+
 [Download Example](/assets/downloads/example.zip)
 ```
+
+When syncing from Git, asset URLs are automatically transformed to point to the raw GitHub content URL.
 
 ## Example Structure
 
@@ -233,6 +243,9 @@ Complete example for a typical documentation site:
 ```
 my-docs/
 ├── docs/
+│   ├── assets/                  # Reserved - media files
+│   │   └── images/
+│   │       └── logo.png
 │   ├── documentation/
 │   │   ├── _meta.json
 │   │   ├── getting-started/
@@ -255,13 +268,10 @@ my-docs/
 │   │       ├── _meta.json
 │   │       ├── users.md
 │   │       └── posts.md
-│   └── changelog/
-│       ├── _meta.json
-│       └── v1-0-0.md
-├── assets/
-│   └── images/
-│       └── logo.png
-└── docs-config.json
+│   ├── changelog/
+│   │   ├── _meta.json
+│   │   └── v1-0-0.md
+│   └── docs-config.json         # Global configuration
 ```
 
 ## Best Practices

@@ -1,6 +1,20 @@
+<div align="center">
+
 # Docs Starter Kit
 
-An **open-source starter kit** for building modern documentation websites with Vue.js, Laravel, and TypeScript.
+**Build beautiful documentation sites in minutes, not months.**
+
+[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+An open-source documentation platform with dual content modes, powerful admin panel, and modern UI.
+
+[Documentation](https://github.com/crony-io/docs-starter-kit/blob/main/docs/documentation/getting-started/introduction.md)
+
+</div>
 
 ## Disclaimer
 
@@ -12,122 +26,74 @@ An **open-source starter kit** for building modern documentation websites with V
 
 ## Why Docs Starter Kit?
 
-Skip months of development and launch your documentation site in minutes. Whether you prefer writing in your favorite code editor with Git workflows or using a visual CMS, this starter kit has you covered.
+Skip months of development. Whether you prefer **Git workflows** or a **visual CMS**, this starter kit adapts to your team's needs.
 
-**Built with:** Laravel 12, Vue 3, Inertia.js, TypeScript, Tailwind CSS, shadcn/ui
+- **Git Mode** — Sync from GitHub with webhooks, differential updates, rollback support, and "See on GitHub" links
+- **CMS Mode** — TipTap WYSIWYG editor, drag-and-drop page tree, version history, and draft/publish workflow
 
 ---
 
-## Key Features
+## Features
 
-### Content Mode
-Choose your workflow during the guided setup wizard:
-- **Git Mode:** Sync from GitHub with webhooks, differential updates, rollback support, and "Edit on GitHub" links, YAML frontmatter support for SEO metadata
-- **CMS Mode:** TipTap WYSIWYG or raw Markdown editor, drag-and-drop page tree, version history, and draft/published workflow
+### Drag-and-Drop Page Management -> Only CMS Mode
 
-### Page Editor
-- Toggle between TipTap WYSIWYG and raw Markdown modes
-- Integrated media browser for inserting images, videos, and files
-- Tables, task lists, and strikethrough extensions
-- Syntax highlighting with 190+ languages
+Organize your documentation with an intuitive hierarchical page tree. Drag pages between sections, reorder with ease, and manage navigation tabs, groups, and documents visually.
 
-### Documentation UI
-- Responsive design with light/dark/system theme
-- Navigation tabs, collapsible groups, and nested pages
-- Auto-generated table of contents (left or right position)
-- Code blocks with copy button and line numbers
-- Copy page content and download as TXT
-- Smooth anchor scrolling and internal link handling
+![Page Tree](docs/assets/images/pageTreeDraggable.png)
 
-### Full Customization
-- **Theme:** Primary/secondary/accent colors, dark mode, custom CSS injection
-- **Typography:** Google Fonts for headings, body, and code; font sizes and line heights
-- **Layout:** Sidebar/content width, TOC position, breadcrumbs, footer
-- **Branding:** Site name, tagline, light/dark logos, favicon, social links (Twitter, GitHub, Discord, LinkedIn)
-
-### Page Tree with Drag-and-Drop Reordering
-- Hierarchical page tree with visual drag-and-drop
-- Smart type validation (navigation, groups, documents)
-- Auto-expand on hover during drag
-- Prevents invalid moves (e.g., can't nest navigation)
-
-### Full-Text Search
-- Laravel Scout integration
-- Search result highlighting with context excerpts
-
-### Feedback System
-- "Was this helpful?" widget with thumbs up/down
-- Drag-and-drop form field builder
-- Multiple field types: text, textarea, radio, checkbox, rating, email
-- Configurable required fields
-- Analytics dashboard with helpfulness scores
-- Export to CSV/JSON
+---
 
 ### Media Manager
-- Folder organization with nested structure
-- Drag-and-drop file uploads
-- Automatic thumbnail and preview generation
-- Bulk selection and deletion
-- Move files between folders
 
-### SEO & Structured Data
-- Dynamic XML sitemap
-- Per-page SEO title and description
-- Canonical URLs
-- OpenGraph and Twitter Card meta tags
-- JSON-LD structured data (TechArticle schema)
-- Meta robots configuration
+Upload, organize, and embed media files effortlessly. Create folders, drag-and-drop uploads, generate thumbnails, and insert images directly into your content.
 
-### Server-Side Rendering (SSR)
-- Full SSR support via Inertia.js for faster initial page loads
-- Better SEO with server-rendered content
-- Clustered SSR server for performance
-
-### LLM Ready
-- Auto-generated `llms-full.txt` (complete page content)
-- Copy and download txt on all documents pages
-- Configurable token limits
-- Regenerates on content changes
-
-### Security
-- Two-Factor Authentication with QR code and recovery codes
-- Content Security Policy (CSP) with nonce support
-- Cloudflare Turnstile CAPTCHA on login
-- Rate limiting on sensitive endpoints
-- GitHub webhook signature verification (HMAC SHA-256)
-- Encrypted storage for tokens and secrets
-- Single session per user
-
-### Privacy & Compliance
-- Activity logging with IP geolocation
-- Configurable log retention and cleanup
-- IP anonymization command for GDPR compliance
-- Sensitive data filtering (passwords, tokens never logged)
-
-### Developer Experience
-- CSP-compliant dynamic styles directive (`v-csp-style`)
-- Type-safe routes with Laravel Wayfinder
-- Fully typed TypeScript frontend
-
-### Deployment Ready
-- Web-cron for shared hosting (scheduler + queue worker)
-- Works without shell access or traditional cron
-- Server compatibility checker
-- Async execution when available
+![Media Manager](docs/assets/images/mediaFileManager.png)
 
 ---
 
-## Setup Wizard
+### Feedback Analytics
 
-On first visit, a guided wizard walks you through:
-1. Admin account creation
-2. Content mode selection (Git or CMS)
-3. Git repository configuration (if Git mode)
-4. Site branding and settings
-5. Review and launch
+Collect user feedback with customizable forms. Track helpfulness scores, analyze responses, and export data for insights.
+
+![Feedback System](docs/assets/images/feedbackBackend.png)
+
+---
+
+### Full Customization
+
+Theme colors, typography, layout, branding — configure everything from the admin panel. No code changes required.
+
+![Settings](docs/assets/images/settingsAdvancedTab.png)
+
+---
+
+## More Features
+
+| Category | Highlights |
+|----------|------------|
+| **Editor** | TipTap WYSIWYG + raw Markdown, syntax highlighting (190+ languages), tables, task lists |
+| **Documentation UI** | Light/dark/system theme, responsive design, auto-generated TOC, code copy buttons |
+| **Search** | Full-text search with Laravel Scout, result highlighting with context |
+| **SEO** | Dynamic sitemap, OpenGraph/Twitter cards, JSON-LD schema, per-page meta |
+| **Security** | 2FA, Cloudflare Turnstile, CSP headers, rate limiting, encrypted secrets |
+| **LLM Ready** | Auto-generated `llms-full.txt`, configurable token limits |
+| **Deployment** | Web-cron for shared hosting, SSR support, works without shell access |
+
+---
+
+## Getting Started
+
+A guided setup wizard walks you through everything:
+
+1. Create your admin account
+2. Choose your content mode (Git or CMS)
+3. Configure your site branding
+4. Start writing
+
+See the [full documentation](https://github.com/crony-io/docs-starter-kit/blob/main/docs/documentation/getting-started/introduction.md) for installation and configuration guides.
 
 ---
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License — see [LICENSE](LICENSE) for details.

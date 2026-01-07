@@ -2,7 +2,6 @@
 title: Editor Guide
 description: Master the rich text editor for documentation
 seo_title: Editor Guide - Docs Starter Kit
-order: 3
 status: published
 ---
 

@@ -2,7 +2,6 @@
 title: User Management
 description: Manage admin users and access control
 seo_title: User Management - Docs Starter Kit
-order: 5
 status: published
 ---
 

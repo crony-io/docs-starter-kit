@@ -38,8 +38,8 @@ class SettingsSeeder extends Seeder
 
             // Layout
             ['key' => 'layout_sidebar_width', 'value' => 280, 'group' => 'layout'],
-            ['key' => 'layout_content_width', 'value' => 900, 'group' => 'layout'],
-            ['key' => 'layout_navigation_style', 'value' => 'sidebar', 'group' => 'layout'],
+            ['key' => 'layout_content_width', 'value' => 1400, 'group' => 'layout'],
+            ['key' => 'layout_navigation_style', 'value' => 'both', 'group' => 'layout'],
             ['key' => 'layout_show_toc', 'value' => true, 'group' => 'layout'],
             ['key' => 'layout_toc_position', 'value' => 'right', 'group' => 'layout'],
             ['key' => 'layout_show_breadcrumbs', 'value' => true, 'group' => 'layout'],
@@ -56,7 +56,7 @@ class SettingsSeeder extends Seeder
             ['key' => 'advanced_llm_txt_max_tokens', 'value' => 100000, 'group' => 'advanced'],
             ['key' => 'advanced_meta_robots', 'value' => 'index', 'group' => 'advanced'],
             ['key' => 'advanced_code_copy_button', 'value' => true, 'group' => 'advanced'],
-            ['key' => 'advanced_code_line_numbers', 'value' => true, 'group' => 'advanced'],
+            ['key' => 'advanced_code_line_numbers', 'value' => false, 'group' => 'advanced'],
 
             // General (legacy support)
             ['key' => 'feedback_enabled', 'value' => true, 'group' => 'general'],

@@ -2,7 +2,6 @@
 title: Search
 description: Configure full-text search for your documentation
 seo_title: Search Configuration - Docs Starter Kit
-order: 5
 status: published
 ---
 

@@ -2,7 +2,6 @@
 title: Layout
 description: Configure sidebar, content width, and page layout
 seo_title: Layout Configuration - Docs Starter Kit
-order: 3
 status: published
 ---
 
@@ -101,7 +100,7 @@ Custom text displayed in the footer.
 Supports basic HTML:
 
 ```html
-© 2024 <a href="https://example.com">My Company</a>. 
+© 2026 <a href="https://example.com">My Company</a>. 
 Built with <a href="https://github.com/crony-io/docs-starter-kit">Docs Starter Kit</a>.
 ```
 

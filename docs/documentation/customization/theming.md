@@ -2,7 +2,6 @@
 title: Theming
 description: Customize colors, dark mode, and visual appearance
 seo_title: Theme Customization - Docs Starter Kit
-order: 1
 status: published
 ---
 

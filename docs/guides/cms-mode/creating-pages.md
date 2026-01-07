@@ -2,7 +2,6 @@
 title: Creating Pages
 description: How to create and organize documentation pages
 seo_title: Creating Pages - Docs Starter Kit
-order: 2
 status: published
 ---
 

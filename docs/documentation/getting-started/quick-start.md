@@ -2,7 +2,6 @@
 title: Quick Start
 description: Get up and running with Docs Starter Kit in minutes
 seo_title: Quick Start Guide - Docs Starter Kit
-order: 3
 status: published
 ---
 
@@ -12,14 +11,30 @@ Get your documentation site up and running in just a few minutes.
 
 ## 1. Access the Admin Panel
 
-After installation, navigate to `/dashboard` and log in with:
+After installation, navigate to `/dashboard`.
+
+### If You Ran Seeders (`migrate --seed`)
+
+Log in with the default credentials:
 
 - **Email**: `admin@example.com`
 - **Password**: `password`
 
-## 2. Choose Your Content Mode
+> **Important**: Change these credentials immediately in production!
 
-During first setup, you'll choose how to manage content:
+Seeders pre-configure **CMS Mode** with sample documentation.
+
+### If You Ran Fresh (`migrate` only)
+
+You'll be redirected to the **Setup Wizard** at `/admin/setup` to:
+
+1. Create your admin account
+2. Choose your content mode
+3. Configure initial settings
+
+## 2. Content Modes
+
+Docs Starter Kit supports two content management modes:
 
 ### CMS Mode (Default)
 
@@ -170,7 +185,6 @@ Enable via **Settings > Advanced > LLM Files**.
 
 ## Next Steps
 
-- [Configure environment variables](/docs/documentation/configuration/environment-variables)
 - [Set up Git synchronization](/docs/guides/git-mode/setup)
 - [Customize your theme](/docs/documentation/customization/theming)
 - [Configure analytics](/docs/documentation/configuration/analytics)

@@ -2,7 +2,6 @@
 title: Git Mode Setup
 description: Complete guide to setting up Git-based documentation sync
 seo_title: Git Mode Setup Guide - Docs Starter Kit
-order: 1
 status: published
 ---
 
@@ -25,15 +24,17 @@ Create or use an existing GitHub repository with the expected structure:
 ```
 your-docs-repo/
 ├── docs/
-│   ├── section-name/
+│   ├── assets/           # Reserved folder for images/files
+│   │   └── images/
+│   ├── section-name/     # Navigation tab
 │   │   ├── _meta.json
 │   │   └── page.md
-│   └── another-section/
+│   └── another-section/  # Navigation tab
 │       └── page.md
-├── assets/
-│   └── images/
 └── docs-config.json
 ```
+
+> **Note**: The `assets` folder inside `docs/` is reserved for static files and won't appear as navigation.
 
 See [Repository Structure](/docs/guides/git-mode/repository-structure) for detailed format.
 
@@ -51,14 +52,6 @@ If this is a fresh installation:
    - **Access Token**: Required for private repositories
 4. Click **Continue**
 
-### Via Admin Panel
-
-If you're switching from CMS mode:
-
-1. Navigate to **Git Sync** in the admin sidebar
-2. Click **Configure**
-3. Enter your repository details
-4. Save configuration
 
 ## Step 3: Generate Access Token (Private Repos)
 
@@ -86,17 +79,6 @@ Before syncing, test your repository connection:
 2. Click **Test Connection**
 3. Verify you see "Successfully connected to repository"
 
-### Via Command Line
-
-```bash
-php artisan docs:test-repo
-```
-
-Expected output:
-```
-Testing repository connection...
-✓ Successfully connected to repository
-```
 
 ## Step 5: Initial Sync
 
@@ -104,30 +86,14 @@ Trigger the first synchronization:
 
 ### Via Admin Panel
 
-1. Go to **Git Sync**
+1. Go to **Git Sync** in the admin sidebar
 2. Click **Sync Now**
-3. Wait for the sync to complete
+3. Wait for the sync to complete (runs as background job)
 4. Check the sync history for status
 
-### Via Command Line
+The initial sync is automatically triggered when you complete the setup wizard with Git mode selected.
 
-```bash
-php artisan docs:sync
-```
-
-Expected output:
-```
-Starting Git sync...
-✓ Sync completed successfully!
-+---------------+--------------------------------+
-| Attribute     | Value                          |
-+---------------+--------------------------------+
-| Commit        | abc1234                        |
-| Author        | Your Name                      |
-| Message       | Update documentation           |
-| Files Changed | 15                             |
-+---------------+--------------------------------+
-```
+> **Note**: Syncs run as background jobs on the `high-priority` queue. Ensure your queue worker is running.
 
 ## Step 6: Configure Auto-Sync
 
@@ -158,21 +124,6 @@ After syncing:
 2. Verify all pages appear correctly
 3. Check navigation structure matches your repository
 4. Test internal links between pages
-
-## Environment Variables
-
-Optional environment configuration:
-
-```env
-# Enable/disable Git features
-DOCS_GIT_ENABLED=true
-
-# Sync frequency in minutes
-DOCS_GIT_SYNC_FREQUENCY=15
-
-# Maximum repository size in MB
-DOCS_MAX_REPO_SIZE=500
-```
 
 ## Queue Configuration
 

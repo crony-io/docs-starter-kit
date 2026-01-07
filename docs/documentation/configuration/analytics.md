@@ -2,7 +2,6 @@
 title: Analytics
 description: Configure Google Analytics, Plausible, and Microsoft Clarity
 seo_title: Analytics Configuration - Docs Starter Kit
-order: 4
 status: published
 ---
 
@@ -131,42 +130,3 @@ To disable all analytics:
 2. Clear all analytics ID fields
 3. Save changes
 
-## Verification
-
-### Google Analytics
-
-1. Install the [Google Analytics Debugger](https://chrome.google.com/webstore/detail/google-analytics-debugger) extension
-2. Visit your documentation site
-3. Check browser console for GA4 events
-
-### Plausible
-
-1. Visit your Plausible dashboard
-2. Check "Real-time" view
-3. Open your documentation in another tab
-4. Verify your visit appears
-
-### Clarity
-
-1. Visit your Clarity dashboard
-2. Wait a few hours for data processing
-3. Check Recordings for your session
-
-## Environment Variables
-
-You can also configure analytics via environment variables:
-
-```env
-# These are managed through the admin panel
-# and stored in the settings table
-```
-
-The admin panel settings take precedence and are stored in the database.
-
-## Best Practices
-
-1. **Start with Plausible**: If you're unsure, start with Plausible for simplicity
-2. **Don't over-track**: Use only the providers you actually need
-3. **Review regularly**: Check analytics weekly to understand user behavior
-4. **Act on insights**: Use data to improve documentation structure
-5. **Respect privacy**: Always consider user privacy when adding tracking

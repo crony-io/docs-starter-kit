@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class GitSyncService
 {
+    private const RESERVED_FOLDERS = ['assets'];
+
     public function __construct(
         private MarkdownParser $parser,
         private ContentImporter $importer
@@ -139,9 +141,10 @@ class GitSyncService
         // Update existing navigation/group ordering from meta data
         $this->importer->updateNavigationOrdering();
 
-        // Get all markdown files
+        // Get all markdown files, excluding reserved folders
         $markdownFiles = collect($tree)
             ->filter(fn ($item) => str_ends_with($item['path'], '.md'))
+            ->filter(fn ($item) => ! $this->isInReservedFolder($item['path']))
             ->pluck('path')
             ->toArray();
 
@@ -206,8 +209,8 @@ class GitSyncService
         foreach ($changedFiles as $file) {
             $path = $file['filename'];
 
-            // Only process markdown files in docs directory
-            if (! str_ends_with($path, '.md') || ! str_starts_with($path, 'docs/')) {
+            // Only process markdown files in docs directory, excluding reserved folders
+            if (! str_ends_with($path, '.md') || ! str_starts_with($path, 'docs/') || $this->isInReservedFolder($path)) {
                 continue;
             }
 
@@ -345,5 +348,18 @@ class GitSyncService
         }
 
         return null;
+    }
+
+    private function isInReservedFolder(string $path): bool
+    {
+        $parts = explode('/', $path);
+
+        // Path format: docs/[folder]/...
+        // Check if second segment is a reserved folder
+        if (count($parts) >= 2 && in_array($parts[1], self::RESERVED_FOLDERS, true)) {
+            return true;
+        }
+
+        return false;
     }
 }

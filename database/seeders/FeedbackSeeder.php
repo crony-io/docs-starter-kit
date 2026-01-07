@@ -82,7 +82,7 @@ class FeedbackSeeder extends Seeder
                     'page_id' => $page->id,
                     'feedback_form_id' => null,
                     'is_helpful' => rand(0, 100) > 30,
-                    'form_data' => rand(0, 1) ? ['comment' => $this->getRandomComment()] : null,
+                    'form_data' => rand(0, 1) ? ['responses' => ['comment' => $this->getRandomComment()]] : null,
                     'ip_address' => '127.0.0.1',
                     'user_agent' => 'Seeder',
                     'created_at' => now()->subDays(rand(0, 30)),

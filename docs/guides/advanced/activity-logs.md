@@ -2,7 +2,6 @@
 title: Activity Logs
 description: Monitor and audit user activity across your documentation site
 seo_title: Activity Logs - Docs Starter Kit
-order: 4
 status: published
 ---
 

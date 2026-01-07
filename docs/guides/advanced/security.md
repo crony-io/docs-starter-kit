@@ -2,7 +2,6 @@
 title: Security
 description: Security features including 2FA, Turnstile, and best practices
 seo_title: Security Features - Docs Starter Kit
-order: 6
 status: published
 ---
 
@@ -55,15 +54,15 @@ Docs Starter Kit supports Cloudflare Turnstile for CAPTCHA protection on login.
 ### Configuration
 
 1. Create a Turnstile widget at [Cloudflare Dashboard](https://dash.cloudflare.com/)
-2. Add credentials to `.env`:
+2. Go to **Settings > Advanced** in your admin panel
+3. Enter your Turnstile credentials:
+   - **Site Key**: Your Turnstile site key
+   - **Secret Key**: Your Turnstile secret key
+4. Save changes
 
-```env
-TURNSTILE_CF_SITE=your-site-key
-TURNSTILE_CF_SECRET=your-secret-key
-VITE_TURNSTILE_SITE_KEY="${TURNSTILE_CF_SITE}"
-```
+Turnstile will automatically appear on the login page when configured.
 
-3. Turnstile will automatically appear on the login page
+> **Note**: Credentials are stored encrypted in the database.
 
 ### Benefits
 

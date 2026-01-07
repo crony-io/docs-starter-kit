@@ -2,7 +2,6 @@
 title: Feedback System
 description: Collect and manage user feedback on documentation
 seo_title: Feedback System - Docs Starter Kit
-order: 1
 status: published
 ---
 
@@ -165,58 +164,8 @@ View per-page metrics:
 - User agent
 - IP (anonymized)
 
-## Best Practices
-
-### Form Design
-
-- Keep forms short (3-5 fields max)
-- Make most fields optional
-- Use clear, specific questions
-- Offer predefined options when possible
-
-### Acting on Feedback
-
-1. Review feedback regularly (weekly)
-2. Identify patterns in negative feedback
-3. Prioritize pages with low scores
-4. Update content based on feedback
-5. Close the loop (if email provided)
-
-### Common Improvements
-
-Based on feedback, you might:
-- Add missing information
-- Clarify confusing sections
-- Fix broken code examples
-- Update outdated content
-- Add more examples
-
-## Configuration Options
-
-### Rate Limiting
-
-Prevent spam with rate limiting:
-- Default: 10 submissions per minute per IP
-- Configurable in route middleware
-
-### Anonymous vs Identified
-
-- Default: Anonymous feedback
-- Optional: Request email for follow-up
-- Never required: Users can skip
-
-### Notification
-
-Configure email notifications for feedback:
-
-```env
-FEEDBACK_NOTIFICATION_EMAIL=team@example.com
-```
-
-## Privacy Considerations
+## Privacy
 
 - IP addresses are anonymized after 30 days
 - Email addresses are optional
-- No tracking cookies used
 - GDPR compliant data handling
-- Export and delete user data on request

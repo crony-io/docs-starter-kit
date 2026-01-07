@@ -2,7 +2,6 @@
 title: Troubleshooting
 description: Common Git sync issues and solutions
 seo_title: Git Sync Troubleshooting - Docs Starter Kit
-order: 4
 status: published
 ---
 
@@ -268,34 +267,48 @@ Solutions for common Git synchronization issues.
 php artisan docs:test-repo
 ```
 
+Expected output:
+```
+Testing repository connection...
+✓ Successfully connected to repository
+```
+
 ### Manual Sync
 
 ```bash
-# Normal sync
+# Differential sync (only changed files)
 php artisan docs:sync
 
 # Force full re-sync
 php artisan docs:sync --force
 ```
 
-### Check Sync Status
-
-```bash
-php artisan tinker
->>> App\Models\GitSync::latest()->first()
+Expected output:
 ```
-
-### View Sync History
-
-```bash
-php artisan tinker
->>> App\Models\GitSync::latest()->take(10)->get(['id', 'commit_hash', 'sync_status', 'created_at'])
+Starting differential Git sync...
+✓ Sync completed successfully! (Type: differential)
++---------------+--------------------------------+
+| Attribute     | Value                          |
++---------------+--------------------------------+
+| Commit        | abc1234                        |
+| Author        | Your Name                      |
+| Message       | Update documentation           |
+| Files Changed | 5                              |
+| Sync Type     | differential                   |
++---------------+--------------------------------+
 ```
 
 ### Rollback to Previous Sync
 
 ```bash
 php artisan docs:rollback {sync_id}
+```
+
+You can find sync IDs in the Git Sync admin panel or via:
+
+```bash
+php artisan tinker
+>>> App\Models\GitSync::latest()->take(10)->get(['id', 'commit_hash', 'sync_status', 'created_at'])
 ```
 
 ## Getting Help
@@ -307,14 +320,14 @@ If issues persist:
    tail -f storage/logs/laravel.log
    ```
 
-2. Review sync details in admin panel
+2. Review sync details in admin panel under **Git Sync**
 
 3. Enable debug mode temporarily:
    ```env
    APP_DEBUG=true
    ```
 
-4. Open an issue on GitHub with:
-   - Error messages
-   - Sync history
-   - Repository structure (anonymized)
+4. Check queue worker output:
+   ```bash
+   php artisan queue:work --verbose
+   ```

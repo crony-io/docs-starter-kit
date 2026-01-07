@@ -2,7 +2,6 @@
 title: Database
 description: Database configuration and optimization
 seo_title: Database Configuration - Docs Starter Kit
-order: 3
 status: published
 ---
 

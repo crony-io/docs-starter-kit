@@ -2,7 +2,6 @@
 title: Media Management
 description: Upload and manage images and files
 seo_title: Media Management - Docs Starter Kit
-order: 4
 status: published
 ---
 

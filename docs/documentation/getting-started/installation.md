@@ -2,7 +2,6 @@
 title: Installation
 description: Step-by-step guide to install Docs Starter Kit
 seo_title: Installation Guide - Docs Starter Kit
-order: 2
 status: published
 ---
 
@@ -79,18 +78,34 @@ Create the SQLite file:
 touch database/database.sqlite
 ```
 
-### 6. Run Migrations and Seeders
+### 6. Run Migrations
+
+You have two options:
+
+#### Option A: With Seeders (Recommended for trying out)
 
 ```bash
 php artisan migrate --seed
 ```
 
-This will:
-- Create all necessary database tables
-- Seed default admin user
-- Seed system configuration
-- Seed example documentation pages
-- Seed default settings
+This creates:
+- Default admin user (`admin@example.com` / `password`)
+- System configuration (CMS Mode pre-configured)
+- Example documentation pages
+- Default settings
+
+You'll go directly to the login page.
+
+#### Option B: Fresh Start (Recommended for production)
+
+```bash
+php artisan migrate
+```
+
+This only creates database tables. You'll be redirected to the **Setup Wizard** to:
+- Create your admin account
+- Choose content mode (CMS or Git)
+- Configure initial settings
 
 ### 7. Build Frontend Assets
 
@@ -116,14 +131,16 @@ Visit `http://localhost:8000` to see your documentation site!
 
 ## Default Credentials
 
-After seeding, you can log in with:
+If you ran with seeders (`migrate --seed`), log in with:
 
 | Field | Value |
 |-------|-------|
 | Email | `admin@example.com` |
 | Password | `password` |
 
-> **Important**: Change these credentials immediately after your first login in a production environment!
+> **Important**: Change these credentials immediately in production!
+
+If you ran without seeders, the Setup Wizard will prompt you to create your own admin account.
 
 ## Queue Worker (Optional)
 

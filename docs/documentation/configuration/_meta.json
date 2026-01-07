@@ -4,25 +4,21 @@
   "order": 2,
   "icon": "settings",
   "items": {
-    "environment-variables": {
-      "title": "Environment Variables",
-      "order": 1
-    },
     "content-modes": {
       "title": "Content Modes",
-      "order": 2
+      "order": 1
     },
     "database": {
       "title": "Database",
-      "order": 3
+      "order": 2
     },
     "analytics": {
       "title": "Analytics",
-      "order": 4
+      "order": 3
     },
     "search": {
       "title": "Search",
-      "order": 5
+      "order": 4
     }
   }
 }

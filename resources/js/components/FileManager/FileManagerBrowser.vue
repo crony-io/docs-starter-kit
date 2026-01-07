@@ -194,11 +194,16 @@ const handleFileToggle = (file: MediaFile) => {
   }
 };
 
-const handleUpload = (uploadFiles: File[]) => {
-  let uploadedCount = 0;
-  const totalFiles = uploadFiles.length;
+const handleUpload = async (uploadFiles: File[]) => {
+  const uploadFileSequentially = async (index: number) => {
+    if (index >= uploadFiles.length) {
+      fetchFiles(pagination.value.currentPage);
+      uploaderRef.value?.clearQueue();
+      showUploader.value = false;
+      return;
+    }
 
-  for (const file of uploadFiles) {
+    const file = uploadFiles[index];
     const formData: Record<string, File | string> = { file };
     if (filters.value.folder_id) {
       formData.folder_id = String(filters.value.folder_id);
@@ -209,15 +214,15 @@ const handleUpload = (uploadFiles: File[]) => {
       preserveState: true,
       preserveScroll: true,
       onSuccess: () => {
-        uploadedCount++;
-        if (uploadedCount === totalFiles) {
-          fetchFiles(pagination.value.currentPage);
-          uploaderRef.value?.clearQueue();
-          showUploader.value = false;
-        }
+        uploadFileSequentially(index + 1);
+      },
+      onError: () => {
+        uploadFileSequentially(index + 1);
       },
     });
-  }
+  };
+
+  uploadFileSequentially(0);
 };
 
 const handleDeleteSelected = () => {

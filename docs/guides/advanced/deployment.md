@@ -2,7 +2,6 @@
 title: Deployment
 description: Deploy Docs Starter Kit to production
 seo_title: Deployment Guide - Docs Starter Kit
-order: 3
 status: published
 ---
 
@@ -49,8 +48,6 @@ QUEUE_CONNECTION=redis
 REDIS_HOST=your-redis-host
 REDIS_PASSWORD=redis-password
 
-# Content mode
-DOCS_CONTENT_MODE=cms
 ```
 
 ### Security Settings

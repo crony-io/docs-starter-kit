@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 class LocalDocsImporter
 {
+    private const RESERVED_FOLDERS = ['assets'];
+
     private MarkdownParser $parser;
 
     private PageImporterService $pageImporterService;
@@ -38,7 +40,8 @@ class LocalDocsImporter
             return $stats;
         }
 
-        $directories = File::directories($this->basePath);
+        $directories = collect(File::directories($this->basePath))
+            ->filter(fn ($dir) => ! in_array(basename($dir), self::RESERVED_FOLDERS, true));
 
         foreach ($directories as $navDir) {
             try {
