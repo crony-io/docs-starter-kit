@@ -4,11 +4,11 @@
 
 **Build beautiful documentation sites in minutes, not months.**
 
-[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
-[![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=plastic&labelColor=1e1e1e&logo=laravel&logoColor=white)](https://laravel.com)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?style=plastic&labelColor=1e1e1e&logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=plastic&labelColor=1e1e1e&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=plastic&labelColor=1e1e1e&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![License](https://img.shields.io/github/license/crony-io/docs-starter-kit?style=plastic&labelColor=1e1e1e)](LICENSE)
 
 An open-source documentation platform with dual content modes, powerful admin panel, and modern UI.
 
