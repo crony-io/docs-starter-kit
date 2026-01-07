@@ -15,6 +15,7 @@ use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Middleware\RequireCmsMode;
 use App\Http\Middleware\RequireGitMode;
 use Illuminate\Support\Facades\Route;
@@ -118,15 +119,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('media/folders/{folder}', [MediaController::class, 'destroyFolder'])->name('media.folders.destroy');
 
         // Feedback Management
-        Route::get('feedback', [\App\Http\Controllers\Admin\FeedbackController::class, 'index'])->name('feedback.index');
-        Route::get('feedback/export', [\App\Http\Controllers\Admin\FeedbackController::class, 'export'])->name('feedback.export');
-        Route::delete('feedback/{response}', [\App\Http\Controllers\Admin\FeedbackController::class, 'destroy'])->name('feedback.destroy');
-        Route::get('feedback/forms', [\App\Http\Controllers\Admin\FeedbackController::class, 'forms'])->name('feedback.forms');
-        Route::get('feedback/forms/create', [\App\Http\Controllers\Admin\FeedbackController::class, 'createForm'])->name('feedback.forms.create');
-        Route::post('feedback/forms', [\App\Http\Controllers\Admin\FeedbackController::class, 'storeForm'])->name('feedback.forms.store');
-        Route::get('feedback/forms/{form}/edit', [\App\Http\Controllers\Admin\FeedbackController::class, 'editForm'])->name('feedback.forms.edit');
-        Route::put('feedback/forms/{form}', [\App\Http\Controllers\Admin\FeedbackController::class, 'updateForm'])->name('feedback.forms.update');
-        Route::delete('feedback/forms/{form}', [\App\Http\Controllers\Admin\FeedbackController::class, 'destroyForm'])->name('feedback.forms.destroy');
+        Route::get('feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+        Route::get('feedback/export', [FeedbackController::class, 'export'])->name('feedback.export');
+        Route::delete('feedback/{response}', [FeedbackController::class, 'destroy'])->name('feedback.destroy');
+        Route::get('feedback/forms', [FeedbackController::class, 'forms'])->name('feedback.forms');
+        Route::get('feedback/forms/create', [FeedbackController::class, 'createForm'])->name('feedback.forms.create');
+        Route::post('feedback/forms', [FeedbackController::class, 'storeForm'])->name('feedback.forms.store');
+        Route::get('feedback/forms/{form}/edit', [FeedbackController::class, 'editForm'])->name('feedback.forms.edit');
+        Route::put('feedback/forms/{form}', [FeedbackController::class, 'updateForm'])->name('feedback.forms.update');
+        Route::delete('feedback/forms/{form}', [FeedbackController::class, 'destroyForm'])->name('feedback.forms.destroy');
 
         // Site Settings
         Route::get('settings', [SiteSettingsController::class, 'index'])->name('settings.index');

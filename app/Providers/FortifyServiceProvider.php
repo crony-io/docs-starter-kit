@@ -86,15 +86,19 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureTurnstileValidator(): void
     {
-        $config = SystemConfig::instance();
+        try {
+            $config = SystemConfig::instance();
 
-        if (! empty($config->turnstile_secret_key)) {
-            Validator::extend('turnstile', function ($attribute, $value, $parameters, $validator) {
-                $turnstile = new Turnstile;
-                $validationResult = $turnstile->validate($value);
+            if (! empty($config->turnstile_secret_key)) {
+                Validator::extend('turnstile', function ($attribute, $value, $parameters, $validator) {
+                    $turnstile = new Turnstile;
+                    $validationResult = $turnstile->validate($value);
 
-                return $validationResult['status'] === 1;
-            }, 'El token de captcha no es válido.');
+                    return $validationResult['status'] === 1;
+                }, 'El token de captcha no es válido.');
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Database tables may not exist yet during migrations - skip turnstile setup
         }
     }
 

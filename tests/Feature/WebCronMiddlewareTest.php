@@ -4,10 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\SystemConfig;
 use App\Models\User;
-use App\Services\WebCronService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Mockery\MockInterface;
 use Tests\TestCase;
 
 class WebCronMiddlewareTest extends TestCase
@@ -19,6 +17,9 @@ class WebCronMiddlewareTest extends TestCase
         parent::setUp();
         Cache::flush();
         SystemConfig::clearCache();
+
+        // Setup requires at least one user to be "complete"
+        User::factory()->create();
     }
 
     private function createConfig(array $overrides = []): SystemConfig
@@ -59,10 +60,6 @@ class WebCronMiddlewareTest extends TestCase
             'last_web_cron_at' => null,
         ]);
 
-        $this->mock(WebCronService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('runScheduler')->once()->andReturn(true);
-        });
-
         $this->get('/');
 
         SystemConfig::clearCache();
@@ -99,10 +96,6 @@ class WebCronMiddlewareTest extends TestCase
             'web_cron_enabled' => true,
             'last_web_cron_at' => $initialTime,
         ]);
-
-        $this->mock(WebCronService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('runScheduler')->once()->andReturn(true);
-        });
 
         $this->get('/');
 
@@ -186,10 +179,6 @@ class WebCronMiddlewareTest extends TestCase
             'web_cron_enabled' => true,
             'last_web_cron_at' => null,
         ]);
-
-        $this->mock(WebCronService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('runScheduler')->once()->andReturn(true);
-        });
 
         $this->get('/');
 

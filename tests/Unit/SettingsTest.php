@@ -100,21 +100,21 @@ class SettingsTest extends TestCase
     {
         Setting::set('cached_key', 'original');
 
-        Cache::shouldReceive('forget')
-            ->with('setting.cached_key')
-            ->once();
+        // Cache the value first
+        Cache::put('setting.cached_key', 'original', 3600);
+        Cache::put('settings.group.general', ['cached_key' => 'original'], 3600);
+        Cache::put('settings.all', ['cached_key' => 'original'], 3600);
 
-        Cache::shouldReceive('forget')
-            ->with('settings.group.general')
-            ->once();
-
-        Cache::shouldReceive('forget')
-            ->with('settings.all')
-            ->once();
+        $this->assertTrue(Cache::has('setting.cached_key'));
 
         $setting = Setting::where('key', 'cached_key')->first();
         $setting->value = 'updated';
         $setting->save();
+
+        // Verify cache was cleared
+        $this->assertFalse(Cache::has('setting.cached_key'));
+        $this->assertFalse(Cache::has('settings.group.general'));
+        $this->assertFalse(Cache::has('settings.all'));
     }
 
     public function test_setting_value_is_cast_to_json()

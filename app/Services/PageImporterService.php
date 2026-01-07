@@ -23,7 +23,7 @@ class PageImporterService
                 'title' => Str::title(str_replace(['-', '_'], ' ', $slug)),
                 'status' => 'published',
                 'is_expanded' => true,
-            ], $attributes)
+            ], array_filter($attributes, fn ($value) => $value !== null))
         );
     }
 
@@ -43,7 +43,7 @@ class PageImporterService
                 'title' => Str::title(str_replace(['-', '_'], ' ', $slug)),
                 'status' => 'published',
                 'is_expanded' => true,
-            ], $attributes)
+            ], array_filter($attributes, fn ($value) => $value !== null))
         );
     }
 

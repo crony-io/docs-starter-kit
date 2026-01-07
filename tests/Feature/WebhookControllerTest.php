@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\SyncGitRepositoryJob;
 use App\Models\SystemConfig;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -16,6 +17,9 @@ class WebhookControllerTest extends TestCase
     {
         parent::setUp();
         Queue::fake();
+
+        // Setup requires at least one user to be "complete"
+        User::factory()->create();
     }
 
     private function createGitModeConfig(array $overrides = []): void

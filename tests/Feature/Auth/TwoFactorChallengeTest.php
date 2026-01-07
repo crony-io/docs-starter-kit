@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\SystemConfig;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -11,6 +12,15 @@ use Tests\TestCase;
 class TwoFactorChallengeTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        User::factory()->create();
+        SystemConfig::create(['content_mode' => 'cms', 'setup_completed' => true]);
+        SystemConfig::clearCache();
+    }
 
     public function test_two_factor_challenge_redirects_to_login_when_not_authenticated(): void
     {

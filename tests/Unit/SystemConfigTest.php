@@ -95,11 +95,14 @@ class SystemConfigTest extends TestCase
     {
         $config = SystemConfig::instance();
 
-        Cache::shouldReceive('forget')
-            ->with('system_config')
-            ->once();
+        // Verify cache exists
+        Cache::put('system_config', $config, 3600);
+        $this->assertTrue(Cache::has('system_config'));
 
         SystemConfig::clearCache();
+
+        // Verify cache was cleared
+        $this->assertFalse(Cache::has('system_config'));
     }
 
     public function test_git_access_token_is_encrypted()

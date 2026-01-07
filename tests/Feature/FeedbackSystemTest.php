@@ -5,12 +5,23 @@ namespace Tests\Feature;
 use App\Models\FeedbackForm;
 use App\Models\FeedbackResponse;
 use App\Models\Page;
+use App\Models\SystemConfig;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class FeedbackSystemTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        SystemConfig::create(['content_mode' => 'cms', 'setup_completed' => true]);
+        SystemConfig::clearCache();
+        User::factory()->create();
+    }
 
     public function test_user_can_submit_helpful_feedback()
     {
@@ -79,7 +90,7 @@ class FeedbackSystemTest extends TestCase
         $feedback = FeedbackResponse::first();
 
         $this->assertEquals($form->id, $feedback->feedback_form_id);
-        $this->assertEquals('This page needs more examples', $feedback->form_data['comment']);
+        $this->assertEquals('This page needs more examples', $feedback->form_data['responses']['comment']);
     }
 
     public function test_feedback_requires_page_id()
