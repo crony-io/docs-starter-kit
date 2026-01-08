@@ -1,0 +1,36 @@
+# PostgreSQL override: docker compose -f docker-compose.yml -f docker-compose.postgres.yml up
+services:
+  app:
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:18.1-bookworm
+    container_name: docs-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-docs}
+      POSTGRES_USER: ${DB_USERNAME:-docs}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # ports: Uncomment below for local debugging only (security risk in production)
+    #   - "${DB_EXTERNAL_PORT:-5432}:5432"
+    networks:
+      - docs-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-docs} -d ${DB_DATABASE:-docs}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

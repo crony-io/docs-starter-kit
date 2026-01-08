@@ -1,0 +1,75 @@
+# =============================================================================
+# Docker Ignore - Exclude from build context
+# =============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.windsurf
+.codeium
+
+# Dependencies (installed in container)
+node_modules
+vendor
+
+# Build artifacts (built in container)
+public/build
+public/hot
+bootstrap/ssr
+
+# Environment files (use Docker env instead)
+.env
+.env.backup
+.env.production
+
+# Development files
+.editorconfig
+.prettierrc
+.prettierignore
+phpunit.xml
+.phpunit.result.cache
+test-output.txt
+test-results.xml
+
+# Logs
+storage/logs/*
+!storage/logs/.gitignore
+
+# Cache
+storage/framework/cache/*
+!storage/framework/cache/.gitignore
+
+# Sessions
+storage/framework/sessions/*
+!storage/framework/sessions/.gitignore
+
+# Views cache
+storage/framework/views/*
+!storage/framework/views/.gitignore
+
+# Testing
+tests
+coverage
+
+# Docker files not needed in final image
+docker-compose*.yml
+docker/.env
+docker/.env.*
+docker/scripts
+docker/README.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
